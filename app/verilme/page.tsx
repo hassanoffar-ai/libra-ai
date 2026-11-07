@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowUpRight,
@@ -28,7 +28,7 @@ import {
   getCopies,
 } from "@/services/books-service";
 
-export default function VerilmePage() {
+function VerilmeContent() {
   const searchParams = useSearchParams();
   const preselectedReaderId = searchParams.get("readerId");
   const preselectedCopyId = searchParams.get("copyId");
@@ -614,5 +614,22 @@ export default function VerilmePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerilmePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-8 flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm font-medium text-slate-500">Yüklənir...</p>
+          </div>
+        </div>
+      }
+    >
+      <VerilmeContent />
+    </Suspense>
   );
 }
