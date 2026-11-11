@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   Loader2,
   BookOpen,
-  Building2,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -97,11 +96,6 @@ export default function ReaderLoginPage() {
 
           {/* Top Institutional Header */}
           <div className="text-center mb-6 sm:mb-8">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-3 shadow-2xs">
-              <Building2 className="w-4 h-4 text-indigo-600" />
-              <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi</span>
-            </div>
-
             <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug max-w-3xl mx-auto">
               Lənkəran Dövlət Peşə Təhsil Mərkəzinin kitabxanasına xoş gəlmisiniz.
             </h1>
