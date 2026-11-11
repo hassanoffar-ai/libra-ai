@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Library,
   Mail,
   Lock,
   Eye,
@@ -83,53 +82,41 @@ export default function ReaderLoginPage() {
 
   return (
     <div className="relative min-h-screen flex flex-col justify-between selection:bg-indigo-600 selection:text-white">
-      {/* Background Building Image - Clearly visible, vivid & centered */}
+      {/* Background Building Image - Clear, crisp & vivid */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <img
           src="/ldptm-building.jpg"
           alt="Lənkəran Dövlət Peşə Təhsil Mərkəzi"
           className="w-full h-full object-cover object-center"
+          style={{
+            filter: "contrast(1.05) saturate(1.05)",
+          }}
         />
-        {/* Soft atmospheric overlay for legibility while keeping the building clearly visible */}
-        <div className="absolute inset-0 bg-slate-950/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-slate-950/40" />
+        {/* Soft natural edge vignette so the building stays sharp and vivid */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/30" />
       </div>
 
       {/* Main Container - Centered on top of the background */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 w-full">
-        <div className="w-full max-w-md my-auto">
-
-          {/* Top Institutional Header */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-white/20 text-white text-xs font-semibold mb-3 shadow-lg">
-              <Library className="w-4 h-4 text-indigo-300" />
-              <span>Peşə Kitabxanası</span>
-            </div>
-
-            <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-snug drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
-              Lənkəran Dövlət Peşə Təhsil Mərkəzinin kitabxanasına xoş gəlmisiniz.
-            </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-100 font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
-              Elektron kitab fondu və oxucu xidmətləri portalı
-            </p>
-          </div>
+        <div className="w-full max-w-lg my-auto">
 
           {/* Center Overlaid Login & Registration Card */}
-          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-white/80 shadow-2xl shadow-black/60 p-6 sm:p-8 relative">
+          <div className="bg-white/95 sm:bg-white/95 backdrop-blur-xl rounded-3xl border border-white/80 shadow-2xl shadow-slate-950/60 p-6 sm:p-8 relative">
             <div>
-              {/* Brand & Heading */}
-              <div className="mb-5 pb-4 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
-                      <BookOpen className="w-4 h-4" />
-                    </div>
-                    <span className="text-base font-black tracking-tight text-slate-900 font-sans">
-                      Peşə Kitabxanası
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500">Oxucu şəxsi kabinetinə daxil olun</p>
+              {/* Institutional Header & Brand INSIDE Card (Requested by User) */}
+              <div className="mb-6 pb-5 border-b border-slate-100 text-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold mb-3 shadow-2xs">
+                  <BookOpen className="w-4 h-4 text-indigo-600" />
+                  <span>Peşə Kitabxanası</span>
                 </div>
+
+                <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-snug">
+                  Lənkəran Dövlət Peşə Təhsil Mərkəzinin kitabxanasına xoş gəlmisiniz.
+                </h1>
+                
+                <p className="mt-1.5 text-xs text-slate-500 font-medium">
+                  Elektron kitab fondu və oxucu xidmətləri portalı
+                </p>
               </div>
 
               {/* Success Message Banner */}
@@ -248,7 +235,7 @@ export default function ReaderLoginPage() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 py-4 text-center text-xs text-white/90 font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+      <footer className="relative z-10 py-3 text-center text-xs text-white/90 font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
         Peşə Kitabxanası © 2026 • Lənkəran Dövlət Peşə Təhsil Mərkəzi
       </footer>
     </div>
