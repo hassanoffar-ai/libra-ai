@@ -14,10 +14,9 @@ import {
   CheckCircle2,
   Sparkles,
   Loader2,
-  KeyRound,
   Ticket,
 } from "lucide-react";
-import { loginReader, ensureInitialDemoReader } from "@/services/auth-service";
+import { loginReader } from "@/services/auth-service";
 
 function LoginContent() {
   const router = useRouter();
@@ -35,11 +34,6 @@ function LoginContent() {
       ? "Qeydiyyat uğurla tamamlandı! Giriş edə bilərsiniz."
       : null
   );
-
-  // Initialize demo reader for smooth testing if storage is empty
-  useEffect(() => {
-    ensureInitialDemoReader();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,13 +71,6 @@ function LoginContent() {
       setErrorMessage(err?.message || "Daxil olarkən xəta baş verdi.");
       setIsSubmitting(false);
     }
-  };
-
-  // Demo autofill for quick testing
-  const handleFillDemo = () => {
-    setIdentifier("oxucu@libra.az");
-    setPassword("password123");
-    setErrorMessage(null);
   };
 
   return (
@@ -219,21 +206,6 @@ function LoginContent() {
               </button>
             </div>
           </form>
-
-          {/* Quick Demo Credentials Autofill Helper */}
-          <div className="mt-5 p-3 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between text-xs text-slate-600">
-            <div className="flex items-center gap-2">
-              <KeyRound className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
-              <span>Demo hesabla daxil olmaq istəyirsiniz?</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleFillDemo}
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline flex-shrink-0"
-            >
-              Doldur
-            </button>
-          </div>
 
           {/* Bottom link: Don't have an account? */}
           <div className="mt-6 pt-5 border-t border-slate-100 text-center">

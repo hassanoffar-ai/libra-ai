@@ -209,16 +209,6 @@ export function Sidebar({
 
         {/* Sidebar Footer / Collapse Toggle */}
         <div className="p-3 border-t border-slate-800/80">
-          {(!isCollapsed || isMobileOpen) && (
-            <div className="px-3 py-2 mb-2 rounded-lg bg-slate-800/50 border border-slate-700/50 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Smart Library</span>
-              </div>
-              <span className="text-[10px] text-slate-400 font-mono">v1.0</span>
-            </div>
-          )}
-
           {/* Desktop Collapse Button */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}

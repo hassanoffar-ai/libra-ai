@@ -330,27 +330,3 @@ export function isAuthenticated(): boolean {
   return getCurrentReader() !== null;
 }
 
-/**
- * İlk dəfə işə düşəndə demo oxucu yaratmaq üçün köməkçi funksiya
- */
-export async function ensureInitialDemoReader(): Promise<void> {
-  const all = await getReaders();
-  if (all.length === 0) {
-    const hashedPassword = await hashPassword("password123");
-    await createReader({
-      ticketNumber: "OX-1001",
-      firstName: "Rəşad",
-      lastName: "Qasımov",
-      fatherName: "İlham",
-      category: "Tələbə",
-      department: "V-102 Kompüter sistemləri",
-      phone: "+994 50 234 56 78",
-      email: "oxucu@libra.az",
-      password: hashedPassword,
-      maxBookLimit: 5,
-      status: "Aktiv",
-      notes: "Sistem ilkin demo oxucusu",
-    });
-  }
-}
-
