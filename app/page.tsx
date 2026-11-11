@@ -14,8 +14,6 @@ import {
   CheckCircle2,
   Loader2,
   BookOpen,
-  ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/lib/firebase/auth-context";
 
@@ -274,17 +272,6 @@ export default function ReaderLoginPage() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Admin entrance link indicator */}
-          <div className="mt-6 text-center">
-            <Link
-              href="/admin"
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Kitabxanaçı / Admin Girişi</span>
-            </Link>
           </div>
         </div>
       </main>
