@@ -1,5 +1,5 @@
 /**
- * LIBRA AI - Oxucu və Dövriyyə Servisi (Phase 4)
+ * Peşə Kitabxanası - Oxucu və Dövriyyə Servisi (Phase 4)
  * 
  * Bu xidmət oxucuların qeydiyyatı, kitabların verilməsi (Loan issue),
  * kitabların qaytarılması (Loan return) və rezervasiyaların idarə olunmasını təmin edir.

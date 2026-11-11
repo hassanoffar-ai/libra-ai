@@ -1,5 +1,5 @@
 /**
- * LIBRA AI - Ağıllı Kitabxanaçı Köməkçisi Xidməti (AI Assistant Service)
+ * Peşə Kitabxanası - Ağıllı Kitabxanaçı Köməkçisi Xidməti (AI Assistant Service)
  * 
  * Bu xidmət oxucu və kitabxanaçılara təbii dildə sorğular üzrə
  * biblioqrafik axtarış, rəf istiqamətləndirməsi və tövsiyələr verir.
@@ -35,7 +35,7 @@ export async function askAiAssistant(query: string): Promise<AiResponse> {
   // Kitabxana fondu tamamilə boşdursa:
   if (books.length === 0) {
     return {
-      answer: `Salam! Mən LIBRA AI Kitabxanaçı Köməkçisiyəm. Hazırda Lənkəran Dövlət Peşə Təhsil Mərkəzinin kitabxana fondunda qeydiyyatda olan nəşr yoxdur. Zəhmət olmasa, əvvəlcə "Kitab fondu" bölməsindən yeni dərsliklər və kitablar daxil edin. Bundan sonra sizə dərhal rəf ünvanları və tövsiyələr təqdim edə biləcəyəm.`,
+      answer: `Salam! Mən Peşə Kitabxanası Köməkçisiyəm. Hazırda Lənkəran Dövlət Peşə Təhsil Mərkəzinin kitabxana fondunda qeydiyyatda olan nəşr yoxdur. Zəhmət olmasa, əvvəlcə "Kitab fondu" bölməsindən yeni dərsliklər və kitablar daxil edin. Bundan sonra sizə dərhal rəf ünvanları və tövsiyələr təqdim edə biləcəyəm.`,
       recommendedBooks: [],
     };
   }

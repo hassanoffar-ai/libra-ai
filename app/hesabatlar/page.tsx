@@ -225,7 +225,7 @@ export default function HesabatlarPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `LIBRA_AI_Hesabat_${todayStr}.csv`);
+    link.setAttribute("download", `Pese_Kitabxanasi_Hesabat_${todayStr}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

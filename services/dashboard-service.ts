@@ -1,5 +1,5 @@
 /**
- * LIBRA AI - Dashboard Service Layer
+ * Peşə Kitabxanası - Dashboard Service Layer
  * 
  * Bu xidmət təbəqəsi idarəetmə panelinin statistik məlumatlarını,
  * qrafik göstəricilərini və son əməliyyat loglarını təmin edir.

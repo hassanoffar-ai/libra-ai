@@ -1,4 +1,4 @@
-# LIBRA AI - Ağıllı Kitabxana İdarəetmə Sistemi
+# Peşə Kitabxanası - Lənkəran Dövlət Peşə Təhsil Mərkəzi Kitabxana İdarəetmə Sistemi
 
 Lənkəran Dövlət Peşə Təhsil Mərkəzi üçün baza strukturu və foundational layout.
 

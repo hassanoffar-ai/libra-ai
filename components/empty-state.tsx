@@ -48,7 +48,7 @@ export function EmptyState({
 
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium">
           <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-          LIBRA AI Modulu Aktivləşdirilməsi Gözlənilir
+          Peşə Kitabxanası Modulu Aktivləşdirilməsi Gözlənilir
         </div>
       </div>
     </div>

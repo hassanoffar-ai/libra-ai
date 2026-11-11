@@ -1,5 +1,5 @@
 /**
- * LIBRA AI - Sinxronizasiya və Oflayn/Onlayn Xidməti (Sync Service)
+ * Peşə Kitabxanası - Sinxronizasiya və Oflayn/Onlayn Xidməti (Sync Service)
  * 
  * Bu xidmət şəbəkə bağlantısının vəziyyətini (online/offline),
  * yerli əməliyyatların növbəsini (pending mutations) və

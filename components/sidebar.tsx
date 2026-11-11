@@ -128,12 +128,12 @@ export function Sidebar({
             </div>
 
             {(!isCollapsed || isMobileOpen) && (
-              <div className="flex items-center gap-1.5 transition-opacity duration-200">
-                <span className="text-lg font-bold tracking-tight text-white font-sans">
-                  LIBRA
+              <div className="flex flex-col text-left transition-opacity duration-200">
+                <span className="text-sm font-bold tracking-tight text-white font-sans leading-tight">
+                  Peşə Kitabxanası
                 </span>
-                <span className="bg-indigo-600/90 text-white text-[10px] font-bold px-1.5 py-0.5 rounded tracking-wide border border-indigo-400/30 shadow-sm">
-                  AI
+                <span className="text-[10px] text-slate-400 font-medium leading-tight">
+                  Lənkəran DPTM
                 </span>
               </div>
             )}

@@ -81,7 +81,7 @@ function ReaderPortalContent() {
           </div>
           <div>
             <span className="text-base font-bold text-slate-900 leading-none block">
-              LIBRA <span className="text-indigo-600 text-xs font-bold">AI</span>
+              Peşə Kitabxanası
             </span>
             <span className="text-[11px] text-slate-400 leading-tight">Oxucu Şəxsi Kabineti</span>
           </div>

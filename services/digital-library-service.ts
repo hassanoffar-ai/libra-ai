@@ -1,5 +1,5 @@
 /**
- * LIBRA AI - Rəqəmsal Kitabxana Servisi (Digital Library Service)
+ * Peşə Kitabxanası - Rəqəmsal Kitabxana Servisi (Digital Library Service)
  * 
  * Elektron dərsliklər, tədris vəsaitləri və rəqəmsal resursların idarə olunması.
  */

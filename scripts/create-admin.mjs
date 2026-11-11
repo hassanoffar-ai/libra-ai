@@ -1,11 +1,11 @@
 /**
- * LIBRA AI - Təhlükəsiz Admin İstifadəçisi Yaratma Skripti
+ * Peşə Kitabxanası - Təhlükəsiz Admin İstifadəçisi Yaratma Skripti
  * 
  * İstifadə qaydası:
  * node scripts/create-admin.mjs <admin_email> <admin_password> [ad] [soyad]
  * 
  * Nümunə:
- * node scripts/create-admin.mjs admin@libra.az Kitabxana2026! "Kamran" "Əliyev"
+ * node scripts/create-admin.mjs admin@ldptm.edu.az Kitabxana2026! "Kamran" "Əliyev"
  */
 
 import { initializeApp, getApps, cert } from "firebase-admin/app";
@@ -19,7 +19,7 @@ const lastName = process.argv[5] || "Kitabxanaçı";
 
 if (!email || !password) {
   console.error("Xəta: Zəhmət olmasa email və şifrə daxil edin.");
-  console.error("Nümunə: node scripts/create-admin.mjs admin@libra.az Sifre123! 'Ad' 'Soyad'");
+  console.error("Nümunə: node scripts/create-admin.mjs admin@ldptm.edu.az Sifre123! 'Ad' 'Soyad'");
   process.exit(1);
 }
 

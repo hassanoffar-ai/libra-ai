@@ -146,7 +146,7 @@ export default function AdminLoginPage() {
                     type="email"
                     required
                     autoComplete="email"
-                    placeholder="admin@libra.az"
+                    placeholder="admin@ldptm.edu.az"
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -230,7 +230,7 @@ export default function AdminLoginPage() {
 
       {/* Footer */}
       <footer className="py-4 text-center text-xs text-slate-500 border-t border-slate-800/80 bg-slate-950/40">
-        LIBRA AI © 2026 • Təhlükəsiz Administrator Girişi
+        Peşə Kitabxanası © 2026 • Təhlükəsiz Administrator Girişi
       </footer>
     </div>
   );

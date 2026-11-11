@@ -26,7 +26,7 @@ export function Topbar({ onToggleMobileSidebar }: TopbarProps) {
     ? `${profile.firstName} ${profile.lastName}`
     : user?.displayName || "Admin İstifadəçi";
 
-  const userEmail = profile?.email || user?.email || "admin@libra.az";
+  const userEmail = profile?.email || user?.email || "admin@ldptm.edu.az";
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between gap-4">

@@ -218,7 +218,7 @@ export function DocumentPreviewModal({ isOpen, resource, onClose }: DocumentPrev
 
             {/* Page Footer */}
             <div className="pt-8 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-400 font-sans">
-              <span>LIBRA AI Digital Reader</span>
+              <span>Peşə Kitabxanası Rəqəmsal Oxucu</span>
               <span className="font-mono">{currentPage} / {totalPages}</span>
             </div>
           </div>

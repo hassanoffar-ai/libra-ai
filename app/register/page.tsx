@@ -170,12 +170,9 @@ export default function ReaderRegisterPage() {
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#0F172A] via-indigo-950 to-indigo-700 flex items-center justify-center text-white shadow-xl shadow-indigo-950/20 group-hover:scale-105 transition-transform duration-200">
                 <Library className="w-6 h-6 text-indigo-300" />
               </div>
-              <div className="flex items-center gap-1.5 text-left">
-                <span className="text-2xl font-black tracking-tight text-slate-900 font-sans">
-                  LIBRA
-                </span>
-                <span className="bg-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded-md tracking-wider shadow-sm">
-                  AI
+              <div className="text-left">
+                <span className="text-2xl font-black tracking-tight text-slate-900 font-sans block">
+                  Peşə Kitabxanası
                 </span>
               </div>
             </Link>
@@ -476,7 +473,7 @@ export default function ReaderRegisterPage() {
 
       {/* Footer */}
       <footer className="py-4 text-center text-xs text-slate-400">
-        LIBRA AI © 2026 • Lənkəran Dövlət Peşə Təhsil Mərkəzi
+        Peşə Kitabxanası © 2026 • Lənkəran Dövlət Peşə Təhsil Mərkəzi
       </footer>
     </div>
   );

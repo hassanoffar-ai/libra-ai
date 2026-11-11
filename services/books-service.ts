@@ -1,5 +1,5 @@
 /**
- * LIBRA AI - Kitab Fondu və Fiziki Nüsxələr Servisi (Phase 3)
+ * Peşə Kitabxanası - Kitab Fondu və Fiziki Nüsxələr Servisi (Phase 3)
  * 
  * Bu xidmət kitab fondunun və fiziki nüsxələrin idarə edilməsini təmin edir.
  * Müştəri tərəfində reaktiv vəziyyət (localStorage / in-memory) saxlayır və

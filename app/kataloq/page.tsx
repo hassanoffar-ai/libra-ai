@@ -325,7 +325,7 @@ export default function KataloqPage() {
                     <div className="w-12 h-16 rounded-xl bg-gradient-to-tr from-slate-900 to-indigo-900 text-white flex flex-col items-center justify-center p-1.5 shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform">
                       <BookOpen className="w-5 h-5 text-indigo-300 mb-1" />
                       <span className="text-[9px] font-bold font-mono tracking-tighter text-indigo-200">
-                        LIBRA
+                        Peşə
                       </span>
                     </div>
 

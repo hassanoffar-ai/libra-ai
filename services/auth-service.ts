@@ -1,5 +1,5 @@
 /**
- * LIBRA AI - Oxucu Autentifikasiyası Xidməti (Reader Auth Service)
+ * Peşə Kitabxanası - Oxucu Autentifikasiyası Xidməti (Reader Auth Service)
  * 
  * Bu xidmət oxucuların qeydiyyatı, şifrə heşlənməsi, daxil olma yoxlaması
  * və sessiya idarəçiliyini təmin edir.
@@ -116,7 +116,7 @@ export async function registerReader(input: RegisterReaderInput): Promise<AuthRe
   if (!emailRegex.test(trimmedEmail)) {
     return {
       success: false,
-      error: "Düzgün e-poçt ünvanı daxil edin (məs: oxucu@libra.az).",
+      error: "Düzgün e-poçt ünvanı daxil edin (məs: oxucu@ldptm.edu.az).",
     };
   }
 

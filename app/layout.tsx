@@ -4,9 +4,9 @@ import { AppShell } from "@/components/app-shell";
 import { AuthProvider } from "@/lib/firebase/auth-context";
 
 export const metadata: Metadata = {
-  title: "LIBRA AI - Ağıllı Kitabxana İdarəetmə Sistemi",
+  title: "Peşə Kitabxanası - Lənkəran Dövlət Peşə Təhsil Mərkəzi",
   description:
-    "Lənkəran Dövlət Peşə Təhsil Mərkəzi üçün LIBRA AI Ağıllı Kitabxana İdarəetmə Sistemi",
+    "Lənkəran Dövlət Peşə Təhsil Mərkəzi üçün Peşə Kitabxanası İdarəetmə Sistemi",
 };
 
 export default function RootLayout({

@@ -78,7 +78,7 @@ export default function DashboardPage() {
             </h1>
             <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-100/80 text-indigo-700 text-xs font-semibold">
               <Sparkles className="w-3 h-3 text-indigo-500" />
-              LIBRA AI
+              Peşə Kitabxanası
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
