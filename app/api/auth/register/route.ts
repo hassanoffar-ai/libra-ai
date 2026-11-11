@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { createAuthUserViaRest } from "@/lib/firebase/server-auth";
 import { UserProfile } from "@/lib/types/user";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
@@ -65,82 +67,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Check if user already exists in Firebase Auth or Firestore
-    try {
-      const existingUser = await adminAuth.getUserByEmail(cleanEmail);
-      if (existingUser) {
-        return NextResponse.json(
-          { error: "Bu e-poçt ünvanı ilə artıq qeydiyyatdan keçilib." },
-          { status: 400 }
-        );
-      }
-    } catch (err: any) {
-      // If user not found, getUserByEmail throws auth/user-not-found - which is expected
-      if (err.code !== "auth/user-not-found") {
-        console.error("User lookup error:", err);
-      }
+    // 2. Create user in Firebase Authentication via Google Identity Toolkit
+    const createRes = await createAuthUserViaRest(
+      cleanEmail,
+      password,
+      `${cleanFirst} ${cleanLast}`
+    );
+
+    if (!createRes.success) {
+      return NextResponse.json(
+        { error: createRes.error || "Qeydiyyat zamanı xəta baş verdi." },
+        { status: 400 }
+      );
     }
 
-    // 3. Create user in Firebase Authentication
-    // Note: Password is securely managed by Firebase Auth and NEVER stored in plaintext or in Firestore.
-    const userRecord = await adminAuth.createUser({
-      email: cleanEmail,
-      password: password,
-      displayName: `${cleanFirst} ${cleanLast}`,
-    });
-
-    // 4. Set custom user claims - strictly "oxucu"
-    // Client has ZERO ability to assign Admin role
-    await adminAuth.setCustomUserClaims(userRecord.uid, {
-      role: "oxucu",
-    });
-
-    // 5. Generate unique Ticket Number for reader
-    let ticketNumber = "OX-1001";
-    try {
-      const countSnapshot = await adminDb.collection("users").count().get();
-      const nextNum = 1000 + countSnapshot.data().count + 1;
-      ticketNumber = `OX-${nextNum}`;
-    } catch (e) {
-      // Fallback ticket generator
-      ticketNumber = `OX-${Math.floor(1000 + Math.random() * 9000)}`;
-    }
-
-    const now = new Date().toISOString();
-    const userProfile: UserProfile = {
-      uid: userRecord.uid,
-      email: cleanEmail,
-      role: "oxucu", // STRICTLY oxucu
-      firstName: cleanFirst,
-      lastName: cleanLast,
-      phone: cleanPhone,
-      category: cleanCategory,
-      ticketNumber,
-      status: "Aktiv",
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    // 6. Save reader profile in Firestore
-    await adminDb.collection("users").doc(userRecord.uid).set(userProfile);
+    const ticketNumber = `OX-${Math.floor(1000 + Math.random() * 9000)}`;
 
     return NextResponse.json({
       success: true,
       message: "Qeydiyyat uğurla tamamlandı! Giriş edə bilərsiniz.",
       ticketNumber,
+      uid: createRes.uid,
     });
   } catch (err: any) {
     console.error("Registration error:", err);
-    if (err.code === "auth/email-already-exists") {
-      return NextResponse.json(
-        { error: "Bu e-poçt ünvanı ilə artıq qeydiyyatdan keçilib." },
-        { status: 400 }
-      );
-    }
     return NextResponse.json(
       { error: err?.message || "Qeydiyyat zamanı xəta baş verdi." },
       { status: 500 }
     );
   }
 }
-

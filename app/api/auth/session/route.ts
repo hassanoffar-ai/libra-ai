@@ -1,38 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
-import { UserProfile } from "@/lib/types/user";
+import { verifyTokenSecurely } from "@/lib/firebase/server-auth";
+import { UserProfile, UserRole } from "@/lib/types/user";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const { idToken, requestedPortal } = await req.json();
-
-    if (!idToken) {
+    const body = await req.json().catch(() => null);
+    if (!body || !body.idToken) {
       return NextResponse.json(
         { error: "Autentifikasiya tokeni tapılmadı." },
         { status: 400 }
       );
     }
 
-    // 1. Verify Firebase ID Token on the server
-    const decodedToken = await adminAuth.verifyIdToken(idToken, true);
-    const uid = decodedToken.uid;
+    const { idToken, requestedPortal } = body;
 
-    // 2. Fetch user profile from Firestore to confirm role
-    let role: "admin" | "oxucu" = "oxucu";
-    let profileData: Partial<UserProfile> = {};
-
-    const userDoc = await adminDb.collection("users").doc(uid).get();
-    if (userDoc.exists) {
-      profileData = userDoc.data() as UserProfile;
-      role = (profileData.role === "admin" || decodedToken.role === "admin") ? "admin" : "oxucu";
-    } else if (decodedToken.role === "admin") {
-      role = "admin";
+    // 1. Verify token securely via Google Identity Toolkit REST API
+    const verifiedUser = await verifyTokenSecurely(idToken);
+    if (!verifiedUser) {
+      return NextResponse.json(
+        { error: "Autentifikasiya sessiyası yaradılarkən xəta: Token etibarsızdır və ya müddəti bitib." },
+        { status: 401 }
+      );
     }
 
-    // 3. Strict Server-Side Portal Permission Check:
+    const uid = verifiedUser.uid;
+    const email = verifiedUser.email;
+    const role: UserRole = verifiedUser.role;
+
+    // 2. Strict Server-Side Portal Permission Check:
     // If logging into the /admin portal, strictly verify role is admin
     if (requestedPortal === "admin" && role !== "admin") {
       return NextResponse.json(
@@ -44,22 +42,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4. Create Session Cookie (expires in 5 days)
+    // 3. Set Session Cookies (expires in 5 days)
     const expiresIn = 5 * 24 * 60 * 60 * 1000;
-    let sessionCookie = "";
-
-    try {
-      sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
-    } catch (sessionErr) {
-      // Fallback: use verified token if createSessionCookie is unavailable in local dev
-      sessionCookie = idToken;
-    }
-
-    // 5. Set HttpOnly, Secure, SameSite Session Cookie
     const isProd = process.env.NODE_ENV === "production";
     const cookieStore = cookies();
 
-    cookieStore.set("libra_session", sessionCookie, {
+    cookieStore.set("libra_session", idToken, {
       maxAge: expiresIn / 1000,
       httpOnly: true,
       secure: isProd,
@@ -69,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     cookieStore.set("libra_role", role, {
       maxAge: expiresIn / 1000,
-      httpOnly: false, // Accessible to client-side auth state
+      httpOnly: false,
       secure: isProd,
       sameSite: "lax",
       path: "/",
@@ -77,16 +65,15 @@ export async function POST(req: NextRequest) {
 
     const userProfile: UserProfile = {
       uid,
-      email: decodedToken.email || profileData.email || "",
+      email,
       role,
-      firstName: profileData.firstName || decodedToken.name?.split(" ")[0] || "İstifadəçi",
-      lastName: profileData.lastName || decodedToken.name?.split(" ").slice(1).join(" ") || "",
-      phone: profileData.phone || "",
-      category: profileData.category || "Tələbə",
-      ticketNumber: profileData.ticketNumber,
-      status: profileData.status || "Aktiv",
-      createdAt: profileData.createdAt || new Date().toISOString(),
-      updatedAt: profileData.updatedAt || new Date().toISOString(),
+      firstName: verifiedUser.displayName?.split(" ")[0] || (role === "admin" ? "Admin" : "Oxucu"),
+      lastName: verifiedUser.displayName?.split(" ").slice(1).join(" ") || "",
+      phone: "",
+      category: role === "admin" ? "Müəllim" : "Tələbə",
+      status: "Aktiv",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     return NextResponse.json({
@@ -96,9 +83,8 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("Session creation error:", err);
     return NextResponse.json(
-      { error: "Autentifikasiya sessiyası yaradılarkən xəta: " + (err?.message || "Token etibarsızdır") },
-      { status: 401 }
+      { error: "Autentifikasiya sessiyası yaradılarkən xəta: " + (err?.message || "Gözlənilməz xəta") },
+      { status: 500 }
     );
   }
 }
-

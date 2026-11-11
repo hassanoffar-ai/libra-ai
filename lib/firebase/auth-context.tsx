@@ -113,7 +113,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }),
       });
 
-      const data = await response.json();
+      let data: any = {};
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        console.error("Non-JSON response from /api/auth/session:", await response.text().catch(() => ""));
+        return {
+          success: false,
+          error: "Sessiya xətası baş verdi. Zəhmət olmasa yenidən cəhd edin.",
+        };
+      }
 
       if (!response.ok) {
         // If rejected on server, sign out from client auth
