@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
+import { AuthProvider } from "@/lib/firebase/auth-context";
 
 export const metadata: Metadata = {
   title: "LIBRA AI - Ağıllı Kitabxana İdarəetmə Sistemi",
@@ -16,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="az">
       <body>
-        <AppShell>{children}</AppShell>
+        <AuthProvider>
+          <AppShell>{children}</AppShell>
+        </AuthProvider>
       </body>
     </html>
   );

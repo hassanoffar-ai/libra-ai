@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. DENY-BY-DEFAULT: Default rule to deny everything
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions for security evaluation
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'admin' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // 2. USERS COLLECTION
+    // Reader can ONLY read and update their own document
+    // Reader CANNOT see other readers' personal data
+    // Admin has full management access
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+
+      // Creation is handled server-side via Firebase Admin SDK.
+      // If done via client, enforce oxucu role only (no user can set role to admin)
+      allow create: if isAdmin() || (
+        isAuthenticated() &&
+        isOwner(userId) &&
+        request.resource.data.role == 'oxucu'
+      );
+
+      // Reader can update only their non-sensitive fields; cannot escalate to admin or alter status
+      allow update: if isAdmin() || (
+        isOwner(userId) &&
+        request.resource.data.role == resource.data.role &&
+        request.resource.data.status == resource.data.status
+      );
+
+      // Deletion is strictly reserved for Admin
+      allow delete: if isAdmin();
+    }
+
+    // 3. BOOKS & COPIES
+    // Authenticated users (both readers and admin) can read book catalog
+    // Only Admin can create, update, or delete books
+    match /books/{bookId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /book_copies/{copyId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // 4. LOANS (Kitab dövriyyəsi)
+    // Readers can read only their own loans
+    // Admin has full control
+    match /loans/{loanId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+
+    // 5. RESERVATIONS
+    // Readers can view and create their own reservations
+    // Admin has full control
+    match /reservations/{resId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // 6. DIGITAL LIBRARY RESOURCES
+    match /digital_resources/{resId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // 7. AUDIT & SYNC LOGS (Admin only)
+    match /sync_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
+

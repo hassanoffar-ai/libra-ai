@@ -10,10 +10,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  // Auth pages (login, register) use their own dedicated layout
-  const isAuthPage = pathname?.startsWith("/auth");
+  // Dedicated full-page layouts (reader login, registration, admin login, reader portal)
+  const isDedicatedPage =
+    pathname === "/" ||
+    pathname === "/register" ||
+    pathname === "/admin" ||
+    pathname === "/reader" ||
+    pathname?.startsWith("/auth");
 
-  if (isAuthPage) {
+  if (isDedicatedPage) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
         {children}
