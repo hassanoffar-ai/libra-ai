@@ -15,14 +15,15 @@ export type ReservationStatus = "Gözləyir" | "Nüsxə ayrıldı" | "Ləğv edi
 
 export interface Reader {
   id: string;
-  ticketNumber: string; // Məs: OX-1001
+  ticketNumber: string; // Məs: OX-1001 (unikal)
   firstName: string;
   lastName: string;
-  fatherName: string;
+  fatherName?: string;
   category: ReaderCategory;
   department: string; // Qrup / Kafedra / Şöbə
   phone: string;
-  email: string;
+  email: string; // unikal
+  password?: string; // Heşlənmiş təhlükəsiz şifrə (Auth)
   maxBookLimit: number;
   status: ReaderStatus;
   registeredDate: string;
@@ -143,14 +144,58 @@ export async function getReaderById(id: string): Promise<Reader | null> {
   return readers.find((r) => r.id === id) || null;
 }
 
-export async function createReader(input: Omit<Reader, "id" | "registeredDate">): Promise<Reader> {
+export async function getReaderByEmail(email: string): Promise<Reader | null> {
+  const { readers } = loadCirculationData();
+  const normalized = email.trim().toLowerCase();
+  return readers.find((r) => r.email?.trim().toLowerCase() === normalized) || null;
+}
+
+export async function getReaderByTicketNumber(ticketNumber: string): Promise<Reader | null> {
+  const { readers } = loadCirculationData();
+  const normalized = ticketNumber.trim().toUpperCase();
+  return readers.find((r) => r.ticketNumber?.trim().toUpperCase() === normalized) || null;
+}
+
+export async function generateNextTicketNumber(): Promise<string> {
+  const { readers } = loadCirculationData();
+  let highest = 1000;
+  for (const r of readers) {
+    const match = r.ticketNumber?.match(/OX-(\d+)/i);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num > highest) highest = num;
+    }
+  }
+  let candidate = highest + 1;
+  while (readers.some((r) => r.ticketNumber?.toUpperCase() === `OX-${candidate}`)) {
+    candidate++;
+  }
+  return `OX-${candidate}`;
+}
+
+export async function createReader(
+  input: Omit<Reader, "id" | "registeredDate"> & { ticketNumber?: string }
+): Promise<Reader> {
   const { readers, loans, reservations } = loadCirculationData();
+
+  // Validate or auto-generate unique ticket number
+  let finalTicket = input.ticketNumber?.trim().toUpperCase();
+  if (!finalTicket) {
+    finalTicket = await generateNextTicketNumber();
+  } else {
+    // If ticket number exists, generate next unique
+    const isTaken = readers.some((r) => r.ticketNumber?.toUpperCase() === finalTicket);
+    if (isTaken) {
+      finalTicket = await generateNextTicketNumber();
+    }
+  }
 
   const readerId = `r-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
   const now = new Date().toISOString().split("T")[0];
 
   const newReader: Reader = {
     ...input,
+    ticketNumber: finalTicket,
     id: readerId,
     registeredDate: now,
   };

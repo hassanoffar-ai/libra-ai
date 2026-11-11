@@ -1,0 +1,158 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ReaderCategory {
+  TELEBE   @map("Tələbə")
+  MUELLIM  @map("Müəllim")
+  EMEKDAS  @map("Əməkdaş")
+}
+
+enum ReaderStatus {
+  AKTIV    @map("Aktiv")
+  BORCLU   @map("Borclu")
+  BLOK     @map("Bloklanıb")
+}
+
+enum CopyCondition {
+  ELA      @map("Əla")
+  YAXSI    @map("Yaxşı")
+  TEMIR    @map("Təmirə ehtiyac var")
+  YARARSIZ @map("Yararsız")
+}
+
+enum CopyStatus {
+  FONDDA   @map("Fondda")
+  OXUCUDA  @map("Oxucuda")
+  SILINIB  @map("Silinib")
+  ITMIS    @map("İtmiş")
+}
+
+enum LoanStatus {
+  AKTIV      @map("Aktiv")
+  QAYTARILIB @map("Qaytarılıb")
+  GECIKIB    @map("Gecikib")
+}
+
+enum ReservationStatus {
+  GOZLEYIR      @map("Gözləyir")
+  NUSXE_AYRILDI @map("Nüsxə ayrıldı")
+  LEGVEDILDI    @map("Ləğv edildi")
+  TAMAMLANDI    @map("Tamamlandı")
+}
+
+model Reader {
+  id             String          @id @default(cuid())
+  ticketNumber   String          @unique // Məs: OX-1001, unikal oxucu bilet nömrəsi
+  email          String          @unique // Unikal e-poçt ünvanı
+  password       String          // Heşlənmiş təhlükəsiz şifrə (Reader authentication)
+  firstName      String
+  lastName       String
+  fatherName     String?
+  category       ReaderCategory  @default(TELEBE)
+  department     String          // Qrup / İxtisas və ya Kafedra / Şöbə
+  phone          String
+  maxBookLimit   Int             @default(5)
+  status         ReaderStatus    @default(AKTIV)
+  registeredDate DateTime        @default(now())
+  notes          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  loans          Loan[]
+  reservations   Reservation[]
+
+  @@map("readers")
+}
+
+model Book {
+  id             String         @id @default(cuid())
+  title          String
+  author         String
+  isbn           String?
+  udk            String?
+  category       String
+  publisher      String?
+  year           String?
+  pages          Int?
+  language       String         @default("Azərbaycan")
+  copiesCount    Int            @default(0)
+  availableCount Int            @default(0)
+  initialShelf   String
+  description    String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  copies         BookCopy[]
+  loans          Loan[]
+  reservations   Reservation[]
+
+  @@map("books")
+}
+
+model BookCopy {
+  id              String        @id @default(cuid())
+  bookId          String
+  inventoryNumber String        @unique // Məs: INV-1001
+  shelfLocation   String
+  condition       CopyCondition @default(YAXSI)
+  status          CopyStatus    @default(FONDDA)
+  addedDate       DateTime      @default(now())
+  lastAuditDate   DateTime?
+  auditStatus     String?
+
+  book            Book          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  loans           Loan[]
+
+  @@map("book_copies")
+}
+
+model Loan {
+  id                String     @id @default(cuid())
+  readerId          String
+  bookId            String
+  copyId            String
+  inventoryNumber   String
+  issueDate         DateTime   @default(now())
+  dueDate           DateTime
+  returnDate        DateTime?
+  status            LoanStatus @default(AKTIV)
+  conditionAtIssue  String
+  conditionAtReturn String?
+  notes             String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  reader            Reader     @relation(fields: [readerId], references: [id], onDelete: Cascade)
+  book              Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  copy              BookCopy   @relation(fields: [copyId], references: [id], onDelete: Cascade)
+
+  @@map("loans")
+}
+
+model Reservation {
+  id                      String            @id @default(cuid())
+  readerId                String
+  bookId                  String
+  reservedDate            DateTime          @default(now())
+  queuePosition           Int               @default(1)
+  status                  ReservationStatus @default(GOZLEYIR)
+  assignedCopyId          String?
+  assignedInventoryNumber String?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+
+  reader                  Reader            @relation(fields: [readerId], references: [id], onDelete: Cascade)
+  book                    Book              @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@map("reservations")
+}
+
