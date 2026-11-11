@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   User,
   Ticket,
@@ -20,12 +20,16 @@ import {
   GraduationCap,
   Briefcase,
   ArrowRight,
+  ShieldAlert,
 } from "lucide-react";
 import { useAuth } from "@/lib/firebase/auth-context";
 import { getLoans, Loan } from "@/services/circulation-service";
 
-export default function ReaderPortalPage() {
+function ReaderPortalContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isDeniedAdmin = searchParams.get("denied") === "admin_only";
+
   const { user, profile, role, isLoading, logout } = useAuth();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [isLoansLoading, setIsLoansLoading] = useState(true);
@@ -104,6 +108,17 @@ export default function ReaderPortalPage() {
 
       {/* Main Body */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+        {/* Admin Access Restriction Notice Banner */}
+        {isDeniedAdmin && (
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-3 animate-in fade-in duration-200">
+            <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold block">İcazə Məhdudiyyəti</span>
+              <span>Kitabxana idarəetmə panelinə yalnız Administratorlar daxil ola bilər. Oxucu profilinizlə şəxsi kabinetinizə yönləndirildiniz.</span>
+            </div>
+          </div>
+        )}
 
         {/* Reader Profile Card */}
         <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8 relative overflow-hidden">
@@ -288,3 +303,19 @@ export default function ReaderPortalPage() {
   );
 }
 
+export default function ReaderPortalPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs font-medium text-slate-500">Məlumatlar yüklənir...</p>
+          </div>
+        </div>
+      }
+    >
+      <ReaderPortalContent />
+    </Suspense>
+  );
+}
