@@ -152,7 +152,7 @@ export default function AdminLoginPage() {
                       setEmail(e.target.value);
                       if (errorMessage) setErrorMessage(null);
                     }}
-                    className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-800/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition-all"
+                    className="w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-800/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition-all"
                   />
                 </div>
               </div>
@@ -179,7 +179,7 @@ export default function AdminLoginPage() {
                       setPassword(e.target.value);
                       if (errorMessage) setErrorMessage(null);
                     }}
-                    className="w-full pl-10 pr-10 py-2.5 text-sm bg-slate-800/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition-all"
+                    className="w-full pl-10 pr-10 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-800/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition-all"
                   />
                   <button
                     type="button"

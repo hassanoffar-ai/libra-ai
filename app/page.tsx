@@ -101,7 +101,7 @@ export default function ReaderLoginPage() {
         <div className="w-full max-w-lg my-auto">
 
           {/* Center Overlaid Login & Registration Card */}
-          <div className="bg-white/95 sm:bg-white/95 backdrop-blur-xl rounded-3xl border border-white/80 shadow-2xl shadow-slate-950/60 p-6 sm:p-8 relative">
+          <div className="bg-white/95 sm:bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-white/80 shadow-2xl shadow-slate-950/60 p-5 sm:p-8 relative">
             <div>
               {/* Institutional Header & Brand INSIDE Card (Requested by User) */}
               <div className="mb-6 pb-5 border-b border-slate-100 text-center">
@@ -156,7 +156,7 @@ export default function ReaderLoginPage() {
                         setEmail(e.target.value);
                         if (errorMessage) setErrorMessage(null);
                       }}
-                      className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                      className="w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all min-h-[46px] sm:min-h-0"
                     />
                   </div>
                 </div>
@@ -183,7 +183,7 @@ export default function ReaderLoginPage() {
                         setPassword(e.target.value);
                         if (errorMessage) setErrorMessage(null);
                       }}
-                      className="w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                      className="w-full pl-10 pr-10 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all min-h-[46px] sm:min-h-0"
                     />
                     <button
                       type="button"
@@ -201,7 +201,7 @@ export default function ReaderLoginPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-[0.99] transition-all shadow-lg shadow-indigo-600/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="w-full flex items-center justify-center gap-2 py-3.5 sm:py-3 px-4 rounded-xl text-base sm:text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-[0.99] transition-all shadow-lg shadow-indigo-600/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-70 disabled:cursor-not-allowed min-h-[48px]"
                   >
                     {isSubmitting ? (
                       <>

@@ -158,8 +158,8 @@ export default function ReaderRegisterPage() {
       )}
 
       {/* Main Container */}
-      <main className="flex-1 flex flex-col items-center justify-center">
-        <div className="w-full max-w-xl">
+      <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 w-full">
+        <div className="w-full max-w-xl my-auto">
 
           {/* Brand Header */}
           <div className="text-center mb-6">
@@ -188,7 +188,7 @@ export default function ReaderRegisterPage() {
           </div>
 
           {/* Registration Card */}
-          <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xl shadow-slate-200/50 p-6 sm:p-10 relative">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xl shadow-slate-200/50 p-5 sm:p-8 lg:p-10 relative">
 
             {/* Error Banner */}
             {errorMessage && (
@@ -218,7 +218,7 @@ export default function ReaderRegisterPage() {
                         setFirstName(e.target.value);
                         if (fieldErrors.firstName) setFieldErrors({ ...fieldErrors, firstName: "" });
                       }}
-                      className={`w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.firstName
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
                           : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
@@ -247,7 +247,7 @@ export default function ReaderRegisterPage() {
                         setLastName(e.target.value);
                         if (fieldErrors.lastName) setFieldErrors({ ...fieldErrors, lastName: "" });
                       }}
-                      className={`w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.lastName
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
                           : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
@@ -279,7 +279,7 @@ export default function ReaderRegisterPage() {
                         setPhone(e.target.value);
                         if (fieldErrors.phone) setFieldErrors({ ...fieldErrors, phone: "" });
                       }}
-                      className={`w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.phone
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
                           : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
@@ -308,7 +308,7 @@ export default function ReaderRegisterPage() {
                         setEmail(e.target.value);
                         if (fieldErrors.email) setFieldErrors({ ...fieldErrors, email: "" });
                       }}
-                      className={`w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.email
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
                           : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
@@ -374,7 +374,7 @@ export default function ReaderRegisterPage() {
                         setPassword(e.target.value);
                         if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: "" });
                       }}
-                      className={`w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-10 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.password
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
                           : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
@@ -411,7 +411,7 @@ export default function ReaderRegisterPage() {
                         setConfirmPassword(e.target.value);
                         if (fieldErrors.confirmPassword) setFieldErrors({ ...fieldErrors, confirmPassword: "" });
                       }}
-                      className={`w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-10 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.confirmPassword
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
                           : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
