@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Library,
   Mail,
@@ -17,8 +17,11 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/firebase/auth-context";
 
-export default function ReaderLoginPage() {
+function ReaderLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isRegisteredRedirect = searchParams.get("registered") === "1";
+
   const { login, user, role, isLoading: isAuthLoading } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -29,13 +32,21 @@ export default function ReaderLoginPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (isRegisteredRedirect) {
+      setSuccessMessage(
+        "Qeydiyyat tamamlandı! Hesabınız kitabxanaçı təsdiqindən sonra aktivləşəcək."
+      );
+    }
+  }, [isRegisteredRedirect]);
+
   // If already logged in, redirect to appropriate area
   useEffect(() => {
     if (!isAuthLoading && user && role) {
-      if (role === "admin") {
+      if (role === "admin" || (role as string) === "librarian") {
         router.push("/dashboard");
       } else {
-        router.push("/reader");
+        router.push("/portal");
       }
     }
   }, [user, role, isAuthLoading, router]);
@@ -69,10 +80,10 @@ export default function ReaderLoginPage() {
       setSuccessMessage("Uğurla daxil oldunuz! Yönləndirilirsiniz...");
 
       setTimeout(() => {
-        if (res.role === "admin") {
+        if (res.role === "admin" || (res.role as string) === "librarian") {
           router.push("/dashboard");
         } else {
-          router.push("/reader");
+          router.push("/portal");
         }
       }, 700);
     } catch (err: any) {
@@ -282,5 +293,22 @@ export default function ReaderLoginPage() {
         Peşə Kitabxanası © 2026 • Lənkəran Dövlət Peşə Təhsil Mərkəzi
       </footer>
     </div>
+  );
+}
+
+export default function ReaderLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs font-medium text-slate-500">Yüklənir...</p>
+          </div>
+        </div>
+      }
+    >
+      <ReaderLoginForm />
+    </Suspense>
   );
 }

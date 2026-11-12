@@ -9,17 +9,21 @@
 import { getCopies, updateCopy, getBooks, getBookById } from "./books-service";
 
 export type ReaderCategory = "Tələbə" | "Müəllim" | "Əməkdaş";
-export type ReaderStatus = "Aktiv" | "Borclu" | "Bloklanıb";
+export type ReaderRole = "student" | "teacher" | "staff";
+export type UserAccessRole = "reader" | "librarian";
+export type ReaderStatus = "pending" | "active" | "blocked" | "Aktiv" | "Borclu" | "Bloklanıb";
 export type LoanStatus = "Aktiv" | "Qaytarılıb" | "Gecikib";
 export type ReservationStatus = "Gözləyir" | "Nüsxə ayrıldı" | "Ləğv edildi" | "Tamamlandı";
 
 export interface Reader {
   id: string;
-  ticketNumber: string; // Məs: OX-1001 (unikal)
+  ticketNumber: string; // Məs: OX-1045 (unikal)
   firstName: string;
   lastName: string;
   fatherName?: string;
   category: ReaderCategory;
+  role?: ReaderRole; // 'student' | 'teacher' | 'staff'
+  accessRole?: UserAccessRole; // 'reader' | 'librarian'
   department: string; // Qrup / Kafedra / Şöbə
   phone: string;
   email: string; // unikal
@@ -28,6 +32,24 @@ export interface Reader {
   status: ReaderStatus;
   registeredDate: string;
   notes?: string;
+}
+
+export function mapCategoryToRole(category: ReaderCategory): ReaderRole {
+  if (category === "Müəllim") return "teacher";
+  if (category === "Əməkdaş") return "staff";
+  return "student";
+}
+
+export function isReaderPending(status: ReaderStatus | string): boolean {
+  return status === "pending" || status === "Təsdiq gözləyir";
+}
+
+export function isReaderActive(status: ReaderStatus | string): boolean {
+  return status === "active" || status === "Aktiv";
+}
+
+export function isReaderBlocked(status: ReaderStatus | string): boolean {
+  return status === "blocked" || status === "Bloklanıb";
 }
 
 export interface Loan {
@@ -192,10 +214,16 @@ export async function createReader(
 
   const readerId = `r-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
   const now = new Date().toISOString().split("T")[0];
+  const role = input.role || mapCategoryToRole(input.category || "Tələbə");
+  const accessRole = input.accessRole || "reader";
+  const status = input.status || "active";
 
   const newReader: Reader = {
     ...input,
     ticketNumber: finalTicket,
+    role,
+    accessRole,
+    status,
     id: readerId,
     registeredDate: now,
   };
@@ -203,6 +231,10 @@ export async function createReader(
   const updatedReaders = [newReader, ...readers];
   saveCirculationData(updatedReaders, loans, reservations);
   return newReader;
+}
+
+export async function approveReader(id: string): Promise<Reader> {
+  return updateReader(id, { status: "active" });
 }
 
 export async function updateReader(id: string, updates: Partial<Reader>): Promise<Reader> {

@@ -171,25 +171,27 @@ export async function registerReader(input: RegisterReaderInput): Promise<AuthRe
       firstName,
       lastName,
       category: input.category || "Tələbə",
+      role: input.category === "Müəllim" ? "teacher" : input.category === "Əməkdaş" ? "staff" : "student",
+      accessRole: "reader",
       department: trimmedDept,
       phone: trimmedPhone,
       email: trimmedEmail,
       password: hashedPassword,
       maxBookLimit: input.category === "Müəllim" || input.category === "Əməkdaş" ? 10 : 5,
-      status: "Aktiv",
-      notes: "Onlayn portal vasitəsilə qeydiyyatdan keçib",
+      status: "pending", // Hybrid registration: starts as pending approval
+      notes: "Onlayn portal vasitəsilə qeydiyyatdan keçib (Təsdiq gözləyir)",
     });
 
     // Sinxronizasiya loguna yaz
     recordMutationLog(
       "Yeni oxucu",
-      `${trimmedName} (${ticketNumber})`,
+      `${trimmedName} (${ticketNumber} - Təsdiq gözləyir)`,
       "Uğurlu"
     );
 
     return {
       success: true,
-      message: "Qeydiyyat uğurla tamamlandı! Giriş edə bilərsiniz",
+      message: "Qeydiyyat tamamlandı! Hesabınız kitabxanaçı təsdiqindən sonra aktivləşəcək.",
       reader: newReader,
       ticketNumber,
     };

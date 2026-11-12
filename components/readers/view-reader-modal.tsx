@@ -16,7 +16,14 @@ import {
   ArrowUpRight,
   Edit2,
 } from "lucide-react";
-import { Reader, Loan, getLoans } from "@/services/circulation-service";
+import {
+  Reader,
+  Loan,
+  getLoans,
+  isReaderPending,
+  isReaderActive,
+  isReaderBlocked,
+} from "@/services/circulation-service";
 
 interface ViewReaderModalProps {
   isOpen: boolean;
@@ -61,14 +68,22 @@ export function ViewReaderModal({ isOpen, onClose, reader, onEdit }: ViewReaderM
               <div className="flex items-center gap-2">
                 <span
                   className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                    reader.status === "Aktiv"
+                    isReaderPending(reader.status)
+                      ? "bg-amber-950 text-amber-300 border border-amber-800/50"
+                      : isReaderActive(reader.status)
                       ? "bg-emerald-950 text-emerald-400 border border-emerald-800/50"
                       : reader.status === "Borclu"
                       ? "bg-amber-950 text-amber-400 border border-amber-800/50"
                       : "bg-rose-950 text-rose-400 border border-rose-800/50"
                   }`}
                 >
-                  {reader.status}
+                  {isReaderPending(reader.status)
+                    ? "Təsdiq gözləyir"
+                    : isReaderActive(reader.status)
+                    ? "Aktiv"
+                    : isReaderBlocked(reader.status)
+                    ? "Bloklanıb"
+                    : reader.status}
                 </span>
               </div>
               <h3 className="text-base font-bold text-white mt-1">

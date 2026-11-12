@@ -12,9 +12,11 @@ export async function POST(req: NextRequest) {
       lastName,
       phone,
       email,
+      department,
       category,
       password,
       confirmPassword,
+      ticketNumber: requestedTicket,
     } = body;
 
     // 1. Validation
@@ -22,9 +24,16 @@ export async function POST(req: NextRequest) {
     const cleanLast = (lastName || "").trim();
     const cleanPhone = (phone || "").trim();
     const cleanEmail = (email || "").trim().toLowerCase();
+    const cleanDept = (department || "").trim() || (category === "Müəllim" ? "Pedaqoji heyət" : "Tələbə qrupu");
     
     // Explicitly validate user category: STRICTLY "Müəllim" or "Tələbə"
     const cleanCategory: "Tələbə" | "Müəllim" = category === "Müəllim" ? "Müəllim" : "Tələbə";
+    const categoryRole = cleanCategory === "Müəllim" ? "teacher" : "student";
+
+    // Generate unique Reader Ticket Number (e.g., OX-1045)
+    const ticketNumber =
+      requestedTicket?.trim() ||
+      `OX-${Math.floor(1000 + Math.random() * 9000)}`;
 
     if (!cleanFirst || cleanFirst.length < 2) {
       return NextResponse.json(
@@ -89,11 +98,15 @@ export async function POST(req: NextRequest) {
       uid: createRes.uid,
       email: cleanEmail,
       role: "oxucu", // STRICTLY Oxucu - cannot escalate to admin
-      category: cleanCategory, // Saved correctly as Müəllim or Tələbə
+      accessRole: "reader",
+      category: cleanCategory,
+      categoryRole,
       firstName: cleanFirst,
       lastName: cleanLast,
       phone: cleanPhone,
-      status: "Aktiv",
+      department: cleanDept,
+      ticketNumber,
+      status: "pending", // Hybrid workflow: newly registered reader starts with 'pending'
       createdAt: now,
       updatedAt: now,
     };
@@ -105,7 +118,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Qeydiyyat uğurla tamamlandı! Giriş edə bilərsiniz.",
+      message: "Qeydiyyat tamamlandı! Hesabınız kitabxanaçı təsdiqindən sonra aktivləşəcək.",
+      ticketNumber,
+      status: "pending",
       uid: createRes.uid,
       user: userProfile,
     });

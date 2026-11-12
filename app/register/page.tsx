@@ -13,20 +13,23 @@ import {
   EyeOff,
   GraduationCap,
   Briefcase,
+  Building,
   ArrowRight,
   CheckCircle2,
   AlertCircle,
   Loader2,
 } from "lucide-react";
+import { createReader, generateNextTicketNumber } from "@/services/circulation-service";
 
 export default function ReaderRegisterPage() {
   const router = useRouter();
 
-  // Form states - Requirement 3
+  // Form states - Hybrid Reader Registration & Librarian Approval
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("+994 ");
   const [email, setEmail] = useState("");
+  const [department, setDepartment] = useState("");
   const [category, setCategory] = useState<"Tələbə" | "Müəllim">("Tələbə");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -65,6 +68,10 @@ export default function ReaderRegisterPage() {
       errors.email = "Düzgün e-poçt formatı daxil edin (məs: ad.soyad@example.com).";
     }
 
+    if (!department.trim()) {
+      errors.department = "Qrup və ya Şöbə qeyd edilməlidir.";
+    }
+
     if (!password || password.length < 6) {
       errors.password = "Şifrə minimum 6 simvol olmalıdır.";
     }
@@ -85,17 +92,27 @@ export default function ReaderRegisterPage() {
     setErrorMessage(null);
 
     try {
+      const cleanPhone = phone.trim();
+      const cleanDept = department.trim();
+
+      // Automatically generate unique Ticket Number (e.g., OX-1045)
+      const ticketNumber = await generateNextTicketNumber().catch(
+        () => `OX-${Math.floor(1000 + Math.random() * 9000)}`
+      );
+
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           firstName,
           lastName,
-          phone,
-          email,
+          phone: cleanPhone,
+          email: email.trim().toLowerCase(),
+          department: cleanDept,
           category,
           password,
           confirmPassword,
+          ticketNumber,
         }),
       });
 
@@ -107,13 +124,30 @@ export default function ReaderRegisterPage() {
         return;
       }
 
+      // Synchronize immediately to circulation-service as a pending reader for librarian review
+      const assignedTicket = data.ticketNumber || ticketNumber;
+      await createReader({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        phone: cleanPhone,
+        email: email.trim().toLowerCase(),
+        department: cleanDept,
+        category,
+        role: category === "Müəllim" ? "teacher" : "student",
+        accessRole: "reader",
+        ticketNumber: assignedTicket,
+        status: "pending",
+        maxBookLimit: category === "Müəllim" ? 10 : 5,
+        notes: "Onlayn qeydiyyatdan keçib (Təsdiq gözləyir)",
+      }).catch(console.error);
+
       setSuccessInfo({
-        message: data.message || "Qeydiyyat uğurla tamamlandı! Giriş edə bilərsiniz.",
+        message: "Qeydiyyat tamamlandı! Hesabınız kitabxanaçı təsdiqindən sonra aktivləşəcək.",
       });
 
-      // Automatically redirect to login page after 2 seconds
+      // Automatically redirect to /auth/login after 2 seconds
       setTimeout(() => {
-        router.push("/");
+        router.push("/auth/login?registered=1");
       }, 2000);
     } catch (err: any) {
       setErrorMessage(err?.message || "Gözlənilməz şəbəkə xətası baş verdi.");
@@ -342,6 +376,40 @@ export default function ReaderRegisterPage() {
                     <span>Müəllim</span>
                   </button>
                 </div>
+              </div>
+
+              {/* Qrup / Şöbə */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Qrup və ya Şöbə <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Building className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder={
+                      category === "Müəllim"
+                        ? "Məs: Kompüter texnologiyaları kafedrası"
+                        : "Məs: Qrup 204 və ya Aqronomluq ixtisası"
+                    }
+                    value={department}
+                    onChange={(e) => {
+                      setDepartment(e.target.value);
+                      if (fieldErrors.department) setFieldErrors({ ...fieldErrors, department: "" });
+                    }}
+                    className={`w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      fieldErrors.department
+                        ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
+                        : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    }`}
+                  />
+                </div>
+                {fieldErrors.department && (
+                  <p className="mt-1 text-xs text-rose-600 font-medium">{fieldErrors.department}</p>
+                )}
               </div>
 
               {/* 6. Şifrə & 7. Şifrənin təkrarı (2 sütun) */}

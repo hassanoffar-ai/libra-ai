@@ -12,6 +12,7 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle,
+  AlertCircle,
   Layers,
   X,
   Sparkles,
@@ -22,6 +23,9 @@ import {
   issueBook,
   getLoans,
   Loan,
+  updateReader,
+  isReaderPending,
+  isReaderActive,
 } from "@/services/circulation-service";
 import {
   BookCopy,
@@ -143,6 +147,24 @@ function VerilmeContent() {
     const d = new Date();
     d.setDate(d.getDate() + days);
     setCustomDueDate(d.toISOString().split("T")[0]);
+  };
+
+  const handleApproveSelectedReader = async () => {
+    if (!selectedReader) return;
+    try {
+      await updateReader(selectedReader.id, { status: "active" });
+      setSelectedReader({ ...selectedReader, status: "active" });
+      setReaders((prev) =>
+        prev.map((r) => (r.id === selectedReader.id ? { ...r, status: "active" } : r))
+      );
+      setSuccessMessage(
+        `"${selectedReader.firstName} ${selectedReader.lastName}" adlı oxucu uğurla təsdiqləndi və aktiv edildi!`
+      );
+      setTimeout(() => setSuccessMessage(null), 4000);
+    } catch (err: any) {
+      console.error("Oxucu təsdiqlənərkən xəta:", err);
+      setErrorMessage(err?.message || "Oxucunu təsdiqləyərkən xəta baş verdi.");
+    }
   };
 
   const handleIssueSubmit = async (e: React.FormEvent) => {
@@ -346,14 +368,41 @@ function VerilmeContent() {
                   </div>
 
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${selectedReader.status === "Aktiv"
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                      isReaderPending(selectedReader.status)
+                        ? "bg-amber-50 text-amber-700 border border-amber-200"
+                        : isReaderActive(selectedReader.status)
                         ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                         : "bg-rose-50 text-rose-700 border border-rose-200"
-                      }`}
+                    }`}
                   >
-                    {selectedReader.status}
+                    {isReaderPending(selectedReader.status)
+                      ? "Təsdiq gözləyir"
+                      : isReaderActive(selectedReader.status)
+                      ? "Aktiv"
+                      : selectedReader.status}
                   </span>
                 </div>
+
+                {/* Inline approval prompt if reader status is pending - Requirement 4 */}
+                {isReaderPending(selectedReader.status) && (
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200/90 text-amber-900 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                      <span className="font-semibold text-[11px] sm:text-xs">
+                        Bu oxucu hələ təsdiqlənməyib. Təsdiqləyib kitab verilsin?
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleApproveSelectedReader}
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-xs transition-all whitespace-nowrap"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Təsdiqlə və Davam et</span>
+                    </button>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-indigo-100/60 text-[11px]">
                   <div>

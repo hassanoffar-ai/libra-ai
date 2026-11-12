@@ -15,6 +15,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname === "/" ||
     pathname === "/register" ||
     pathname === "/admin" ||
+    pathname === "/portal" ||
+    pathname?.startsWith("/portal/") ||
     pathname === "/reader" ||
     pathname?.startsWith("/reader/") ||
     pathname?.startsWith("/auth");

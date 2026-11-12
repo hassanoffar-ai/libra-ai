@@ -1,5 +1,7 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import ReaderLoginPage from "@/app/page";
 
 export default function AuthLoginPage() {
-  redirect("/");
+  return <ReaderLoginPage />;
 }

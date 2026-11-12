@@ -11,8 +11,6 @@ const ADMIN_ONLY_ROUTES = [
   "/verilme",
   "/qaytarilma",
   "/hesabatlar",
-  "/kataloq",
-  "/e-kitabxana",
   "/rezervasiyalar",
 ];
 
@@ -23,8 +21,7 @@ export function middleware(request: NextRequest) {
   const roleCookie = request.cookies.get("libra_role")?.value;
 
   const isAuthenticated = Boolean(sessionCookie);
-  const isAdmin = roleCookie === "admin";
-  const isReader = roleCookie === "oxucu";
+  const isAdmin = roleCookie === "admin" || roleCookie === "librarian";
 
   // 1. Protect Admin Management Routes
   const isAdminRoute = ADMIN_ONLY_ROUTES.some((route) =>
@@ -41,7 +38,7 @@ export function middleware(request: NextRequest) {
 
     if (!isAdmin) {
       // Logged in as regular reader -> strictly deny access to admin panels
-      const readerPortalUrl = new URL("/reader", request.url);
+      const readerPortalUrl = new URL("/portal", request.url);
       readerPortalUrl.searchParams.set("denied", "admin_only");
       return NextResponse.redirect(readerPortalUrl);
     }
@@ -54,17 +51,22 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       } else {
         // Authenticated as reader -> block access to /admin and redirect to reader portal
-        const readerPortalUrl = new URL("/reader", request.url);
+        const readerPortalUrl = new URL("/portal", request.url);
         readerPortalUrl.searchParams.set("denied", "admin_only");
         return NextResponse.redirect(readerPortalUrl);
       }
     }
   }
 
-  // 3. Protect Reader Portal Routes (/reader, /reader/kataloq, etc.)
-  if (pathname === "/reader" || pathname.startsWith("/reader/")) {
+  // 3. Protect Reader Portal Routes (/portal, /reader)
+  if (
+    pathname === "/portal" ||
+    pathname.startsWith("/portal/") ||
+    pathname === "/reader" ||
+    pathname.startsWith("/reader/")
+  ) {
     if (!isAuthenticated) {
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/auth/login", request.url));
     }
   }
 
@@ -81,10 +83,10 @@ export const config = {
     "/verilme/:path*",
     "/qaytarilma/:path*",
     "/hesabatlar/:path*",
-    "/kataloq/:path*",
-    "/e-kitabxana/:path*",
     "/rezervasiyalar/:path*",
     "/admin",
+    "/portal",
+    "/portal/:path*",
     "/reader",
     "/reader/:path*",
   ],

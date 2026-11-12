@@ -19,7 +19,11 @@ interface AddReaderModalProps {
 }
 
 const CATEGORIES: ReaderCategory[] = ["Tələbə", "Müəllim", "Əməkdaş"];
-const STATUSES: ReaderStatus[] = ["Aktiv", "Borclu", "Bloklanıb"];
+const STATUS_OPTIONS: { value: ReaderStatus; label: string }[] = [
+  { value: "active", label: "Aktiv" },
+  { value: "pending", label: "Təsdiq gözləyir" },
+  { value: "blocked", label: "Bloklanıb" },
+];
 
 export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddReaderModalProps) {
   const isEdit = Boolean(editReader);
@@ -33,7 +37,7 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [maxBookLimit, setMaxBookLimit] = useState(5);
-  const [status, setStatus] = useState<ReaderStatus>("Aktiv");
+  const [status, setStatus] = useState<ReaderStatus>("active");
   const [notes, setNotes] = useState("");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -75,7 +79,7 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
     setPhone("+994 ");
     setEmail("");
     setMaxBookLimit(5);
-    setStatus("Aktiv");
+    setStatus("active");
     setNotes("");
     setErrors({});
     setIsSuccess(false);
@@ -126,13 +130,15 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
           ticketNumber: ticketNumber.trim(),
           firstName: firstName.trim(),
           lastName: lastName.trim(),
-          fatherName: fatherName.trim(),
+          fatherName: fatherName.trim() || undefined,
           category,
+          role: category === "Müəllim" ? "teacher" : category === "Əməkdaş" ? "staff" : "student",
+          accessRole: "reader",
           department: department.trim(),
           phone: phone.trim(),
           email: email.trim(),
           maxBookLimit: Number(maxBookLimit) || 5,
-          status: "Aktiv",
+          status: "active", // Readers added directly by librarian get 'active' immediately
           notes: notes.trim(),
         });
       }
@@ -354,9 +360,9 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
                     onChange={(e) => setStatus(e.target.value as ReaderStatus)}
                     className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
                   >
-                    {STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
+                    {STATUS_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
                       </option>
                     ))}
                   </select>
