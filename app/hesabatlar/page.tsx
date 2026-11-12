@@ -560,9 +560,8 @@ export default function HesabatlarPage() {
           </table>
 
           <!-- CLEAN SIGNATURES: PURE PARAGRAPH WITH NO TABLE GRIDLINES -->
-          <p style="margin-top: 36pt; font-size: 11pt; tab-stops: right 510pt;">
-            <span>Kitabxana məsulu: ___________________</span>
-            <span style="float: right; text-align: right;">&#9;Təsdiq etdi / Rəhbərlik: ___________________</span>
+          <p class="MsoNormal" style="margin-top: 36pt; font-size: 11pt; tab-stops: right 510.0pt;">
+            <span>Kitabxana məsulu: ___________________</span><span style="mso-tab-count: 1">&#9;</span><span style="float: right;">Təsdiq etdi / Rəhbərlik: ___________________</span>
           </p>
 
           <p style="margin-top: 24pt; font-size: 11pt;">
