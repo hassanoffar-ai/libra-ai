@@ -7,6 +7,7 @@ export async function POST() {
   const cookieStore = cookies();
   cookieStore.delete("libra_session");
   cookieStore.delete("libra_role");
+  cookieStore.delete("libra_admin_session");
 
   return NextResponse.json({
     success: true,

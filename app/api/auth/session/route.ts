@@ -77,6 +77,16 @@ export async function POST(req: NextRequest) {
       path: "/",
     });
 
+    if (role === "admin") {
+      cookieStore.set("libra_admin_session", "true", {
+        maxAge: expiresIn / 1000,
+        httpOnly: false,
+        secure: isProd,
+        sameSite: "lax",
+        path: "/",
+      });
+    }
+
     // 5. Build full user profile, respecting their selected category (Müəllim / Tələbə)
     const category: "Tələbə" | "Müəllim" =
       firestoreProfile?.category === "Müəllim"

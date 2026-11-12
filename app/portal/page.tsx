@@ -24,6 +24,7 @@ import {
   MapPin,
   X,
   Filter,
+  ShieldCheck,
 } from "lucide-react";
 import {
   getStoredReaderSession,
@@ -660,6 +661,18 @@ function ReaderPortalContent() {
             </div>
           )}
         </div>
+
+        {/* Footer */}
+        <footer className="mt-12 py-6 text-center text-xs text-slate-400 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>Peşə Kitabxanası © 2026 • Lənkəran Dövlət Peşə Təhsil Mərkəzi</span>
+          <Link
+            href="/admin/login"
+            className="text-slate-400 hover:text-indigo-600 transition-colors inline-flex items-center gap-1.5 font-medium"
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Kitabxanaçı Girişi</span>
+          </Link>
+        </footer>
       </main>
     </div>
   );

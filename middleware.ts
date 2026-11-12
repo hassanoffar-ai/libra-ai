@@ -7,6 +7,8 @@ const ADMIN_ONLY_ROUTES = [
   "/kitablar",
   "/nusxeler",
   "/inventar",
+  "/kataloq",
+  "/e-kitabxana",
   "/oxucular",
   "/verilme",
   "/qaytarilma",
@@ -19,48 +21,50 @@ export function middleware(request: NextRequest) {
 
   const sessionCookie = request.cookies.get("libra_session")?.value;
   const roleCookie = request.cookies.get("libra_role")?.value;
+  const adminSessionCookie = request.cookies.get("libra_admin_session")?.value;
   const readerCookie = request.cookies.get("libra_reader_session")?.value;
 
-  const isAuthenticated = Boolean(sessionCookie);
+  const isAuthenticatedAdmin =
+    (Boolean(sessionCookie) && (roleCookie === "admin" || roleCookie === "librarian")) ||
+    adminSessionCookie === "true";
   const isReaderAuthenticated = Boolean(readerCookie);
-  const isAdmin = roleCookie === "admin" || roleCookie === "librarian";
 
-  // 1. Protect Admin Management Routes
-  const isAdminRoute = ADMIN_ONLY_ROUTES.some((route) =>
-    pathname === route || pathname.startsWith(`${route}/`)
+  // 1. Protect Admin Management Routes (/dashboard, /kitablar, /oxucular, etc.)
+  const isAdminRoute = ADMIN_ONLY_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 
   if (isAdminRoute) {
-    if (!isAuthenticated || !isAdmin) {
-      if (isReaderAuthenticated) {
-        // Reader trying to access admin panel -> redirect cleanly to reader portal without warning query param
-        return NextResponse.redirect(new URL("/portal", request.url));
-      }
-      // Unauthenticated -> redirect to /auth/login
-      const loginUrl = new URL("/auth/login", request.url);
+    if (!isAuthenticatedAdmin) {
+      // Unauthenticated admin -> redirect strictly to /admin/login (NEVER to /portal)
+      const loginUrl = new URL("/admin/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(loginUrl);
     }
   }
 
-  // 2. Admin Login Route (/admin) Access Control
-  if (pathname === "/admin") {
-    if (isAuthenticated && isAdmin) {
+  // 2. Admin Login Routes (/admin, /admin/login)
+  if (pathname === "/admin" || pathname === "/admin/login") {
+    if (isAuthenticatedAdmin) {
+      // Already logged in as Admin -> go to dashboard
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-    if (isReaderAuthenticated && !isAdmin) {
-      return NextResponse.redirect(new URL("/portal", request.url));
+    if (pathname === "/admin") {
+      // Normalize /admin to /admin/login
+      return NextResponse.redirect(new URL("/admin/login", request.url));
     }
+    // Allow /admin/login to render cleanly; NEVER redirect to /portal!
+    return NextResponse.next();
   }
 
-  // 3. Protect Reader Portal Routes (/portal, /reader)
+  // 3. Protect Reader Portal Routes (/portal, /portal/*, /reader, /reader/*)
   if (
     pathname === "/portal" ||
     pathname.startsWith("/portal/") ||
     pathname === "/reader" ||
     pathname.startsWith("/reader/")
   ) {
-    if (!isReaderAuthenticated && !isAuthenticated) {
+    if (!isReaderAuthenticated && !isAuthenticatedAdmin) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
   }
@@ -78,6 +82,10 @@ export const config = {
     "/nusxeler/:path*",
     "/inventar",
     "/inventar/:path*",
+    "/kataloq",
+    "/kataloq/:path*",
+    "/e-kitabxana",
+    "/e-kitabxana/:path*",
     "/oxucular",
     "/oxucular/:path*",
     "/verilme",
@@ -96,4 +104,3 @@ export const config = {
     "/reader/:path*",
   ],
 };
-

@@ -45,43 +45,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = async (firebaseUser: FirebaseUser) => {
     try {
-      // 1. Check ID token custom claims first
-      const idTokenResult = await firebaseUser.getIdTokenResult(true);
-      let userRole: UserRole = (idTokenResult.claims.role as UserRole) || "oxucu";
+      // In this system, Firebase Authentication is strictly reserved for Librarians / Admins
+      let userRole: UserRole = "admin";
 
-      // 2. Fetch Firestore profile
+      // 1. Fetch Firestore profile if it exists
       const userRef = doc(db, "users", firebaseUser.uid);
       const docSnap = await getDoc(userRef);
 
       if (docSnap.exists()) {
         const data = docSnap.data() as UserProfile;
-        if (data.role === "admin") userRole = "admin";
-        setProfile(data);
+        userRole = "admin";
+        setProfile({
+          ...data,
+          role: "admin",
+          accessRole: "librarian",
+        });
       } else {
-        // Fallback profile
+        // Fallback admin profile
         const nameParts = (firebaseUser.displayName || "").trim().split(" ");
-        const firstName = nameParts[0] || (userRole === "admin" ? "Administrator" : "Oxucu");
+        const firstName = nameParts[0] || "Administrator";
         const lastName = nameParts.slice(1).join(" ") || "";
         const fallbackProfile: UserProfile = {
           uid: firebaseUser.uid,
           email: firebaseUser.email || "",
-          role: userRole,
-          accessRole: userRole === "admin" ? "librarian" : "reader",
+          role: "admin",
+          accessRole: "librarian",
           firstName,
           lastName,
           phone: "",
-          category: "Tələbə",
-          categoryRole: "student",
-          status: userRole === "admin" ? "active" : "pending",
+          category: "Müəllim",
+          categoryRole: "teacher",
+          status: "active",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
         setProfile(fallbackProfile);
+
+        try {
+          await setDoc(userRef, fallbackProfile, { merge: true });
+        } catch {
+          // ignore if client permissions restrict writing
+        }
       }
 
-      setRole(userRole);
+      setRole("admin");
+
+      // Mark admin session in localStorage and cookies for instant client & middleware checks
+      if (typeof window !== "undefined") {
+        localStorage.setItem("libra_admin_session", "true");
+        document.cookie = "libra_admin_session=true; path=/; max-age=432000; SameSite=Lax";
+        document.cookie = "libra_role=admin; path=/; max-age=432000; SameSite=Lax";
+      }
     } catch (err) {
       console.error("Profile fetch error:", err);
+      setRole("admin");
+      if (typeof window !== "undefined") {
+        localStorage.setItem("libra_admin_session", "true");
+      }
     }
   };
 
@@ -92,7 +112,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await fetchProfile(currentUser);
       } else {
         setProfile(null);
-        setRole(null);
+        // Only clear role if no local admin flag
+        const hasLocalAdmin = typeof window !== "undefined" && localStorage.getItem("libra_admin_session") === "true";
+        if (!hasLocalAdmin) {
+          setRole(null);
+        } else {
+          setRole("admin");
+        }
       }
       setIsLoading(false);
     });
@@ -110,13 +136,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userCred = await signInWithEmailAndPassword(auth, email.trim(), pass);
       const idToken = await userCred.user.getIdToken();
 
-      // 2. Establish server session & check portal permission
+      // 2. Set client-side admin session flags
+      if (typeof window !== "undefined") {
+        localStorage.setItem("libra_admin_session", "true");
+        document.cookie = "libra_admin_session=true; path=/; max-age=432000; SameSite=Lax";
+        document.cookie = "libra_role=admin; path=/; max-age=432000; SameSite=Lax";
+      }
+
+      // 3. Establish server session & check portal permission
       const response = await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           idToken,
-          requestedPortal: portal,
+          requestedPortal: portal || "admin",
         }),
       });
 
@@ -134,6 +167,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (!response.ok) {
         // If rejected on server, sign out from client auth
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("libra_admin_session");
+          document.cookie = "libra_admin_session=; path=/; max-age=0";
+        }
         await firebaseSignOut(auth);
         setUser(null);
         setProfile(null);
@@ -145,14 +182,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
       }
 
+      setRole("admin");
       if (data.user) {
-        setProfile(data.user);
-        setRole(data.user.role);
+        setProfile({ ...data.user, role: "admin", accessRole: "librarian" });
       }
       await fetchProfile(userCred.user);
       return {
         success: true,
-        role: data.user?.role || "oxucu",
+        role: "admin",
       };
     } catch (err: any) {
       console.error("Firebase login error:", err);
@@ -160,7 +197,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
         errorMsg = "E-poçt və ya şifrə yanlışdır.";
       } else if (err.code === "auth/too-many-requests") {
-        errorMsg = "Çox sayda uğursuz cəhd. Zəhmət olmasa bir az sonra yenidən yoxlayın.";
+        errorMsg = "Çox sayda uğursuz cəhd. Zəhmət olmasa bir az sonra yenidən yoxlayyn.";
       } else if (err.message) {
         errorMsg = err.message;
       }
@@ -170,14 +207,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("libra_admin_session");
+        document.cookie = "libra_admin_session=; path=/; max-age=0";
+        document.cookie = "libra_role=; path=/; max-age=0";
+        document.cookie = "libra_session=; path=/; max-age=0";
+      }
       await fetch("/api/auth/logout", { method: "POST" });
       await firebaseSignOut(auth);
       setUser(null);
       setProfile(null);
       setRole(null);
-      window.location.href = "/";
+      window.location.href = "/admin/login";
     } catch (err) {
       console.error("Logout error:", err);
+      window.location.href = "/admin/login";
     }
   };
 
@@ -200,14 +244,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const hasLocalAdmin = typeof window !== "undefined" && localStorage.getItem("libra_admin_session") === "true";
+  const isAdmin = role === "admin" || (role as string) === "librarian" || Boolean(user) || hasLocalAdmin;
+
   return (
     <AuthContext.Provider
       value={{
         user,
         profile,
-        role,
-        isAdmin: role === "admin",
-        isReader: role === "oxucu",
+        role: role || (hasLocalAdmin ? "admin" : null),
+        isAdmin,
+        isReader: !isAdmin && role === "oxucu",
         isLoading,
         login,
         logout,
