@@ -198,7 +198,6 @@ export default function HesabatlarPage() {
       "İnventar №",
       "Kitabın Adı",
       "Müəllif",
-      "Oxucu Bilet №",
       "Oxucu Adı",
       "Verilmə Tarixi",
       "Son Qaytarılma Tarixi",
@@ -210,7 +209,6 @@ export default function HesabatlarPage() {
       `"${l.inventoryNumber}"`,
       `"${l.bookTitle.replace(/"/g, '""')}"`,
       `"${l.bookAuthor.replace(/"/g, '""')}"`,
-      `"${l.readerTicket}"`,
       `"${l.readerName.replace(/"/g, '""')}"`,
       `"${l.issueDate}"`,
       `"${l.dueDate}"`,
@@ -449,7 +447,6 @@ export default function HesabatlarPage() {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  <th className="py-2.5 px-3">Bilet №</th>
                   <th className="py-2.5 px-3">Oxucu</th>
                   <th className="py-2.5 px-3">Şöbə / Qrup</th>
                   <th className="py-2.5 px-3">Əlaqə</th>
@@ -461,9 +458,6 @@ export default function HesabatlarPage() {
               <tbody className="divide-y divide-slate-100">
                 {overdueLoansList.map((item) => (
                   <tr key={item.id} className="hover:bg-rose-50/20">
-                    <td className="py-2.5 px-3 font-mono font-bold text-slate-700">
-                      {item.readerTicket}
-                    </td>
                     <td className="py-2.5 px-3 font-bold text-slate-900">
                       {item.readerName}
                     </td>
@@ -522,7 +516,7 @@ export default function HesabatlarPage() {
                     </span>
                     <div>
                       <h4 className="text-xs font-bold text-slate-900">{r.readerName}</h4>
-                      <p className="text-[10px] text-slate-400">{r.ticket} • {r.dept}</p>
+                      <p className="text-[10px] text-slate-400">{r.dept}</p>
                     </div>
                   </div>
 

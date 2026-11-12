@@ -59,12 +59,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile(data);
       } else {
         // Fallback profile
+        const nameParts = (firebaseUser.displayName || "").trim().split(" ");
+        const firstName = nameParts[0] || (userRole === "admin" ? "Administrator" : "Oxucu");
+        const lastName = nameParts.slice(1).join(" ") || "";
         const fallbackProfile: UserProfile = {
           uid: firebaseUser.uid,
           email: firebaseUser.email || "",
           role: userRole,
-          firstName: firebaseUser.displayName?.split(" ")[0] || "İstifadəçi",
-          lastName: firebaseUser.displayName?.split(" ").slice(1).join(" ") || "",
+          firstName,
+          lastName,
           phone: "",
           category: "Tələbə",
           status: "Aktiv",
@@ -140,6 +143,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
       }
 
+      if (data.user) {
+        setProfile(data.user);
+        setRole(data.user.role);
+      }
       await fetchProfile(userCred.user);
       return {
         success: true,

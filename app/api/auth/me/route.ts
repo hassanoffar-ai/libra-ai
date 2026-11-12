@@ -41,25 +41,28 @@ export async function GET(req: NextRequest) {
     }
 
     const category: "Tələbə" | "Müəllim" =
-      firestoreProfile?.category === "Müəllim" || (role === "admin" && !firestoreProfile?.category)
+      firestoreProfile?.category === "Müəllim"
         ? "Müəllim"
-        : "Tələbə";
+        : (role === "admin" ? "Müəllim" : "Tələbə");
+
+    const firstName =
+      firestoreProfile?.firstName ||
+      verifiedUser.displayName?.split(" ")[0] ||
+      (role === "admin" ? "Administrator" : "Oxucu");
+
+    const lastName =
+      firestoreProfile?.lastName ||
+      verifiedUser.displayName?.split(" ").slice(1).join(" ") ||
+      "";
 
     const user: UserProfile = {
       uid,
       email,
       role,
       category,
-      firstName:
-        firestoreProfile?.firstName ||
-        verifiedUser.displayName?.split(" ")[0] ||
-        (role === "admin" ? "Admin" : "Oxucu"),
-      lastName:
-        firestoreProfile?.lastName ||
-        verifiedUser.displayName?.split(" ").slice(1).join(" ") ||
-        "",
+      firstName,
+      lastName,
       phone: firestoreProfile?.phone || "",
-      ticketNumber: firestoreProfile?.ticketNumber || (role === "admin" ? "ADM-001" : "OX-1001"),
       status: firestoreProfile?.status || "Aktiv",
       createdAt: firestoreProfile?.createdAt || new Date().toISOString(),
       updatedAt: firestoreProfile?.updatedAt || new Date().toISOString(),

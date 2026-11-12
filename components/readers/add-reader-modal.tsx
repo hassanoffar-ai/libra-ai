@@ -96,7 +96,6 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
     if (!lastName.trim()) newErrors.lastName = "Soyad tələb olunur";
     if (!department.trim()) newErrors.department = "Qrup, ixtisas və ya şöbə qeyd edilməlidir";
     if (!phone.trim() || phone.trim() === "+994") newErrors.phone = "Əlaqə nömrəsi daxil edilməlidir";
-    if (!ticketNumber.trim()) newErrors.ticketNumber = "Oxucu bilet nömrəsi tələb olunur";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -173,7 +172,7 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
                 {isEdit ? "Oxucu Məlumatlarını Redaktə Et" : "Yeni Oxucu Qeydiyyatı"}
               </h3>
               <p className="text-xs text-slate-400">
-                Elektron oxucu bileti və şəxsi kartın formalaşdırılması
+                Oxucunun qeydiyyatı və şəxsi kartının formalaşdırılması
               </p>
             </div>
           </div>
@@ -194,8 +193,8 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
             <h4 className="text-base font-bold text-slate-800 mb-1">
               {isEdit ? "Oxucu məlumatları yeniləndi!" : "Oxucu uğurla qeydiyyata alındı!"}
             </h4>
-            <p className="text-xs text-slate-500 font-mono">
-              Oxucu Bilet №: {ticketNumber}
+            <p className="text-xs text-slate-500">
+              Oxucu məlumatları sistemdə saxlanıldı.
             </p>
           </div>
         ) : (
@@ -207,38 +206,22 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
               </div>
             )}
 
-            {/* Ticket & Category */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Bilet Nömrəsi <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={ticketNumber}
-                  onChange={(e) => setTicketNumber(e.target.value.toUpperCase())}
-                  placeholder="OX-1001"
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Oxucu Kateqoriyası
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => handleCategoryChange(e.target.value as ReaderCategory)}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-medium text-slate-800"
-                >
-                  {CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {/* Category */}
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Oxucu Kateqoriyası
+              </label>
+              <select
+                value={category}
+                onChange={(e) => handleCategoryChange(e.target.value as ReaderCategory)}
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-medium text-slate-800"
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Name, Surname, Father Name */}

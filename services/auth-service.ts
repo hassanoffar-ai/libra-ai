@@ -215,7 +215,7 @@ export async function loginReader(
   if (!trimmedId) {
     return {
       success: false,
-      error: "E-poçt və ya Oxucu Bilet № daxil edin.",
+      error: "E-poçt ünvanınızı daxil edin.",
     };
   }
 

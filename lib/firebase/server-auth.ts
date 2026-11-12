@@ -142,7 +142,6 @@ export async function saveUserProfileViaRest(
   profile: Partial<UserProfile>
 ): Promise<boolean> {
   try {
-    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${uid}?key=${apiKey}`;
     const fields: Record<string, any> = {};
 
     for (const [k, v] of Object.entries(profile)) {
@@ -151,6 +150,12 @@ export async function saveUserProfileViaRest(
       else if (typeof v === "number") fields[k] = { integerValue: String(v) };
       else if (typeof v === "boolean") fields[k] = { booleanValue: v };
     }
+
+    const fieldMaskParams = Object.keys(fields)
+      .map((k) => `updateMask.fieldPaths=${encodeURIComponent(k)}`)
+      .join("&");
+
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${uid}?${fieldMaskParams}&key=${apiKey}`;
 
     const res = await fetch(url, {
       method: "PATCH",

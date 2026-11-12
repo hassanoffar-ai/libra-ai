@@ -17,7 +17,6 @@ import {
   Hash,
   Sparkles,
   BookX,
-  Ticket,
   LogOut,
   GraduationCap,
   Briefcase,
@@ -150,8 +149,6 @@ function ReaderCatalogContent() {
                 )}
                 <span>{profile?.category || "Tələbə"}</span>
               </span>
-              <span>•</span>
-              <span className="font-mono">{profile?.ticketNumber || "OX-1001"}</span>
             </div>
           </div>
 
@@ -440,3 +437,4 @@ export default function ReaderCatalogPage() {
     </Suspense>
   );
 }
+

@@ -173,7 +173,7 @@ export default function QaytarilmaPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Sürətli axtarış: İnventar № (məs: INV-1001) və ya Oxucu Bilet № (məs: OX-1001)..."
+              placeholder="Sürətli axtarış: İnventar № (məs: INV-1001) və ya Oxucu adı..."
               className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-mono"
             />
           </div>
@@ -247,7 +247,7 @@ export default function QaytarilmaPage() {
             Axtarışa uyğun aktiv istiqraz tapılmadı
           </h4>
           <p className="text-xs text-slate-500 max-w-sm mb-4">
-            Daxil edilmiş inventar nömrəsini və ya oxucu bilet nömrəsini yenidən yoxlayın.
+            Daxil edilmiş inventar nömrəsini və ya oxucu adını yenidən yoxlayın.
           </p>
           <button
             onClick={() => {
@@ -268,7 +268,7 @@ export default function QaytarilmaPage() {
                 <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   <th className="py-3 px-4">İnventar №</th>
                   <th className="py-3 px-4">Kitabın Adı</th>
-                  <th className="py-3 px-4">Oxucu (Ad və Bilet №)</th>
+                  <th className="py-3 px-4">Oxucu</th>
                   <th className="py-3 px-4">Verilmə Tarixi</th>
                   <th className="py-3 px-4">Son Qaytarılma Tarixi</th>
                   <th className="py-3 px-4 text-center">Gecikmə Statusu</th>
@@ -311,9 +311,6 @@ export default function QaytarilmaPage() {
                         <div className="font-semibold text-slate-800">
                           {loan.readerName}
                         </div>
-                        <span className="font-mono text-[10px] text-slate-400">
-                          {loan.readerTicket}
-                        </span>
                       </td>
 
                       {/* Issue Date */}
@@ -396,7 +393,7 @@ export default function QaytarilmaPage() {
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
                 <span className="text-slate-400 block font-medium text-[11px]">Qaytarılan Nəşr:</span>
                 <span className="font-bold text-slate-900 block truncate text-xs">{returningLoan.bookTitle}</span>
-                <span className="text-slate-500 block text-[11px]">Oxucu: {returningLoan.readerName} ({returningLoan.readerTicket})</span>
+                <span className="text-slate-500 block text-[11px]">Oxucu: {returningLoan.readerName}</span>
               </div>
 
               <div>

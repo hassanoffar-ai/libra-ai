@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  Ticket,
 } from "lucide-react";
 
 export default function ReaderRegisterPage() {
@@ -42,7 +41,6 @@ export default function ReaderRegisterPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [successInfo, setSuccessInfo] = useState<{
     message: string;
-    ticketNumber?: string;
   } | null>(null);
 
   const validateForm = (): boolean => {
@@ -111,13 +109,12 @@ export default function ReaderRegisterPage() {
 
       setSuccessInfo({
         message: data.message || "Qeydiyyat uğurla tamamlandı! Giriş edə bilərsiniz.",
-        ticketNumber: data.ticketNumber,
       });
 
-      // Automatically redirect to login page after 2.5 seconds
+      // Automatically redirect to login page after 2 seconds
       setTimeout(() => {
         router.push("/");
-      }, 2500);
+      }, 2000);
     } catch (err: any) {
       setErrorMessage(err?.message || "Gözlənilməz şəbəkə xətası baş verdi.");
       setIsSubmitting(false);
@@ -140,14 +137,6 @@ export default function ReaderRegisterPage() {
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-bold">{successInfo.message}</h4>
-              {successInfo.ticketNumber && (
-                <p className="text-xs text-emerald-200 mt-1">
-                  Oxucu Bilet №:{" "}
-                  <span className="font-mono font-bold text-white bg-emerald-800/80 px-2 py-0.5 rounded border border-emerald-400/30">
-                    {successInfo.ticketNumber}
-                  </span>
-                </p>
-              )}
               <div className="mt-2.5 flex items-center gap-2 text-[11px] text-emerald-300">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 <span>Giriş səhifəsinə yönləndirilirsiniz...</span>

@@ -83,7 +83,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const ticketNumber = `OX-${Math.floor(1000 + Math.random() * 9000)}`;
     const now = new Date().toISOString();
 
     const userProfile: UserProfile = {
@@ -94,7 +93,6 @@ export async function POST(req: NextRequest) {
       firstName: cleanFirst,
       lastName: cleanLast,
       phone: cleanPhone,
-      ticketNumber,
       status: "Aktiv",
       createdAt: now,
       updatedAt: now,
@@ -108,7 +106,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Qeydiyyat uğurla tamamlandı! Giriş edə bilərsiniz.",
-      ticketNumber,
       uid: createRes.uid,
       user: userProfile,
     });

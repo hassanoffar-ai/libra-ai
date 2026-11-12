@@ -165,7 +165,7 @@ export function AddReservationModal({ isOpen, onClose, onSuccess }: AddReservati
                       type="text"
                       value={readerQuery}
                       onChange={(e) => setReaderQuery(e.target.value)}
-                      placeholder="Oxucu adı və ya Bilet № daxil edin..."
+                      placeholder="Oxucu adı daxil edin..."
                       className="w-full pl-9 pr-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
                     />
                   </div>
@@ -185,8 +185,8 @@ export function AddReservationModal({ isOpen, onClose, onSuccess }: AddReservati
                             className="p-2.5 hover:bg-indigo-50/70 cursor-pointer flex items-center justify-between"
                           >
                             <span className="font-bold text-slate-900">{r.firstName} {r.lastName}</span>
-                            <span className="font-mono text-[10px] text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
-                              {r.ticketNumber}
+                            <span className="text-[10px] text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                              {r.category}
                             </span>
                           </div>
                         ))
@@ -204,8 +204,8 @@ export function AddReservationModal({ isOpen, onClose, onSuccess }: AddReservati
                       <span className="font-bold text-slate-900 block text-xs">
                         {selectedReader.firstName} {selectedReader.lastName}
                       </span>
-                      <span className="font-mono text-[10px] text-slate-500">
-                        {selectedReader.ticketNumber} • {selectedReader.department}
+                      <span className="text-[10px] text-slate-500">
+                        {selectedReader.category} • {selectedReader.department}
                       </span>
                     </div>
                   </div>

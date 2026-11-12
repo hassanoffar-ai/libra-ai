@@ -203,7 +203,7 @@ function VerilmeContent() {
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
-            Oxucu biletinə və fiziki nüsxənin inventar nömrəsinə əsasən kitab təhvili
+            Oxucuya və fiziki nüsxənin inventar nömrəsinə əsasən kitab təhvili
           </p>
         </div>
       </div>
@@ -274,7 +274,7 @@ function VerilmeContent() {
               /* Reader Search & Results Dropdown */
               <div className="space-y-3">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Oxucu Bilet № və ya Ad/Soyad ilə canlı axtarış:
+                  Oxucunun Adı/Soyadı ilə canlı axtarış:
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -284,7 +284,7 @@ function VerilmeContent() {
                     type="text"
                     value={readerQuery}
                     onChange={(e) => setReaderQuery(e.target.value)}
-                    placeholder="Məs: OX-1001 və ya Rəşad Qasımov..."
+                    placeholder="Məs: Rəşad Qasımov..."
                     className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
                   />
                 </div>
@@ -314,8 +314,8 @@ function VerilmeContent() {
                               {r.department}
                             </div>
                           </div>
-                          <span className="font-mono text-xs font-bold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                            {r.ticketNumber}
+                          <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                            {r.category}
                           </span>
                         </div>
                       ))
@@ -336,8 +336,8 @@ function VerilmeContent() {
                       {selectedReader.firstName.charAt(0)}{selectedReader.lastName.charAt(0)}
                     </div>
                     <div>
-                      <span className="font-mono font-bold text-indigo-800 block text-[11px]">
-                        {selectedReader.ticketNumber}
+                      <span className="font-semibold text-indigo-800 block text-[11px]">
+                        {selectedReader.category}
                       </span>
                       <h4 className="text-sm font-bold text-slate-900">
                         {selectedReader.firstName} {selectedReader.lastName}

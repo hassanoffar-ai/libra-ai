@@ -59,9 +59,6 @@ export function ViewReaderModal({ isOpen, onClose, reader, onEdit }: ViewReaderM
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-800/40">
-                  {reader.ticketNumber}
-                </span>
                 <span
                   className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                     reader.status === "Aktiv"

@@ -143,7 +143,7 @@ export default function OxucularPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Axtarış: Ad, Soyad, Bilet № və ya Qrup..."
+              placeholder="Axtarış: Ad, Soyad, Qrup və ya Əlaqə..."
               className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
             />
           </div>
@@ -212,7 +212,7 @@ export default function OxucularPage() {
             Oxucu bazasında hələ heç bir üzv qeydiyyatdan keçməyib
           </h3>
           <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed mb-6">
-            Mərkəzin tələbə və müəllim heyətini oxucu biletləri ilə sistemə daxil edərək kitab istiqrazına başlayın.
+            Mərkəzin tələbə və müəllim heyətini sistemə daxil edərək kitab istiqrazına başlayın.
           </p>
           <button
             onClick={() => {
@@ -255,7 +255,6 @@ export default function OxucularPage() {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3 px-4">Bilet №</th>
                   <th className="py-3 px-4">Ad, Soyad və Ata Adı</th>
                   <th className="py-3 px-4">Kateqoriya</th>
                   <th className="py-3 px-4">Qrup / Şöbə</th>
@@ -275,13 +274,6 @@ export default function OxucularPage() {
                       key={reader.id}
                       className="hover:bg-slate-50/70 transition-colors group"
                     >
-                      {/* Ticket Number */}
-                      <td className="py-3 px-4">
-                        <span className="font-mono font-bold text-indigo-950 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                          {reader.ticketNumber}
-                        </span>
-                      </td>
-
                       {/* Name */}
                       <td className="py-3 px-4">
                         <span

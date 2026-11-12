@@ -22,11 +22,15 @@ export function Topbar({ onToggleMobileSidebar }: TopbarProps) {
     return name.slice(0, 2).toUpperCase();
   };
 
-  const displayName = profile
-    ? `${profile.firstName} ${profile.lastName}`
-    : user?.displayName || "Admin İstifadəçi";
+  const roleTitle = role === "admin" ? "Administrator" : (profile?.category || "Tələbə");
 
-  const userEmail = profile?.email || user?.email || "admin@ldptm.edu.az";
+  const displayName = role === "admin"
+    ? "Administrator"
+    : profile
+    ? `${profile.firstName} ${profile.lastName}`.trim() || user?.displayName || "Oxucu"
+    : user?.displayName || "Oxucu";
+
+  const userEmail = profile?.email || user?.email || (role === "admin" ? "admin@ldptm.edu.az" : "");
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between gap-4">
@@ -84,14 +88,14 @@ export function Topbar({ onToggleMobileSidebar }: TopbarProps) {
             className="flex items-center gap-2 p-1 sm:p-1.5 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none group"
           >
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0F172A] to-indigo-700 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-indigo-500/20">
-              {getInitials(displayName)}
+              {role === "admin" ? "AD" : getInitials(displayName)}
             </div>
             <div className="hidden xl:flex flex-col text-left">
               <span className="text-xs font-semibold text-slate-800 leading-tight">
                 {displayName}
               </span>
               <span className="text-[10px] text-indigo-600 font-semibold leading-tight">
-                {role === "admin" ? "Admin (Kitabxanaçı)" : "Oxucu"}
+                {roleTitle}
               </span>
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden xl:block group-hover:text-slate-600 transition-colors" />
@@ -107,10 +111,10 @@ export function Topbar({ onToggleMobileSidebar }: TopbarProps) {
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200/80 p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                 <div className="p-2.5 border-b border-slate-100">
                   <p className="text-xs font-bold text-slate-900 truncate">{displayName}</p>
-                  <p className="text-[11px] text-slate-500 truncate">{userEmail}</p>
+                  {userEmail && <p className="text-[11px] text-slate-500 truncate">{userEmail}</p>}
                   <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/50">
                     <ShieldCheck className="w-3 h-3 text-indigo-600" />
-                    <span>{role === "admin" ? "Sistem Administratoru" : "Oxucu"}</span>
+                    <span>{roleTitle}</span>
                   </span>
                 </div>
 

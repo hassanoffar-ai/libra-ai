@@ -10,7 +10,6 @@ export interface UserProfile {
   lastName: string;
   phone: string;
   category: ReaderUserCategory;
-  ticketNumber?: string; // Məs: OX-1001
   status: "Aktiv" | "Bloklanıb";
   createdAt: string;
   updatedAt: string;
