@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   Loader2,
   BookOpen,
-  ShieldCheck,
 } from "lucide-react";
 import { readerLogin, getStoredReaderSession } from "@/services/reader-auth-service";
 
@@ -284,15 +283,8 @@ function ReaderLoginForm() {
       </main>
 
       {/* Footer */}
-      <footer className="py-4 px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 border-t border-slate-200/60 bg-white/50 backdrop-blur-xs gap-2 max-w-6xl w-full mx-auto">
+      <footer className="py-4 px-6 flex items-center justify-center text-xs text-slate-400 border-t border-slate-200/60 bg-white/50 backdrop-blur-xs max-w-6xl w-full mx-auto text-center">
         <span>Peşə Kitabxanası © 2026 • Lənkəran Dövlət Peşə Təhsil Mərkəzi</span>
-        <Link
-          href="/admin/login"
-          className="text-slate-400 hover:text-indigo-600 transition-colors inline-flex items-center gap-1.5 font-medium"
-        >
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Kitabxanaçı Girişi</span>
-        </Link>
       </footer>
     </div>
   );

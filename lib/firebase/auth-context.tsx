@@ -218,10 +218,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setProfile(null);
       setRole(null);
-      window.location.href = "/admin/login";
+      window.location.href = "/admin";
     } catch (err) {
       console.error("Logout error:", err);
-      window.location.href = "/admin/login";
+      window.location.href = "/admin";
     }
   };
 

@@ -33,8 +33,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isDedicatedPage && !isLoading) {
       if (!isAuthAdmin) {
-        // Unauthenticated -> redirect strictly to /admin/login (NEVER to /portal or /auth/login)
-        router.replace(`/admin/login?redirect=${encodeURIComponent(pathname || "/dashboard")}`);
+        // Unauthenticated -> redirect strictly to /admin (NEVER to /portal or /auth/login)
+        router.replace(`/admin?redirect=${encodeURIComponent(pathname || "/dashboard")}`);
       }
     }
   }, [isAuthAdmin, isLoading, isDedicatedPage, pathname, router]);

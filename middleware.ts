@@ -36,8 +36,8 @@ export function middleware(request: NextRequest) {
 
   if (isAdminRoute) {
     if (!isAuthenticatedAdmin) {
-      // Unauthenticated admin -> redirect strictly to /admin/login (NEVER to /portal)
-      const loginUrl = new URL("/admin/login", request.url);
+      // Unauthenticated admin -> redirect strictly to /admin (NEVER to /portal)
+      const loginUrl = new URL("/admin", request.url);
       loginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -50,14 +50,14 @@ export function middleware(request: NextRequest) {
     pathname === "/auth/admin"
   ) {
     if (isAuthenticatedAdmin) {
-      // Already logged in as Admin -> go to dashboard
+      // Already logged in as Admin -> go straight to dashboard
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-    if (pathname === "/admin" || pathname === "/auth/admin") {
-      // Normalize to /admin/login
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+    if (pathname === "/admin/login" || pathname === "/auth/admin") {
+      // Normalize to /admin
+      return NextResponse.redirect(new URL("/admin", request.url));
     }
-    // Allow /admin/login to render cleanly; NEVER redirect to /portal!
+    // Allow /admin to render cleanly; NEVER redirect to /portal!
     return NextResponse.next();
   }
 
