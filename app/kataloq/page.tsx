@@ -18,9 +18,14 @@ import {
   ChevronUp,
   BookX,
   Compass,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 import { Book, getBooks } from "@/services/books-service";
 import { ViewBookModal } from "@/components/books/view-book-modal";
+import { AddBookModal } from "@/components/books/add-book-modal";
+import { DeleteBookDialog } from "@/components/books/delete-book-dialog";
+import { useAuth } from "@/lib/firebase/auth-context";
 
 export default function KataloqPage() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -34,8 +39,16 @@ export default function KataloqPage() {
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
-  // View modal
+  // View, Edit, Delete modals
   const [viewingBook, setViewingBook] = useState<Book | null>(null);
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [deletingBook, setDeletingBook] = useState<Book | null>(null);
+
+  // Authentication role check (Librarian/Admin only)
+  const { user, role, isAdmin } = useAuth();
+  const hasLocalAdmin = typeof window !== "undefined" && localStorage.getItem("libra_admin_session") === "true";
+  const isLibrarian = isAdmin || Boolean(user) || role === "admin" || (role as string) === "librarian" || hasLocalAdmin;
 
   const fetchBooks = async () => {
     setIsLoading(true);
@@ -361,19 +374,44 @@ export default function KataloqPage() {
                   </div>
                 </div>
 
-                {/* Bottom Row: Exact Physical Shelf Location & Action */}
+                {/* Bottom Row: Exact Physical Shelf Location & Actions */}
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-2">
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200/80 truncate">
                     <MapPin className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
                     <span className="truncate">{book.initialShelf}</span>
                   </div>
 
-                  <button
-                    onClick={() => setViewingBook(book)}
-                    className="px-3 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-colors flex-shrink-0"
-                  >
-                    Detallar
-                  </button>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => setViewingBook(book)}
+                      className="px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-colors"
+                    >
+                      Detallar
+                    </button>
+
+                    {/* Admin / Librarian Actions (Hidden from readers) */}
+                    {isLibrarian && (
+                      <div className="flex items-center gap-0.5 border-l border-slate-200 pl-1.5 ml-0.5">
+                        <button
+                          onClick={() => {
+                            setEditingBook(book);
+                            setIsEditModalOpen(true);
+                          }}
+                          title="Redaktə et"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setDeletingBook(book)}
+                          title="Sil"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             );
@@ -386,6 +424,33 @@ export default function KataloqPage() {
         isOpen={Boolean(viewingBook)}
         book={viewingBook}
         onClose={() => setViewingBook(null)}
+        onEdit={
+          isLibrarian
+            ? (book) => {
+                setEditingBook(book);
+                setIsEditModalOpen(true);
+              }
+            : undefined
+        }
+      />
+
+      {/* Edit Book Modal */}
+      <AddBookModal
+        isOpen={isEditModalOpen}
+        editBook={editingBook}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingBook(null);
+        }}
+        onSuccess={fetchBooks}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteBookDialog
+        isOpen={Boolean(deletingBook)}
+        book={deletingBook}
+        onClose={() => setDeletingBook(null)}
+        onSuccess={fetchBooks}
       />
     </div>
   );

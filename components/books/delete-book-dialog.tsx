@@ -44,7 +44,7 @@ export function DeleteBookDialog({ isOpen, book, onClose, onSuccess }: DeleteBoo
         </div>
 
         <h3 className="text-base font-bold text-slate-900 mb-1">
-          Kitabı fonddan silmək istəyirsiniz?
+          Bu nəşri fonddan və kataloqdan silmək istədiyinizə əminsiniz?
         </h3>
 
         <p className="text-xs text-slate-500 leading-relaxed mb-4">

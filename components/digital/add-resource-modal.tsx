@@ -168,24 +168,30 @@ export function AddResourceModal({
       // If user uploaded a new local file from device
       if (activeTab === "file" && selectedFile) {
         finalFileName = selectedFile.name;
+        const sanitized = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        // Store directly under e-library/{timestamp}_{sanitized_filename} as required
+        storagePath = `e-library/${Date.now()}_${sanitized}`;
+        const storageRef = ref(storage, storagePath);
+
         try {
-          const cleanFileName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-          storagePath = `digital_resources/${Date.now()}_${cleanFileName}`;
-          const storageRef = ref(storage, storagePath);
           await uploadBytes(storageRef, selectedFile);
           finalFileUrl = await getDownloadURL(storageRef);
-        } catch (storageErr) {
-          console.warn("Storage upload fallback to DataURL:", storageErr);
-          finalFileUrl = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = () => resolve(URL.createObjectURL(selectedFile));
-            reader.readAsDataURL(selectedFile);
-          });
+        } catch (storageErr: any) {
+          console.error("Firebase Storage upload error:", storageErr);
+          throw new Error(
+            `Fayl Firebase Storage yaddaşına yüklənə bilmədi (${storageErr?.message || "İcazə və ya bağlantı xətası"}). Zəhmət olmasa internet bağlantınızı yoxlayın və ya 'URL / Keçid' tabından istifadə edin.`
+          );
         }
+      } else if (activeTab === "url" && !finalFileUrl) {
+        throw new Error("Zəhmət olmasa resurs üçün keçid (URL) daxil edin.");
       } else if (!finalFileName && finalFileUrl) {
         const urlBase = finalFileUrl.split("/").pop()?.split("?")[0] || "";
         finalFileName = urlBase || `${title.trim().replace(/\s+/g, "_")}.${format.toLowerCase()}`;
+      }
+
+      // STRICT VALIDATION: Ensure NO base64 data URLs or raw blobs enter the database
+      if (finalFileUrl.startsWith("data:")) {
+        throw new Error("Fayl məzmunu (Base64) birbaşa verilənlər bazasında saxlanıla bilməz. Yalnız yüngül Firebase Storage və ya birbaşa keçid (URL) qəbul edilir.");
       }
 
       if (editResource) {
@@ -194,9 +200,11 @@ export function AddResourceModal({
           author: author.trim(),
           category,
           format,
+          fileFormat: format,
           fileSize: fileSize.trim() || "4.0 MB",
           fileUrl: finalFileUrl,
           fileName: finalFileName,
+          originalFileName: finalFileName,
           storagePath,
           description: description.trim(),
         });
@@ -206,9 +214,11 @@ export function AddResourceModal({
           author: author.trim(),
           category,
           format,
+          fileFormat: format,
           fileSize: fileSize.trim() || "4.0 MB",
           fileUrl: finalFileUrl,
           fileName: finalFileName,
+          originalFileName: finalFileName,
           storagePath,
           description: description.trim(),
         });

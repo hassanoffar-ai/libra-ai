@@ -15,12 +15,15 @@ export interface DigitalResource {
   author: string;
   category: string;
   format: "PDF" | "EPUB" | "DOCX" | "DOC" | "PPTX" | "XLSX" | string;
+  fileFormat?: string;
   fileSize: string;
-  fileUrl?: string;
+  fileUrl?: string;        // ONLY lightweight URL (Firebase Storage download URL or external link)
   fileName?: string;       // Original filename with extension, e.g. "riyaziyyat_derslik.docx"
+  originalFileName?: string;
   storagePath?: string;
   description?: string;
   uploadDate: string;
+  createdAt?: string;
   downloadsCount: number;
 }
 
@@ -39,8 +42,15 @@ function loadDigitalData(): DigitalResource[] {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        inMemoryDigital = parsed;
-        return parsed;
+        // Strip any heavy base64 data URLs to prevent storage and query bloating
+        const cleaned = parsed.map((item: DigitalResource) => ({
+          ...item,
+          fileUrl: item.fileUrl?.startsWith("data:") ? "" : item.fileUrl,
+          originalFileName: item.originalFileName || item.fileName || "",
+          fileFormat: item.fileFormat || item.format || "PDF",
+        }));
+        inMemoryDigital = cleaned;
+        return cleaned;
       }
     }
     return [];
@@ -51,10 +61,15 @@ function loadDigitalData(): DigitalResource[] {
 }
 
 function saveDigitalData(data: DigitalResource[]): void {
-  inMemoryDigital = data;
+  // Strip any accidental heavy data URLs before persisting
+  const safeData = data.map((item) => ({
+    ...item,
+    fileUrl: item.fileUrl?.startsWith("data:") ? "" : item.fileUrl,
+  }));
+  inMemoryDigital = safeData;
   if (isClient()) {
     try {
-      localStorage.setItem(STORAGE_KEY_DIGITAL, JSON.stringify(data));
+      localStorage.setItem(STORAGE_KEY_DIGITAL, JSON.stringify(safeData));
       window.dispatchEvent(new CustomEvent("libra-data-updated"));
     } catch (err) {
       console.error("Elektron resurslar saxlanarkən xəta:", err);
@@ -93,9 +108,11 @@ export async function createDigitalResource(input: {
   author: string;
   category: string;
   format: "PDF" | "EPUB" | "DOCX" | "DOC" | "PPTX" | "XLSX" | string;
+  fileFormat?: string;
   fileSize?: string;
   fileUrl?: string;
   fileName?: string;
+  originalFileName?: string;
   storagePath?: string;
   description?: string;
 }): Promise<DigitalResource> {
@@ -104,25 +121,35 @@ export async function createDigitalResource(input: {
   const id = `dig-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
   const now = new Date().toISOString().split("T")[0];
 
+  const rawUrl = input.fileUrl?.trim() || "";
+  // STRICT: Never store heavy Base64 in Firestore
+  const safeFileUrl = rawUrl.startsWith("data:") ? "" : rawUrl;
+
+  const fileName = input.originalFileName?.trim() || input.fileName?.trim() || "";
+  const format = input.fileFormat || input.format || "PDF";
+
   const newResource: DigitalResource = {
     id,
     title: input.title.trim(),
     author: input.author.trim(),
     category: input.category.trim(),
-    format: input.format || "PDF",
+    format,
+    fileFormat: format,
     fileSize: input.fileSize || "3.5 MB",
-    fileUrl: input.fileUrl?.trim() || "",
-    fileName: input.fileName?.trim() || "",
+    fileUrl: safeFileUrl,
+    fileName,
+    originalFileName: fileName,
     storagePath: input.storagePath || "",
     description: input.description?.trim() || "",
     uploadDate: now,
+    createdAt: now,
     downloadsCount: 0,
   };
 
   const updated = [newResource, ...data];
   saveDigitalData(updated);
 
-  // Firestore sync
+  // Firestore sync: ONLY lightweight URL and metadata
   try {
     const docRef = doc(db, "digital_resources", id);
     await setDoc(docRef, newResource, { merge: true });
@@ -146,14 +173,25 @@ export async function updateDigitalResource(
     throw new Error("Resurs tapılmadı");
   }
 
+  const rawUrl = input.fileUrl !== undefined ? input.fileUrl.trim() : data[index].fileUrl;
+  const safeFileUrl = rawUrl?.startsWith("data:") ? "" : rawUrl;
+
+  const fileName = input.originalFileName || input.fileName || data[index].originalFileName || data[index].fileName || "";
+  const format = input.fileFormat || input.format || data[index].format || "PDF";
+
   const updatedResource: DigitalResource = {
     ...data[index],
     ...input,
+    format,
+    fileFormat: format,
+    fileUrl: safeFileUrl,
+    fileName,
+    originalFileName: fileName,
   };
   data[index] = updatedResource;
   saveDigitalData(data);
 
-  // Firestore sync
+  // Firestore sync: ONLY lightweight URL and metadata
   try {
     const docRef = doc(db, "digital_resources", id);
     await setDoc(docRef, updatedResource, { merge: true });
@@ -223,9 +261,10 @@ export async function downloadDigitalResource(res: DigitalResource): Promise<voi
   await incrementDownload(res.id);
 
   // 2. Orijinal fayl adı və uzantısını müəyyən edirik
-  let downloadName = res.fileName?.trim() || "";
+  let downloadName = res.originalFileName?.trim() || res.fileName?.trim() || "";
   if (!downloadName) {
-    const ext = res.format ? `.${res.format.toLowerCase()}` : ".pdf";
+    const formatStr = res.fileFormat || res.format;
+    const ext = formatStr ? `.${formatStr.toLowerCase()}` : ".pdf";
     const cleanTitle = res.title.replace(/[^a-zA-Z0-9_\u0400-\u04FF\u0100-\u017F-]/g, "_");
     downloadName = `${cleanTitle}${ext}`;
   }
