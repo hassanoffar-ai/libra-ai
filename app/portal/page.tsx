@@ -614,7 +614,7 @@ function ReaderPortalContent() {
                         </span>
 
                         <span className="text-[10px] text-slate-500 font-medium font-mono">
-                          {res.downloadsCount || 0} yükləmə
+                          {res.downloadCount ?? res.downloadsCount ?? 0} yükləmə
                         </span>
                       </div>
 
@@ -631,9 +631,9 @@ function ReaderPortalContent() {
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
                           {res.category}
                         </span>
-                        {res.fileName && (
-                          <span className="text-[10px] text-slate-400 font-mono truncate max-w-[140px]" title={res.fileName}>
-                            {res.fileName}
+                        {(res.originalFileName || res.fileName) && (
+                          <span className="text-[10px] text-slate-400 font-mono truncate max-w-[140px]" title={res.originalFileName || res.fileName}>
+                            {res.originalFileName || res.fileName}
                           </span>
                         )}
                       </div>

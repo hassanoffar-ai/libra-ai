@@ -20,7 +20,7 @@ import {
   DigitalResource,
 } from "@/services/digital-library-service";
 import { storage } from "@/lib/firebase/client";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 interface AddResourceModalProps {
   isOpen: boolean;
@@ -62,12 +62,14 @@ export function AddResourceModal({
   const [description, setDescription] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
   // Sync state when editing or opening
   useEffect(() => {
+    setUploadProgress(null);
     if (editResource) {
       setTitle(editResource.title || "");
       setAuthor(editResource.author || "");
@@ -169,17 +171,46 @@ export function AddResourceModal({
       if (activeTab === "file" && selectedFile) {
         finalFileName = selectedFile.name;
         const sanitized = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        // Store directly under e-library/{timestamp}_{sanitized_filename} as required
+        // Store directly under e-library/{timestamp}_{filename} using uploadBytesResumable
         storagePath = `e-library/${Date.now()}_${sanitized}`;
         const storageRef = ref(storage, storagePath);
 
+        setUploadProgress(0);
+
         try {
-          await uploadBytes(storageRef, selectedFile);
-          finalFileUrl = await getDownloadURL(storageRef);
+          const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+          finalFileUrl = await new Promise<string>((resolve, reject) => {
+            uploadTask.on(
+              "state_changed",
+              (snapshot) => {
+                if (snapshot.totalBytes > 0) {
+                  const progress = Math.round(
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                  );
+                  setUploadProgress(progress);
+                }
+              },
+              (storageErr) => {
+                reject(storageErr);
+              },
+              async () => {
+                try {
+                  const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                  resolve(downloadUrl);
+                } catch (urlErr) {
+                  reject(urlErr);
+                }
+              }
+            );
+          });
         } catch (storageErr: any) {
           console.error("Firebase Storage upload error:", storageErr);
+          setUploadProgress(null);
           throw new Error(
-            `Fayl Firebase Storage yaddaşına yüklənə bilmədi (${storageErr?.message || "İcazə və ya bağlantı xətası"}). Zəhmət olmasa internet bağlantınızı yoxlayın və ya 'URL / Keçid' tabından istifadə edin.`
+            `Fayl Firebase Storage yaddaşına yüklənə bilmədi (${
+              storageErr?.message || "İcazə və ya bağlantı xətası"
+            }). Zəhmət olmasa internet bağlantınızı yoxlayın və ya 'URL / Keçid' tabından istifadə edin.`
           );
         }
       } else if (activeTab === "url" && !finalFileUrl) {
@@ -396,6 +427,27 @@ export function AddResourceModal({
                     </div>
                   )}
                 </div>
+
+                {/* Upload Progress Bar (Requirement 1) */}
+                {uploadProgress !== null && (
+                  <div className="p-3.5 rounded-2xl bg-indigo-50/90 border border-indigo-200/80 space-y-2 animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between text-xs font-bold text-indigo-900">
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
+                        <span>Fayl Firebase Storage-a yüklənir...</span>
+                      </span>
+                      <span className="font-mono text-indigo-700 bg-white px-2.5 py-0.5 rounded-md border border-indigo-200 text-xs font-bold shadow-2xs">
+                        {uploadProgress}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-indigo-200/70 rounded-full h-2.5 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-2.5 rounded-full transition-all duration-150 ease-out shadow-xs"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -533,7 +585,11 @@ export function AddResourceModal({
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Yadda saxlanılır...</span>
+                    <span>
+                      {uploadProgress !== null
+                        ? `Yüklənir (${uploadProgress}%)...`
+                        : "Yadda saxlanılır..."}
+                    </span>
                   </>
                 ) : (
                   <>

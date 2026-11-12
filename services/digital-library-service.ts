@@ -15,16 +15,17 @@ export interface DigitalResource {
   author: string;
   category: string;
   format: "PDF" | "EPUB" | "DOCX" | "DOC" | "PPTX" | "XLSX" | string;
-  fileFormat?: string;
+  fileFormat: string;
   fileSize: string;
-  fileUrl?: string;        // ONLY lightweight URL (Firebase Storage download URL or external link)
-  fileName?: string;       // Original filename with extension, e.g. "riyaziyyat_derslik.docx"
-  originalFileName?: string;
-  storagePath?: string;
+  fileUrl: string;         // ONLY lightweight URL (Firebase Storage download URL or external link)
+  fileName: string;        // Original filename with extension, e.g. "riyaziyyat_derslik.docx"
+  originalFileName: string;
+  storagePath: string;     // e.g. "e-library/1731400000_derslik.pdf"
   description?: string;
   uploadDate: string;
-  createdAt?: string;
+  createdAt: string;
   downloadsCount: number;
+  downloadCount: number;
 }
 
 const STORAGE_KEY_DIGITAL = "libra_ai_digital_resources_v1";
@@ -43,11 +44,18 @@ function loadDigitalData(): DigitalResource[] {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
         // Strip any heavy base64 data URLs to prevent storage and query bloating
-        const cleaned = parsed.map((item: DigitalResource) => ({
+        const cleaned = parsed.map((item: any) => ({
           ...item,
-          fileUrl: item.fileUrl?.startsWith("data:") ? "" : item.fileUrl,
+          fileUrl: item.fileUrl?.startsWith("data:") ? "" : (item.fileUrl || ""),
           originalFileName: item.originalFileName || item.fileName || "",
+          fileName: item.originalFileName || item.fileName || "",
           fileFormat: item.fileFormat || item.format || "PDF",
+          format: item.fileFormat || item.format || "PDF",
+          storagePath: item.storagePath || "",
+          downloadCount: item.downloadCount ?? item.downloadsCount ?? 0,
+          downloadsCount: item.downloadCount ?? item.downloadsCount ?? 0,
+          createdAt: item.createdAt || item.uploadDate || new Date().toISOString(),
+          uploadDate: item.uploadDate || (item.createdAt ? item.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]),
         }));
         inMemoryDigital = cleaned;
         return cleaned;
@@ -78,36 +86,88 @@ function saveDigitalData(data: DigitalResource[]): void {
 }
 
 /**
- * Bütün elektron resursları canlı bazadan (Firestore) gətirir
+ * Bütün elektron resursları canlı bazadan (Firestore e_library kolleksiyası) gətirir
  */
 export async function getDigitalResources(): Promise<DigitalResource[]> {
   const local = loadDigitalData();
   try {
-    const snap = await getDocs(collection(db, "digital_resources"));
+    // 1. Try e_library collection (strictly configured standard)
+    const snap = await getDocs(collection(db, "e_library"));
     if (!snap.empty) {
-      const remote = snap.docs.map((d) => ({ id: d.id, ...d.data() } as DigitalResource));
+      const remote = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          title: data.title || "",
+          author: data.author || "",
+          category: data.category || "",
+          fileFormat: data.fileFormat || data.format || "PDF",
+          format: data.format || data.fileFormat || "PDF",
+          fileSize: data.fileSize || "4.0 MB",
+          originalFileName: data.originalFileName || data.fileName || "",
+          fileName: data.originalFileName || data.fileName || "",
+          fileUrl: data.fileUrl || "",
+          storagePath: data.storagePath || "",
+          description: data.description || "",
+          createdAt: data.createdAt || data.uploadDate || new Date().toISOString(),
+          uploadDate: data.uploadDate || (data.createdAt ? data.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]),
+          downloadCount: data.downloadCount ?? data.downloadsCount ?? 0,
+          downloadsCount: data.downloadCount ?? data.downloadsCount ?? 0,
+        } as DigitalResource;
+      });
       saveDigitalData(remote);
       return remote;
+    }
+
+    // 2. Legacy fallback to digital_resources if e_library was previously named so
+    const legacySnap = await getDocs(collection(db, "digital_resources"));
+    if (!legacySnap.empty) {
+      const remote = legacySnap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          title: data.title || "",
+          author: data.author || "",
+          category: data.category || "",
+          fileFormat: data.fileFormat || data.format || "PDF",
+          format: data.format || data.fileFormat || "PDF",
+          fileSize: data.fileSize || "4.0 MB",
+          originalFileName: data.originalFileName || data.fileName || "",
+          fileName: data.originalFileName || data.fileName || "",
+          fileUrl: data.fileUrl || "",
+          storagePath: data.storagePath || "",
+          description: data.description || "",
+          createdAt: data.createdAt || data.uploadDate || new Date().toISOString(),
+          uploadDate: data.uploadDate || (data.createdAt ? data.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]),
+          downloadCount: data.downloadCount ?? data.downloadsCount ?? 0,
+          downloadsCount: data.downloadCount ?? data.downloadsCount ?? 0,
+        } as DigitalResource;
+      });
+      saveDigitalData(remote);
+      // Migrate documents to e_library
+      for (const item of remote) {
+        setDoc(doc(db, "e_library", item.id), item, { merge: true }).catch(() => {});
+      }
+      return remote;
     } else if (local.length > 0) {
-      // If Firestore is empty, sync local items up if any exist
       for (const item of local) {
-        setDoc(doc(db, "digital_resources", item.id), item, { merge: true }).catch(() => {});
+        setDoc(doc(db, "e_library", item.id), item, { merge: true }).catch(() => {});
       }
     }
   } catch (err) {
-    console.warn("Firestore digital resources sync error (offline fallback):", err);
+    console.warn("Firestore e_library sync error (offline fallback):", err);
   }
   return [...local];
 }
 
 /**
- * Yeni elektron resurs yaradır və bazada saxlayır
+ * Yeni elektron resurs yaradır və bazada saxlayır (e_library kolleksiyası)
  */
 export async function createDigitalResource(input: {
   title: string;
   author: string;
   category: string;
-  format: "PDF" | "EPUB" | "DOCX" | "DOC" | "PPTX" | "XLSX" | string;
+  format?: "PDF" | "EPUB" | "DOCX" | "DOC" | "PPTX" | "XLSX" | string;
   fileFormat?: string;
   fileSize?: string;
   fileUrl?: string;
@@ -119,14 +179,16 @@ export async function createDigitalResource(input: {
   const data = loadDigitalData();
 
   const id = `dig-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-  const now = new Date().toISOString().split("T")[0];
+  const nowIso = new Date().toISOString();
+  const dateStr = nowIso.split("T")[0];
 
   const rawUrl = input.fileUrl?.trim() || "";
-  // STRICT: Never store heavy Base64 in Firestore
+  // STRICT FORBID: Never store heavy Base64 inside Firestore
   const safeFileUrl = rawUrl.startsWith("data:") ? "" : rawUrl;
 
   const fileName = input.originalFileName?.trim() || input.fileName?.trim() || "";
   const format = input.fileFormat || input.format || "PDF";
+  const storagePath = input.storagePath?.trim() || "";
 
   const newResource: DigitalResource = {
     id,
@@ -135,24 +197,40 @@ export async function createDigitalResource(input: {
     category: input.category.trim(),
     format,
     fileFormat: format,
-    fileSize: input.fileSize || "3.5 MB",
+    fileSize: input.fileSize || "4.0 MB",
     fileUrl: safeFileUrl,
     fileName,
     originalFileName: fileName,
-    storagePath: input.storagePath || "",
+    storagePath,
     description: input.description?.trim() || "",
-    uploadDate: now,
-    createdAt: now,
+    uploadDate: dateStr,
+    createdAt: nowIso,
+    downloadCount: 0,
     downloadsCount: 0,
   };
 
   const updated = [newResource, ...data];
   saveDigitalData(updated);
 
-  // Firestore sync: ONLY lightweight URL and metadata
+  // Firestore sync: ONLY lightweight metadata fields (under 1 KB per document)
+  const firestoreRecord = {
+    title: newResource.title,
+    author: newResource.author,
+    category: newResource.category,
+    fileFormat: newResource.fileFormat,
+    fileSize: newResource.fileSize,
+    originalFileName: newResource.originalFileName,
+    fileUrl: newResource.fileUrl,
+    storagePath: newResource.storagePath,
+    downloadCount: 0,
+    createdAt: nowIso,
+    description: newResource.description,
+  };
+
   try {
-    const docRef = doc(db, "digital_resources", id);
-    await setDoc(docRef, newResource, { merge: true });
+    await setDoc(doc(db, "e_library", id), firestoreRecord, { merge: true });
+    // Also mirror to digital_resources for backward compatibility
+    await setDoc(doc(db, "digital_resources", id), firestoreRecord, { merge: true });
   } catch (err) {
     console.warn("Firestore save error:", err);
   }
@@ -177,7 +255,8 @@ export async function updateDigitalResource(
   const safeFileUrl = rawUrl?.startsWith("data:") ? "" : rawUrl;
 
   const fileName = input.originalFileName || input.fileName || data[index].originalFileName || data[index].fileName || "";
-  const format = input.fileFormat || input.format || data[index].format || "PDF";
+  const format = input.fileFormat || input.format || data[index].fileFormat || data[index].format || "PDF";
+  const storagePath = input.storagePath !== undefined ? input.storagePath : data[index].storagePath;
 
   const updatedResource: DigitalResource = {
     ...data[index],
@@ -187,14 +266,29 @@ export async function updateDigitalResource(
     fileUrl: safeFileUrl,
     fileName,
     originalFileName: fileName,
+    storagePath,
   };
   data[index] = updatedResource;
   saveDigitalData(data);
 
-  // Firestore sync: ONLY lightweight URL and metadata
+  // Firestore sync: ONLY lightweight metadata
+  const firestoreRecord = {
+    title: updatedResource.title,
+    author: updatedResource.author,
+    category: updatedResource.category,
+    fileFormat: updatedResource.fileFormat,
+    fileSize: updatedResource.fileSize,
+    originalFileName: updatedResource.originalFileName,
+    fileUrl: updatedResource.fileUrl,
+    storagePath: updatedResource.storagePath,
+    downloadCount: updatedResource.downloadCount ?? updatedResource.downloadsCount ?? 0,
+    createdAt: updatedResource.createdAt,
+    description: updatedResource.description || "",
+  };
+
   try {
-    const docRef = doc(db, "digital_resources", id);
-    await setDoc(docRef, updatedResource, { merge: true });
+    await setDoc(doc(db, "e_library", id), firestoreRecord, { merge: true });
+    await setDoc(doc(db, "digital_resources", id), firestoreRecord, { merge: true });
   } catch (err) {
     console.warn("Firestore update error:", err);
   }
@@ -203,7 +297,7 @@ export async function updateDigitalResource(
 }
 
 /**
- * Elektron resursu bazadan və Storage-dan silir
+ * Elektron resursu bazadan (Firestore) və Storage-dan silir
  */
 export async function deleteDigitalResource(id: string): Promise<void> {
   const data = loadDigitalData();
@@ -211,21 +305,23 @@ export async function deleteDigitalResource(id: string): Promise<void> {
   const updated = data.filter((d) => d.id !== id);
   saveDigitalData(updated);
 
-  // Firestore delete
+  // 1. Firestore delete from e_library and digital_resources
   try {
-    const docRef = doc(db, "digital_resources", id);
-    await deleteDoc(docRef);
+    await deleteDoc(doc(db, "e_library", id));
   } catch (err) {
-    console.warn("Firestore delete error:", err);
+    console.warn("Firestore e_library delete error:", err);
   }
+  try {
+    await deleteDoc(doc(db, "digital_resources", id));
+  } catch {}
 
-  // Storage delete if applicable
+  // 2. Firebase Storage automatic file cleanup so storage never wastes space
   if (target?.storagePath) {
     try {
       const storageRef = ref(storage, target.storagePath);
       await deleteObject(storageRef);
-    } catch {
-      // ignore
+    } catch (err) {
+      console.warn("Firebase Storage file delete error:", err);
     }
   }
 }
@@ -237,11 +333,13 @@ export async function incrementDownload(id: string): Promise<void> {
   const data = loadDigitalData();
   const target = data.find((d) => d.id === id);
   if (target) {
-    target.downloadsCount = (target.downloadsCount || 0) + 1;
+    const newCount = (target.downloadCount || target.downloadsCount || 0) + 1;
+    target.downloadCount = newCount;
+    target.downloadsCount = newCount;
     saveDigitalData(data);
     try {
-      const docRef = doc(db, "digital_resources", id);
-      await setDoc(docRef, { downloadsCount: target.downloadsCount }, { merge: true });
+      await setDoc(doc(db, "e_library", id), { downloadCount: newCount, downloadsCount: newCount }, { merge: true });
+      await setDoc(doc(db, "digital_resources", id), { downloadCount: newCount, downloadsCount: newCount }, { merge: true });
     } catch {
       // ignore
     }
@@ -252,7 +350,8 @@ export async function incrementDownload(id: string): Promise<void> {
  * Orijinal formatda birbaşa fayl endirməsi (PDF, DOCX, DOC, EPUB, PPTX və s.)
  */
 export async function downloadDigitalResource(res: DigitalResource): Promise<void> {
-  if (!res.fileUrl) {
+  const url = res.fileUrl?.trim();
+  if (!url) {
     alert("Fayl linki mövcud deyil.");
     return;
   }
@@ -264,14 +363,14 @@ export async function downloadDigitalResource(res: DigitalResource): Promise<voi
   let downloadName = res.originalFileName?.trim() || res.fileName?.trim() || "";
   if (!downloadName) {
     const formatStr = res.fileFormat || res.format;
-    const ext = formatStr ? `.${formatStr.toLowerCase()}` : ".pdf";
+    const ext = formatStr ? `.${formatStr.toLowerCase().replace(/^\./, "")}` : ".pdf";
     const cleanTitle = res.title.replace(/[^a-zA-Z0-9_\u0400-\u04FF\u0100-\u017F-]/g, "_");
     downloadName = `${cleanTitle}${ext}`;
   }
 
   // 3. Blob fetch vasitəsilə birbaşa kompüterə orijinal formatda yüklənmə
   try {
-    const response = await fetch(res.fileUrl);
+    const response = await fetch(url);
     if (!response.ok) throw new Error("Fayl endirilərkən şəbəkə xətası baş verdi");
     const blob = await response.blob();
     const blobUrl = window.URL.createObjectURL(blob);
@@ -285,7 +384,7 @@ export async function downloadDigitalResource(res: DigitalResource): Promise<voi
   } catch (err) {
     // Şəbəkə / CORS məhdudiyyəti olarsa klassik fallback
     const link = document.createElement("a");
-    link.href = res.fileUrl;
+    link.href = url;
     link.download = downloadName;
     link.target = "_blank";
     link.rel = "noopener noreferrer";

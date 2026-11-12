@@ -141,7 +141,7 @@ export function DocumentPreviewModal({ isOpen, resource, onClose }: DocumentPrev
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Orijinal Formatda Yüklə ({resource.fileName || resource.format})</span>
+                  <span>Orijinal Formatda Yüklə ({resource.originalFileName || resource.fileName || resource.format})</span>
                 </button>
 
                 {resource.fileUrl?.startsWith("http") && (

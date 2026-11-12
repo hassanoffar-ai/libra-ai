@@ -277,7 +277,7 @@ export default function EKitabxanaPage() {
                     </span>
 
                     <span className="text-[10px] text-slate-400 font-mono">
-                      {res.downloadsCount || 0} endirmə
+                      {res.downloadCount ?? res.downloadsCount ?? 0} endirmə
                     </span>
                   </div>
 
