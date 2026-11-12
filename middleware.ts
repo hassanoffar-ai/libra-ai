@@ -43,14 +43,18 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // 2. Admin Login Routes (/admin, /admin/login)
-  if (pathname === "/admin" || pathname === "/admin/login") {
+  // 2. Admin Login Routes (/admin, /admin/login, /auth/admin)
+  if (
+    pathname === "/admin" ||
+    pathname === "/admin/login" ||
+    pathname === "/auth/admin"
+  ) {
     if (isAuthenticatedAdmin) {
       // Already logged in as Admin -> go to dashboard
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-    if (pathname === "/admin") {
-      // Normalize /admin to /admin/login
+    if (pathname === "/admin" || pathname === "/auth/admin") {
+      // Normalize to /admin/login
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
     // Allow /admin/login to render cleanly; NEVER redirect to /portal!
@@ -98,6 +102,8 @@ export const config = {
     "/rezervasiyalar/:path*",
     "/admin",
     "/admin/:path*",
+    "/auth/admin",
+    "/auth/admin/:path*",
     "/portal",
     "/portal/:path*",
     "/reader",
