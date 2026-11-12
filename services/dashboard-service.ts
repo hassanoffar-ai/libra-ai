@@ -133,6 +133,30 @@ export async function getDashboardData(): Promise<DashboardData> {
     timestamp: l.returnDate || l.issueDate,
   }));
 
+  // Real aylıq dövriyyə dinamikası
+  const monthMap: Record<string, { borrowed: number; returned: number }> = {};
+  loans.forEach((l) => {
+    if (l.issueDate) {
+      const monthKey = l.issueDate.substring(0, 7);
+      if (!monthMap[monthKey]) monthMap[monthKey] = { borrowed: 0, returned: 0 };
+      monthMap[monthKey].borrowed += 1;
+    }
+    if (l.returnDate) {
+      const monthKey = l.returnDate.substring(0, 7);
+      if (!monthMap[monthKey]) monthMap[monthKey] = { borrowed: 0, returned: 0 };
+      monthMap[monthKey].returned += 1;
+    }
+  });
+
+  const turnover: TurnoverDataPoint[] = Object.keys(monthMap)
+    .sort()
+    .slice(-6)
+    .map((monthKey) => ({
+      period: monthKey,
+      borrowed: monthMap[monthKey].borrowed,
+      returned: monthMap[monthKey].returned,
+    }));
+
   return {
     stats: {
       totalTitles,
@@ -142,7 +166,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       overdueCopies,
       totalReaders: readers.length,
     },
-    turnover: [],
+    turnover,
     categories,
     overdueAlerts,
     recentActivities,

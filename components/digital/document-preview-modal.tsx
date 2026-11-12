@@ -3,20 +3,17 @@
 import React, { useState } from "react";
 import {
   X,
-  ZoomIn,
-  ZoomOut,
   Maximize2,
   Minimize2,
   Download,
-  ChevronLeft,
-  ChevronRight,
   BookOpen,
   FileText,
-  Printer,
-  Bookmark,
-  Sparkles,
+  FileSpreadsheet,
+  FileCode,
+  Globe,
+  ExternalLink,
 } from "lucide-react";
-import { DigitalResource, incrementDownload } from "@/services/digital-library-service";
+import { DigitalResource, downloadDigitalResource } from "@/services/digital-library-service";
 
 interface DocumentPreviewModalProps {
   isOpen: boolean;
@@ -25,29 +22,15 @@ interface DocumentPreviewModalProps {
 }
 
 export function DocumentPreviewModal({ isOpen, resource, onClose }: DocumentPreviewModalProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages] = useState(28);
-  const [zoomLevel, setZoomLevel] = useState(100);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
 
   if (!isOpen || !resource) return null;
 
-  const handleZoom = (delta: number) => {
-    setZoomLevel((prev) => Math.min(175, Math.max(75, prev + delta)));
-  };
+  const isPdf = resource.format?.toUpperCase() === "PDF";
+  const isOffice = ["DOC", "DOCX", "PPT", "PPTX", "XLS", "XLSX"].includes(resource.format?.toUpperCase());
 
-  const handleNextPage = () => {
-    setCurrentPage((p) => Math.min(totalPages, p + 1));
-  };
-
-  const handlePrevPage = () => {
-    setCurrentPage((p) => Math.max(1, p - 1));
-  };
-
-  const handleDownload = () => {
-    incrementDownload(resource.id);
-    alert(`"${resource.title}" (${resource.format}) faylının endirilməsi başladıldı.`);
+  const handleDownload = async () => {
+    await downloadDigitalResource(resource);
   };
 
   return (
@@ -69,11 +52,11 @@ export function DocumentPreviewModal({ isOpen, resource, onClose }: DocumentPrev
           <div className="flex items-center gap-3 min-w-0">
             <span
               className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider ${
-                resource.format === "PDF"
+                isPdf
                   ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                  : resource.format === "EPUB"
-                  ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
-                  : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                  : isOffice
+                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                  : "bg-violet-500/20 text-violet-300 border border-violet-500/30"
               }`}
             >
               {resource.format}
@@ -86,63 +69,8 @@ export function DocumentPreviewModal({ isOpen, resource, onClose }: DocumentPrev
             </div>
           </div>
 
-          {/* Reader Controls: Zoom, Page nav, Fullscreen, Download */}
+          {/* Reader Controls: Fullscreen, Download, Close */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Page Navigation */}
-            <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-800 border border-slate-700 text-xs">
-              <button
-                onClick={handlePrevPage}
-                disabled={currentPage <= 1}
-                className="p-1 hover:text-indigo-400 disabled:opacity-30 disabled:hover:text-white"
-                title="Əvvəlki səhifə"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="font-mono text-[11px] px-1 text-slate-300">
-                {currentPage} / {totalPages}
-              </span>
-              <button
-                onClick={handleNextPage}
-                disabled={currentPage >= totalPages}
-                className="p-1 hover:text-indigo-400 disabled:opacity-30 disabled:hover:text-white"
-                title="Növbəti səhifə"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Zoom Controls */}
-            <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-800 border border-slate-700 text-xs">
-              <button
-                onClick={() => handleZoom(-15)}
-                className="p-1 hover:text-indigo-400"
-                title="Kiçilt"
-              >
-                <ZoomOut className="w-3.5 h-3.5" />
-              </button>
-              <span className="font-mono text-[11px] px-1 text-slate-300 w-10 text-center">
-                {zoomLevel}%
-              </span>
-              <button
-                onClick={() => handleZoom(15)}
-                className="p-1 hover:text-indigo-400"
-                title="Böyüt"
-              >
-                <ZoomIn className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Bookmark button */}
-            <button
-              onClick={() => setIsBookmarked(!isBookmarked)}
-              className={`p-2 rounded-xl transition-colors ${
-                isBookmarked ? "text-amber-400 bg-amber-500/20" : "text-slate-400 hover:bg-slate-800"
-              }`}
-              title="Əlfəcin qoy"
-            >
-              <Bookmark className="w-4 h-4" />
-            </button>
-
             {/* Fullscreen Toggle */}
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
@@ -152,14 +80,14 @@ export function DocumentPreviewModal({ isOpen, resource, onClose }: DocumentPrev
               {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </button>
 
-            {/* Download Button */}
+            {/* Direct Original-Format Download Button */}
             <button
               onClick={handleDownload}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold text-xs transition-colors shadow-sm"
-              title="Faylı kompüterə yüklə"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold text-xs transition-colors shadow-sm cursor-pointer"
+              title="Faylı orijinal formatda yüklə"
             >
               <Download className="w-3.5 h-3.5" />
-              <span className="hidden xs:inline">Yüklə ({resource.fileSize})</span>
+              <span>Yüklə ({resource.fileSize})</span>
             </button>
 
             {/* Close */}
@@ -173,58 +101,65 @@ export function DocumentPreviewModal({ isOpen, resource, onClose }: DocumentPrev
         </div>
 
         {/* Reader Document Canvas */}
-        <div className="flex-1 bg-slate-950/70 p-4 sm:p-8 overflow-y-auto flex items-center justify-center">
-          <div
-            style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: "top center" }}
-            className="w-full max-w-2xl min-h-[640px] bg-white text-slate-900 rounded-xl shadow-2xl p-8 sm:p-14 space-y-6 select-text transition-transform duration-150"
-          >
-            {/* Mock Document Page Header */}
-            <div className="pb-4 border-b border-slate-200 flex items-center justify-between text-xs text-slate-400 font-serif">
-              <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi • Elektron Tədris Fondu</span>
-              <span className="font-mono text-slate-700 font-bold">Səhifə {currentPage}</span>
-            </div>
+        <div className="flex-1 bg-slate-950 p-2 sm:p-4 overflow-hidden flex items-center justify-center">
+          {isPdf && resource.fileUrl ? (
+            <iframe
+              src={resource.fileUrl}
+              className="w-full h-full rounded-xl border border-slate-800 bg-white"
+              title={resource.title}
+            />
+          ) : (
+            <div className="w-full max-w-xl bg-white text-slate-900 rounded-2xl shadow-xl p-8 sm:p-10 space-y-6 text-center animate-in fade-in duration-200">
+              <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mx-auto shadow-sm">
+                {isOffice ? <FileText className="w-8 h-8" /> : <BookOpen className="w-8 h-8" />}
+              </div>
 
-            {/* Document Content Sample */}
-            <div className="space-y-4 font-serif leading-relaxed text-sm text-slate-800">
-              <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-indigo-700 block">
-                Fəsil {Math.ceil(currentPage / 5)}: {resource.category}
-              </span>
-              <h2 className="text-xl sm:text-2xl font-bold font-sans tracking-tight text-slate-950">
-                {resource.title}
-              </h2>
-              <p className="text-xs font-sans text-slate-500 italic pb-2 border-b border-slate-100">
-                Müəllif: {resource.author}
-              </p>
-
-              <p className="pt-2">
-                Bu dərslik və tədris vəsaiti Lənkəran Dövlət Peşə Təhsil Mərkəzinin tələbə və mühəndis-pedaqoji heyətinin rəqəmsal resurslarla təminatı məqsədilə elektron kitabxana bazasına daxil edilmişdir.
-              </p>
-
-              <p>
-                Müasir peşə təhsilində rəqəmsallaşma tələbələrin nəzəri bilikləri sərbəst şəkildə əldə etməsinə, laboratoriya və praktiki məşğələlərə qabaqcadan hazırlaşmasına geniş imkanlar yaradır. Tədris modulları üzrə mənimsənilən biliklər gələcək əmək bazarında rəqabətədavamlı kadr potensialının formalaşdırılmasının əsas sütunudur.
-              </p>
-
-              <div className="my-6 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs font-sans space-y-1">
-                <span className="font-bold text-slate-900 block">Metodiki Tövsiyə #{currentPage}:</span>
-                <p className="text-slate-600">
-                  {resource.description || "Tədris materialının hər bir bölməsindən sonra nəzəriyyəni möhkəmləndirmək üçün praktiki laboratoriya tapşırıqlarını icra edin."}
+              <div>
+                <span className="inline-block px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-indigo-50 text-indigo-700 mb-2 font-mono">
+                  {resource.format} • {resource.fileSize}
+                </span>
+                <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+                  {resource.title}
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Müəllif: <strong className="text-slate-700">{resource.author}</strong>
+                </p>
+                <p className="text-xs text-slate-500">
+                  İxtisas / Bölmə: <strong className="text-slate-700">{resource.category}</strong>
                 </p>
               </div>
 
-              <p>
-                Əlavə suallar və elektron laboratoriya faylları üçün Mərkəzin İnformasiya Texnologiyaları və Kitabxana İdarəetmə Mərkəzi ilə əlaqə saxlaya bilərsiniz.
-              </p>
-            </div>
+              {resource.description && (
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 leading-relaxed text-left">
+                  {resource.description}
+                </div>
+              )}
 
-            {/* Page Footer */}
-            <div className="pt-8 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-400 font-sans">
-              <span>Peşə Kitabxanası Rəqəmsal Oxucu</span>
-              <span className="font-mono">{currentPage} / {totalPages}</span>
+              <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  onClick={handleDownload}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Orijinal Formatda Yüklə ({resource.fileName || resource.format})</span>
+                </button>
+
+                {resource.fileUrl?.startsWith("http") && (
+                  <a
+                    href={resource.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Brauzerdə aç</span>
+                  </a>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
-

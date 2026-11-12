@@ -8,7 +8,7 @@
 
 import { getCopies, updateCopy, getBooks, getBookById } from "./books-service";
 import { db } from "@/lib/firebase/client";
-import { doc, setDoc, deleteDoc } from "firebase/firestore";
+import { doc, setDoc, deleteDoc, collection, getDocs } from "firebase/firestore";
 
 export type ReaderCategory = "Tələbə" | "Müəllim" | "Əməkdaş";
 export type ReaderRole = "student" | "teacher" | "staff";
@@ -168,7 +168,17 @@ function saveCirculationData(
 // ------------------- OXUCULAR (READERS) ------------------- //
 
 export async function getReaders(): Promise<Reader[]> {
-  const { readers } = loadCirculationData();
+  const { readers, loans, reservations } = loadCirculationData();
+  try {
+    const snap = await getDocs(collection(db, "readers"));
+    if (!snap.empty) {
+      const remoteReaders = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Reader));
+      saveCirculationData(remoteReaders, loans, reservations);
+      return remoteReaders;
+    }
+  } catch (err) {
+    console.warn("Firestore readers fetch warning:", err);
+  }
   return [...readers];
 }
 
@@ -285,11 +295,23 @@ export async function deleteReader(id: string): Promise<void> {
 // ------------------- KİTAB VERİLMƏSİ (LOANS) ------------------- //
 
 export async function getLoans(filter?: { status?: LoanStatus; readerId?: string }): Promise<Loan[]> {
-  const { loans } = loadCirculationData();
+  const { readers, loans, reservations } = loadCirculationData();
+  let currentLoans = loans;
+
+  try {
+    const snap = await getDocs(collection(db, "loans"));
+    if (!snap.empty) {
+      currentLoans = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Loan));
+      saveCirculationData(readers, currentLoans, reservations);
+    }
+  } catch (err) {
+    console.warn("Firestore loans fetch warning:", err);
+  }
+
   const today = new Date().toISOString().split("T")[0];
 
   // Gecikmiş olanları dinamik hesablamaq
-  const updatedLoans = loans.map((l) => {
+  const updatedLoans = currentLoans.map((l) => {
     if (l.status === "Aktiv" && l.dueDate < today) {
       return { ...l, status: "Gecikib" as LoanStatus };
     }
@@ -400,6 +422,12 @@ export async function issueBook(input: IssueBookInput): Promise<Loan> {
 
   const updatedLoans = [newLoan, ...loans];
   saveCirculationData(readers, updatedLoans, reservations);
+
+  // Firestore sync
+  try {
+    setDoc(doc(db, "loans", loanId), newLoan, { merge: true }).catch(() => {});
+  } catch {}
+
   return newLoan;
 }
 
@@ -436,13 +464,29 @@ export async function returnBook(input: ReturnBookInput): Promise<Loan> {
   });
 
   saveCirculationData(readers, loans, reservations);
+
+  // Firestore sync
+  try {
+    setDoc(doc(db, "loans", loan.id), updatedLoan, { merge: true }).catch(() => {});
+  } catch {}
+
   return updatedLoan;
 }
 
 // ------------------- REZERVASIYALAR (RESERVATIONS) ------------------- //
 
 export async function getReservations(): Promise<Reservation[]> {
-  const { reservations } = loadCirculationData();
+  const { readers, loans, reservations } = loadCirculationData();
+  try {
+    const snap = await getDocs(collection(db, "reservations"));
+    if (!snap.empty) {
+      const remoteRes = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Reservation));
+      saveCirculationData(readers, loans, remoteRes);
+      return remoteRes;
+    }
+  } catch (err) {
+    console.warn("Firestore reservations fetch warning:", err);
+  }
   return [...reservations];
 }
 

@@ -56,7 +56,7 @@ export function AddResourceModal({
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
-  const [format, setFormat] = useState<"PDF" | "EPUB" | "DOCX">("PDF");
+  const [format, setFormat] = useState<"PDF" | "EPUB" | "DOCX" | "DOC" | "PPTX" | "XLSX" | string>("PDF");
   const [fileSize, setFileSize] = useState("4.5 MB");
   const [fileUrl, setFileUrl] = useState("");
   const [description, setDescription] = useState("");
@@ -102,7 +102,10 @@ export function AddResourceModal({
     const ext = file.name.split(".").pop()?.toUpperCase() || "";
     if (ext === "PDF") setFormat("PDF");
     else if (ext === "EPUB") setFormat("EPUB");
-    else if (ext === "DOC" || ext === "DOCX") setFormat("DOCX");
+    else if (ext === "DOCX") setFormat("DOCX");
+    else if (ext === "DOC") setFormat("DOC");
+    else if (ext === "PPT" || ext === "PPTX") setFormat("PPTX");
+    else if (ext === "XLS" || ext === "XLSX") setFormat("XLSX");
 
     // Auto-calculate size
     const mb = file.size / (1024 * 1024);
@@ -160,9 +163,11 @@ export function AddResourceModal({
     try {
       let finalFileUrl = fileUrl.trim();
       let storagePath = editResource?.storagePath || "";
+      let finalFileName = editResource?.fileName || "";
 
       // If user uploaded a new local file from device
       if (activeTab === "file" && selectedFile) {
+        finalFileName = selectedFile.name;
         try {
           const cleanFileName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
           storagePath = `digital_resources/${Date.now()}_${cleanFileName}`;
@@ -178,6 +183,9 @@ export function AddResourceModal({
             reader.readAsDataURL(selectedFile);
           });
         }
+      } else if (!finalFileName && finalFileUrl) {
+        const urlBase = finalFileUrl.split("/").pop()?.split("?")[0] || "";
+        finalFileName = urlBase || `${title.trim().replace(/\s+/g, "_")}.${format.toLowerCase()}`;
       }
 
       if (editResource) {
@@ -188,6 +196,7 @@ export function AddResourceModal({
           format,
           fileSize: fileSize.trim() || "4.0 MB",
           fileUrl: finalFileUrl,
+          fileName: finalFileName,
           storagePath,
           description: description.trim(),
         });
@@ -199,6 +208,7 @@ export function AddResourceModal({
           format,
           fileSize: fileSize.trim() || "4.0 MB",
           fileUrl: finalFileUrl,
+          fileName: finalFileName,
           storagePath,
           description: description.trim(),
         });
@@ -461,6 +471,9 @@ export function AddResourceModal({
                   <option value="PDF">PDF Sənədi</option>
                   <option value="EPUB">EPUB E-Kitab</option>
                   <option value="DOCX">Word (.docx)</option>
+                  <option value="DOC">Word (.doc)</option>
+                  <option value="PPTX">PowerPoint (.pptx)</option>
+                  <option value="XLSX">Excel (.xlsx)</option>
                 </select>
               </div>
             </div>

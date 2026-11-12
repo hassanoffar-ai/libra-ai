@@ -23,6 +23,7 @@ import {
   getDigitalResources,
   incrementDownload,
   deleteDigitalResource,
+  downloadDigitalResource,
 } from "@/services/digital-library-service";
 import { AddResourceModal } from "@/components/digital/add-resource-modal";
 import { DocumentPreviewModal } from "@/components/digital/document-preview-modal";
@@ -91,8 +92,7 @@ export default function EKitabxanaPage() {
   }, [resources, searchQuery, selectedFormat, selectedCategory]);
 
   const handleDownloadClick = async (res: DigitalResource) => {
-    await incrementDownload(res.id);
-    alert(`"${res.title}" faylının endirilməsi başladı.`);
+    await downloadDigitalResource(res);
     fetchResources();
   };
 

@@ -9,7 +9,7 @@
  */
 
 import { db } from "@/lib/firebase/client";
-import { doc, setDoc, deleteDoc } from "firebase/firestore";
+import { doc, setDoc, deleteDoc, collection, getDocs } from "firebase/firestore";
 
 export type BookLanguage = "Azərbaycan" | "Rus" | "İngilis" | "Türk" | "Digər";
 
@@ -110,10 +110,20 @@ function saveToStorage(books: Book[], copies: BookCopy[]): void {
 }
 
 /**
- * Bütün kitabları gətirir
+ * Bütün kitabları canlı bazadan (Firestore) gətirir
  */
 export async function getBooks(): Promise<Book[]> {
-  const { books } = loadFromStorage();
+  const { books, copies } = loadFromStorage();
+  try {
+    const snap = await getDocs(collection(db, "books"));
+    if (!snap.empty) {
+      const remoteBooks: Book[] = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Book));
+      saveToStorage(remoteBooks, copies);
+      return remoteBooks;
+    }
+  } catch (err) {
+    console.warn("Firestore books fetch warning:", err);
+  }
   return [...books];
 }
 
@@ -122,14 +132,37 @@ export async function getBooks(): Promise<Book[]> {
  */
 export async function getBookById(id: string): Promise<Book | null> {
   const { books } = loadFromStorage();
-  return books.find((b) => b.id === id) || null;
+  const found = books.find((b) => b.id === id);
+  if (found) return found;
+
+  try {
+    const snap = await getDocs(collection(db, "books"));
+    if (!snap.empty) {
+      const match = snap.docs.find((d) => d.id === id);
+      if (match) return { id: match.id, ...match.data() } as Book;
+    }
+  } catch {}
+  return null;
 }
 
 /**
- * Bütün fiziki nüsxələri (istəyə görə spesifik kitaba aid) gətirir
+ * Bütün fiziki nüsxələri canlı bazadan (Firestore) gətirir
  */
 export async function getCopies(bookId?: string): Promise<BookCopy[]> {
-  const { copies } = loadFromStorage();
+  const { books, copies } = loadFromStorage();
+  try {
+    const snap = await getDocs(collection(db, "book_copies"));
+    if (!snap.empty) {
+      const remoteCopies: BookCopy[] = snap.docs.map((d) => ({ id: d.id, ...d.data() } as BookCopy));
+      saveToStorage(books, remoteCopies);
+      if (bookId) {
+        return remoteCopies.filter((c) => c.bookId === bookId);
+      }
+      return remoteCopies;
+    }
+  } catch (err) {
+    console.warn("Firestore book_copies fetch warning:", err);
+  }
   if (bookId) {
     return copies.filter((c) => c.bookId === bookId);
   }

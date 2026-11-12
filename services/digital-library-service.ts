@@ -1,7 +1,8 @@
 /**
  * Peşə Kitabxanası - Rəqəmsal Kitabxana Servisi (Digital Library Service)
  * 
- * Elektron dərsliklər, tədris vəsaitləri və rəqəmsal resursların idarə olunması.
+ * 100% Real Verilənlər Bazası (Firebase Firestore & Firebase Storage)
+ * Heç bir saxta və ya mock resurs daxil edilməyib.
  */
 
 import { db, storage } from "@/lib/firebase/client";
@@ -13,9 +14,10 @@ export interface DigitalResource {
   title: string;
   author: string;
   category: string;
-  format: "PDF" | "EPUB" | "DOCX";
+  format: "PDF" | "EPUB" | "DOCX" | "DOC" | "PPTX" | "XLSX" | string;
   fileSize: string;
   fileUrl?: string;
+  fileName?: string;       // Original filename with extension, e.g. "riyaziyyat_derslik.docx"
   storagePath?: string;
   description?: string;
   uploadDate: string;
@@ -24,45 +26,6 @@ export interface DigitalResource {
 
 const STORAGE_KEY_DIGITAL = "libra_ai_digital_resources_v1";
 
-const INITIAL_RESOURCES: DigitalResource[] = [
-  {
-    id: "dig-1",
-    title: "Veb Proqramlaşdırma Əsasları və Müasir Frontend Texnologiyaları",
-    author: "R. Məmmədov, E. Əliyev",
-    category: "İnformasiya Texnologiyaları",
-    format: "PDF",
-    fileSize: "5.8 MB",
-    fileUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    description: "HTML5, CSS3, JavaScript ES6+ və React əsaslı veb tətbiqlərin yaradılması üzrə dərslik və laboratoriya işləri toplusu.",
-    uploadDate: "2026-03-10",
-    downloadsCount: 42,
-  },
-  {
-    id: "dig-2",
-    title: "Daxili Yanma Mühərriklərinin Konstruksiyası və Diaqnostikası",
-    author: "V. Həsənov",
-    category: "Avtomobil Mühəndisliyi",
-    format: "PDF",
-    fileSize: "8.2 MB",
-    fileUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    description: "Müasir avtomobillərin güc aqreqatlarının texniki xidməti və kompüter diaqnostikası üzrə praktiki təlimat.",
-    uploadDate: "2026-02-18",
-    downloadsCount: 29,
-  },
-  {
-    id: "dig-3",
-    title: "Sənaye Elektrik Avadanlıqlarının Montajı və Təhlükəsizlik Qaydaları",
-    author: "K. Qasımov",
-    category: "Elektrotexnika və Energetika",
-    format: "DOCX",
-    fileSize: "2.4 MB",
-    fileUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    description: "Elektrik şəbəkələrinin quraşdırılması, rele mühafizəsi və əməyin mühafizəsi üzrə metodiki vəsait.",
-    uploadDate: "2026-01-25",
-    downloadsCount: 17,
-  },
-];
-
 let inMemoryDigital: DigitalResource[] = [];
 
 function isClient(): boolean {
@@ -70,23 +33,20 @@ function isClient(): boolean {
 }
 
 function loadDigitalData(): DigitalResource[] {
-  if (!isClient()) return inMemoryDigital.length ? inMemoryDigital : INITIAL_RESOURCES;
+  if (!isClient()) return inMemoryDigital;
   try {
     const raw = localStorage.getItem(STORAGE_KEY_DIGITAL);
     if (raw) {
-      const parsed: DigitalResource[] = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
         inMemoryDigital = parsed;
         return parsed;
       }
     }
-    // Default initial seed
-    inMemoryDigital = INITIAL_RESOURCES;
-    localStorage.setItem(STORAGE_KEY_DIGITAL, JSON.stringify(INITIAL_RESOURCES));
-    return INITIAL_RESOURCES;
+    return [];
   } catch (err) {
     console.error("Elektron resurslar oxunarkən xəta:", err);
-    return inMemoryDigital.length ? inMemoryDigital : INITIAL_RESOURCES;
+    return [];
   }
 }
 
@@ -102,34 +62,40 @@ function saveDigitalData(data: DigitalResource[]): void {
   }
 }
 
+/**
+ * Bütün elektron resursları canlı bazadan (Firestore) gətirir
+ */
 export async function getDigitalResources(): Promise<DigitalResource[]> {
   const local = loadDigitalData();
   try {
-    // Attempt Firestore sync
     const snap = await getDocs(collection(db, "digital_resources"));
     if (!snap.empty) {
       const remote = snap.docs.map((d) => ({ id: d.id, ...d.data() } as DigitalResource));
-      // Merge unique
-      const mergedMap = new Map<string, DigitalResource>();
-      local.forEach((r) => mergedMap.set(r.id, r));
-      remote.forEach((r) => mergedMap.set(r.id, r));
-      const merged = Array.from(mergedMap.values());
-      saveDigitalData(merged);
-      return merged;
+      saveDigitalData(remote);
+      return remote;
+    } else if (local.length > 0) {
+      // If Firestore is empty, sync local items up if any exist
+      for (const item of local) {
+        setDoc(doc(db, "digital_resources", item.id), item, { merge: true }).catch(() => {});
+      }
     }
-  } catch {
-    // Offline or rules restriction fallback
+  } catch (err) {
+    console.warn("Firestore digital resources sync error (offline fallback):", err);
   }
   return [...local];
 }
 
+/**
+ * Yeni elektron resurs yaradır və bazada saxlayır
+ */
 export async function createDigitalResource(input: {
   title: string;
   author: string;
   category: string;
-  format: "PDF" | "EPUB" | "DOCX";
+  format: "PDF" | "EPUB" | "DOCX" | "DOC" | "PPTX" | "XLSX" | string;
   fileSize?: string;
   fileUrl?: string;
+  fileName?: string;
   storagePath?: string;
   description?: string;
 }): Promise<DigitalResource> {
@@ -146,6 +112,7 @@ export async function createDigitalResource(input: {
     format: input.format || "PDF",
     fileSize: input.fileSize || "3.5 MB",
     fileUrl: input.fileUrl?.trim() || "",
+    fileName: input.fileName?.trim() || "",
     storagePath: input.storagePath || "",
     description: input.description?.trim() || "",
     uploadDate: now,
@@ -159,13 +126,16 @@ export async function createDigitalResource(input: {
   try {
     const docRef = doc(db, "digital_resources", id);
     await setDoc(docRef, newResource, { merge: true });
-  } catch {
-    // fallback
+  } catch (err) {
+    console.warn("Firestore save error:", err);
   }
 
   return newResource;
 }
 
+/**
+ * Elektron resursu redaktə edir
+ */
 export async function updateDigitalResource(
   id: string,
   input: Partial<Omit<DigitalResource, "id">>
@@ -187,13 +157,16 @@ export async function updateDigitalResource(
   try {
     const docRef = doc(db, "digital_resources", id);
     await setDoc(docRef, updatedResource, { merge: true });
-  } catch {
-    // fallback
+  } catch (err) {
+    console.warn("Firestore update error:", err);
   }
 
   return updatedResource;
 }
 
+/**
+ * Elektron resursu bazadan və Storage-dan silir
+ */
 export async function deleteDigitalResource(id: string): Promise<void> {
   const data = loadDigitalData();
   const target = data.find((d) => d.id === id);
@@ -204,8 +177,8 @@ export async function deleteDigitalResource(id: string): Promise<void> {
   try {
     const docRef = doc(db, "digital_resources", id);
     await deleteDoc(docRef);
-  } catch {
-    // fallback
+  } catch (err) {
+    console.warn("Firestore delete error:", err);
   }
 
   // Storage delete if applicable
@@ -219,6 +192,9 @@ export async function deleteDigitalResource(id: string): Promise<void> {
   }
 }
 
+/**
+ * Endirmə sayğacını bazada artırır
+ */
 export async function incrementDownload(id: string): Promise<void> {
   const data = loadDigitalData();
   const target = data.find((d) => d.id === id);
@@ -231,5 +207,51 @@ export async function incrementDownload(id: string): Promise<void> {
     } catch {
       // ignore
     }
+  }
+}
+
+/**
+ * Orijinal formatda birbaşa fayl endirməsi (PDF, DOCX, DOC, EPUB, PPTX və s.)
+ */
+export async function downloadDigitalResource(res: DigitalResource): Promise<void> {
+  if (!res.fileUrl) {
+    alert("Fayl linki mövcud deyil.");
+    return;
+  }
+
+  // 1. Sayğacı artırırıq
+  await incrementDownload(res.id);
+
+  // 2. Orijinal fayl adı və uzantısını müəyyən edirik
+  let downloadName = res.fileName?.trim() || "";
+  if (!downloadName) {
+    const ext = res.format ? `.${res.format.toLowerCase()}` : ".pdf";
+    const cleanTitle = res.title.replace(/[^a-zA-Z0-9_\u0400-\u04FF\u0100-\u017F-]/g, "_");
+    downloadName = `${cleanTitle}${ext}`;
+  }
+
+  // 3. Blob fetch vasitəsilə birbaşa kompüterə orijinal formatda yüklənmə
+  try {
+    const response = await fetch(res.fileUrl);
+    if (!response.ok) throw new Error("Fayl endirilərkən şəbəkə xətası baş verdi");
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = downloadName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+  } catch (err) {
+    // Şəbəkə / CORS məhdudiyyəti olarsa klassik fallback
+    const link = document.createElement("a");
+    link.href = res.fileUrl;
+    link.download = downloadName;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 }
