@@ -59,14 +59,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const isHesabatlar = pathname === "/hesabatlar";
-
   return (
-    <div
-      className={`min-h-screen ${
-        isHesabatlar ? "bg-[#0B1A2F]" : "bg-[#F8FAFC]"
-      } flex text-slate-800 antialiased`}
-    >
+    <div className="min-h-screen bg-[#F8FAFC] flex text-slate-800 antialiased">
       {/* Sidebar Navigation */}
       <Sidebar
         isCollapsed={isCollapsed}
@@ -82,16 +76,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         }`}
       >
         {/* Top Navigation Bar */}
-        {!isHesabatlar && <Topbar onToggleMobileSidebar={() => setIsMobileOpen(true)} />}
+        <Topbar onToggleMobileSidebar={() => setIsMobileOpen(true)} />
 
         {/* Page Main Content */}
-        <main
-          className={
-            isHesabatlar
-              ? "flex-1 bg-[#0B1A2F] text-slate-100 p-4 sm:p-6 lg:p-8 w-full"
-              : "flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto"
-          }
-        >
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>
