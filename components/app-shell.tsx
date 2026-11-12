@@ -20,13 +20,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname?.startsWith("/auth");
 
   if (isDedicatedPage) {
-    const isLandingPage = pathname === "/";
     return (
-      <div
-        className={`min-h-screen text-slate-800 antialiased selection:bg-indigo-500 selection:text-white ${
-          isLandingPage ? "" : "bg-[#F8FAFC]"
-        }`}
-      >
+      <div className="min-h-screen bg-[#F8FAFC] text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
         {children}
       </div>
     );
