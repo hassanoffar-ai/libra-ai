@@ -13,7 +13,6 @@ import {
   AlertTriangle,
   Layers,
   ShieldAlert,
-  Eye,
 } from "lucide-react";
 import {
   Loan,
@@ -33,7 +32,6 @@ import {
 } from "@/services/digital-library-service";
 
 type PeriodPreset = "academic" | "month" | "week" | "today" | "all" | "custom";
-type ActiveTab = "dashboard" | "official_doc";
 
 // Helper: Format date as DD.MM.YYYY
 function formatDateAz(dateStr?: string): string {
@@ -93,9 +91,6 @@ export default function HesabatlarPage() {
   const [copies, setCopies] = useState<BookCopy[]>([]);
   const [digitalResources, setDigitalResources] = useState<DigitalResource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Active view tab on screen: 1st "dashboard" (default), 2nd "official_doc"
-  const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
 
   // Time Period Filter: default "academic" (from 01.09 of current academic year to today)
   const [period, setPeriod] = useState<PeriodPreset>("academic");
@@ -436,6 +431,7 @@ export default function HesabatlarPage() {
   }, [loans, books]);
 
   // ================= 4. REAL DATABASE MICROSOFT WORD EXPORT (.doc) =================
+  // Clean export without ANY table gridlines around signatures!
   const handleExportWord = () => {
     const tableRowsHtml = circulationRecords.length === 0
       ? `<tr><td colspan="7" style="border: 1pt solid #000000; padding: 6pt; text-align: center; font-size: 10pt;">Seçilmiş hesabat dövrü üzrə heç bir kitab dövriyyəsi qeydə alınmayıb.</td></tr>`
@@ -501,6 +497,11 @@ export default function HesabatlarPage() {
             text-align: center;
             background-color: #ffffff;
           }
+          table.report-table td {
+            border: 1pt solid #000000;
+            padding: 5pt 6pt;
+            font-size: 9.5pt;
+          }
           table.summary-box {
             border: 1pt solid #000000;
             border-collapse: collapse;
@@ -558,19 +559,14 @@ export default function HesabatlarPage() {
             </tr>
           </table>
 
-          <table style="width: 100%; border: none; margin-top: 36pt; font-size: 11pt;">
-            <tr>
-              <td style="border: none; text-align: left; width: 50%; padding: 0;">
-                <b>Kitabxana məsulu:</b> ___________________
-              </td>
-              <td style="border: none; text-align: right; width: 50%; padding: 0;">
-                <b>Təsdiq etdi / Rəhbərlik:</b> ___________________
-              </td>
-            </tr>
-          </table>
+          <!-- CLEAN SIGNATURES: PURE PARAGRAPH WITH NO TABLE GRIDLINES -->
+          <p style="margin-top: 36pt; font-size: 11pt; tab-stops: right 510pt;">
+            <span>Kitabxana məsulu: ___________________</span>
+            <span style="float: right; text-align: right;">&#9;Təsdiq etdi / Rəhbərlik: ___________________</span>
+          </p>
 
           <p style="margin-top: 24pt; font-size: 11pt;">
-            <b>Tarix:</b> ${formatDateAz(todayStr)}
+            Tarix: ${formatDateAz(todayStr)}
           </p>
         </div>
       </body>
@@ -657,7 +653,7 @@ export default function HesabatlarPage() {
             </h1>
           </div>
           <p className="text-sm text-slate-500 mt-1">
-            Lənkəran Dövlət Peşə Təhsil Mərkəzi — rəsmi A4 çap forması və canlı analitika
+            Lənkəran Dövlət Peşə Təhsil Mərkəzi — kitab fondu və canlı dövriyyə göstəriciləri
           </p>
         </div>
 
@@ -683,41 +679,16 @@ export default function HesabatlarPage() {
         </div>
       </div>
 
-      {/* 2. Filtrlər və Baxış Rejimi Paneli (Screen Only) */}
+      {/* 2. Filtrlər Paneli (Screen Only) */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs space-y-3 print:hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-          {/* View Mode Switcher: 1st Interactive Dashboard, 2nd Official A4 Preview */}
-          <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold">
-            <button
-              onClick={() => setActiveTab("dashboard")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
-                activeTab === "dashboard"
-                  ? "bg-white text-indigo-700 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <Eye className="w-4 h-4 text-indigo-600" />
-              <span>İnteraktiv Göstəricilər Paneli</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("official_doc")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
-                activeTab === "official_doc"
-                  ? "bg-white text-slate-950 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <FileText className="w-4 h-4 text-slate-600" />
-              <span>Rəsmi A4 Hesabat Forması (Önbaxış)</span>
-            </button>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+            <Calendar className="w-4 h-4 text-indigo-600" />
+            Hesabat Dövrü:
+          </span>
 
-          {/* Period Selector */}
+          {/* Period Selector Buttons */}
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
-            <span className="text-slate-500 font-medium mr-1 flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" />
-              Dövr:
-            </span>
             <button
               onClick={() => setPeriod("academic")}
               className={`px-3 py-1.5 rounded-xl font-semibold transition-all ${
@@ -810,399 +781,394 @@ export default function HesabatlarPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. INTERACTIVE DASHBOARD VIEW (1st Tab - Active by default)                */}
+      {/* 3. INTERACTIVE DASHBOARD VIEW (Always directly visible on screen)         */}
       {/* ========================================================================= */}
-      {activeTab === "dashboard" && (
-        <div className="space-y-6 print:hidden">
-          {/* Real-time Summary Stat Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Kitab Fondu</span>
-                <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                  <BookOpen className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="mt-3">
-                <span className="text-2xl font-black text-slate-900">{summaryStats.totalCopies}</span>
-                <p className="text-[10px] text-slate-400 mt-0.5">Cəmi nüsxə sayı</p>
+      <div className="space-y-6 print:hidden">
+        {/* Real-time Summary Stat Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Kitab Fondu</span>
+              <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <BookOpen className="w-4 h-4" />
               </div>
             </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Fondda (Rəfdə)</span>
-                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                  <CheckCircle2 className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="mt-3">
-                <span className="text-2xl font-black text-emerald-700">{summaryStats.inLibrary}</span>
-                <p className="text-[10px] text-slate-400 mt-0.5">Mövcud olanlar</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Oxucuda</span>
-                <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                  <Clock className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="mt-3">
-                <span className="text-2xl font-black text-blue-700">{summaryStats.inUse}</span>
-                <p className="text-[10px] text-slate-400 mt-0.5">Aktiv istiqrazda</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Gecikən</span>
-                <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
-                  <AlertTriangle className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="mt-3">
-                <span className="text-2xl font-black text-rose-700">{summaryStats.overdue}</span>
-                <p className="text-[10px] text-slate-400 mt-0.5">Vaxtı keçmiş</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Elektron Resurs</span>
-                <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-                  <Layers className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="mt-3">
-                <span className="text-2xl font-black text-purple-700">{summaryStats.eResources}</span>
-                <p className="text-[10px] text-slate-400 mt-0.5">PDF / e-kitablar</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Aktiv Oxucu</span>
-                <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                  <Users className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="mt-3">
-                <span className="text-2xl font-black text-slate-900">{summaryStats.activeReaders}</span>
-                <p className="text-[10px] text-slate-400 mt-0.5">Təsdiqlənmiş oxucular</p>
-              </div>
+            <div className="mt-3">
+              <span className="text-2xl font-black text-slate-900">{summaryStats.totalCopies}</span>
+              <p className="text-[10px] text-slate-400 mt-0.5">Cəmi nüsxə sayı</p>
             </div>
           </div>
 
-          {/* Interactive Books Table */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-              <div>
-                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-indigo-600" />
-                  Əsas Kitab Fondu və Dövriyyə Cədvəli
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Bazada qeydiyyatda olan bütün nəşrlər, nüsxə sayları və real dövriyyə göstəriciləri
-                </p>
-              </div>
-
-              {/* Search & Category Filter */}
-              <div className="flex flex-wrap items-center gap-2.5">
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={bookSearchQuery}
-                    onChange={(e) => setBookSearchQuery(e.target.value)}
-                    placeholder="Kitab, müəllif və ya inventar axtar..."
-                    className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-indigo-600 w-56 sm:w-64"
-                  />
-                </div>
-
-                <select
-                  value={selectedBookCategory}
-                  onChange={(e) => setSelectedBookCategory(e.target.value)}
-                  className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-indigo-600 text-slate-700"
-                >
-                  <option value="all">Bütün Bölmələr</option>
-                  {categoriesList.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Fondda (Rəfdə)</span>
+              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
-
-            {filteredBooksReport.length === 0 ? (
-              <div className="py-10 text-center text-slate-400 text-xs">
-                Axtarışa uyğun kitab tapılmadı.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-                      <th className="py-2.5 px-3">№ / İnventar</th>
-                      <th className="py-2.5 px-3">Nəşrin Adı & Müəllif</th>
-                      <th className="py-2.5 px-3">İxtisas / Bölmə</th>
-                      <th className="py-2.5 px-3">Dil / İl</th>
-                      <th className="py-2.5 px-3">Rəf Ünvanı</th>
-                      <th className="py-2.5 px-3 text-center">Cəmi</th>
-                      <th className="py-2.5 px-3 text-center">Fondda</th>
-                      <th className="py-2.5 px-3 text-center">Oxucuda</th>
-                      <th className="py-2.5 px-3 text-center">Gecikən</th>
-                      <th className="py-2.5 px-3 text-center">Vəziyyəti</th>
-                      <th className="py-2.5 px-3 text-right">Ümumi Verilmə</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredBooksReport.map((b) => (
-                      <tr key={b.id} className="hover:bg-slate-50/60 transition-colors">
-                        <td className="py-2.5 px-3 font-mono font-bold text-indigo-700 whitespace-nowrap">
-                          {b.inventoryNumber}
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <div className="font-bold text-slate-900">{b.title}</div>
-                          <div className="text-[11px] text-slate-500">{b.author}</div>
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium">
-                            {b.category}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
-                          {b.language} {b.year !== "—" ? `• ${b.year}` : ""}
-                        </td>
-                        <td className="py-2.5 px-3 text-slate-600 text-[11px]">
-                          {b.shelf}
-                        </td>
-                        <td className="py-2.5 px-3 text-center font-bold text-slate-900">{b.total}</td>
-                        <td className="py-2.5 px-3 text-center font-bold text-emerald-600">{b.inLibrary}</td>
-                        <td className="py-2.5 px-3 text-center font-bold text-blue-600">{b.inUse}</td>
-                        <td className="py-2.5 px-3 text-center">
-                          {b.overdue > 0 ? (
-                            <span className="text-rose-600 font-extrabold">{b.overdue}</span>
-                          ) : (
-                            "0"
-                          )}
-                        </td>
-                        <td className="py-2.5 px-3 text-center">
-                          <span
-                            className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
-                              (b.condition as string) === "Yaxşı" || (b.condition as string) === "Əla"
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                : (b.condition as string) === "Təmirə ehtiyac var" || (b.condition as string) === "Köhnəlmiş"
-                                ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                : (b.condition as string) === "Yararsız"
-                                ? "bg-rose-50 text-rose-700 border border-rose-200"
-                                : "bg-blue-50 text-blue-700 border border-blue-200"
-                            }`}
-                          >
-                            {b.condition}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
-                          {b.totalIssued} dəfə
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <div className="mt-3">
+              <span className="text-2xl font-black text-emerald-700">{summaryStats.inLibrary}</span>
+              <p className="text-[10px] text-slate-400 mt-0.5">Mövcud olanlar</p>
+            </div>
           </div>
 
-          {/* Delinquent Readers Table */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-              <div>
-                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 text-rose-600" />
-                  Borclu və Gecikdirən Oxucular
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Hazırda kitabxana fondundan kitab götürmüş və ya qaytarılma müddəti ötmüş oxucuların canlı siyahısı
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                  {delinquentLoans.length} aktiv borc
-                </span>
-                {summaryStats.overdue > 0 && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                    {summaryStats.overdue} gecikir
-                  </span>
-                )}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Oxucuda</span>
+              <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                <Clock className="w-4 h-4" />
               </div>
             </div>
-
-            {delinquentLoans.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs flex flex-col items-center justify-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
-                  <CheckCircle2 className="w-5 h-5" />
-                </div>
-                <p className="font-semibold text-slate-700">Hazırda aktiv borclu və ya gecikdirən oxucu qeydə alınmayıb!</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Bütün nüsxələr vaxtında təhvil verilib və ya fonddadır.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-                      <th className="py-2.5 px-3">Bilet №</th>
-                      <th className="py-2.5 px-3">Oxucu Adı Soyadı</th>
-                      <th className="py-2.5 px-3">Statusu / Qrupu / Vəzifəsi</th>
-                      <th className="py-2.5 px-3">Götürdüyü Kitab və İnventar</th>
-                      <th className="py-2.5 px-3">Verilmə Tarixi</th>
-                      <th className="py-2.5 px-3">Qaytarılmalı Tarix</th>
-                      <th className="py-2.5 px-3 text-right">Gecikmə Vəziyyəti</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {delinquentLoans.map((item) => (
-                      <tr
-                        key={item.id}
-                        className={`transition-colors ${
-                          item.isOverdue ? "hover:bg-rose-50/30 bg-rose-50/10" : "hover:bg-slate-50/60"
-                        }`}
-                      >
-                        <td className="py-2.5 px-3 font-mono font-bold text-indigo-700 whitespace-nowrap">
-                          {item.ticketNumber}
-                        </td>
-                        <td className="py-2.5 px-3 font-bold text-slate-900 whitespace-nowrap">
-                          {item.readerName}
-                        </td>
-                        <td className="py-2.5 px-3 text-slate-600">
-                          {item.statusInfo}
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <div className="font-medium text-slate-900 leading-snug">{item.bookTitle}</div>
-                          <span className="font-mono text-[10px] text-indigo-600 font-bold">
-                            {item.inventoryNumber}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 font-mono text-slate-600 whitespace-nowrap">
-                          {formatDateAz(item.issueDate)}
-                        </td>
-                        <td className="py-2.5 px-3 font-mono whitespace-nowrap">
-                          <span className={item.isOverdue ? "text-rose-600 font-bold" : "text-slate-800"}>
-                            {formatDateAz(item.dueDate)}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                          {item.isOverdue ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                              <AlertTriangle className="w-3 h-3 text-rose-600" />
-                              <span>{item.delayStatus}</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600">
-                              <Clock className="w-3 h-3 text-slate-400" />
-                              <span>- (İstifadədə)</span>
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <div className="mt-3">
+              <span className="text-2xl font-black text-blue-700">{summaryStats.inUse}</span>
+              <p className="text-[10px] text-slate-400 mt-0.5">Aktiv istiqrazda</p>
+            </div>
           </div>
 
-          {/* Rankings */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-indigo-600" />
-                  Ən Fəal Oxucular
-                </h2>
-                <span className="text-xs text-slate-400 font-medium">Top 5 Oxucu</span>
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Gecikən</span>
+              <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4" />
               </div>
-
-              {topReaders.length === 0 ? (
-                <div className="py-6 text-center text-slate-400 text-xs">
-                  Hələ heç bir oxu statistikası formalaşmayıb.
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  {topReaders.map((r, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-200/60"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="w-6 h-6 rounded-lg bg-indigo-600 text-white font-extrabold text-xs flex items-center justify-center flex-shrink-0">
-                          {idx + 1}
-                        </span>
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-900">{r.readerName}</h4>
-                          <p className="text-[10px] text-slate-400 font-mono">Bilet: {r.ticket} • {r.dept}</p>
-                        </div>
-                      </div>
-
-                      <span className="text-xs font-extrabold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-lg border border-indigo-100">
-                        {r.count} kitab
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
+            <div className="mt-3">
+              <span className="text-2xl font-black text-rose-700">{summaryStats.overdue}</span>
+              <p className="text-[10px] text-slate-400 mt-0.5">Vaxtı keçmiş</p>
+            </div>
+          </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-indigo-600" />
-                  Ən Çox Müraciət Olunan Nəşrlər
-                </h2>
-                <span className="text-xs text-slate-400 font-medium">Top 5 Nəşr</span>
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Elektron Resurs</span>
+              <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                <Layers className="w-4 h-4" />
               </div>
+            </div>
+            <div className="mt-3">
+              <span className="text-2xl font-black text-purple-700">{summaryStats.eResources}</span>
+              <p className="text-[10px] text-slate-400 mt-0.5">PDF / e-kitablar</p>
+            </div>
+          </div>
 
-              {topBooks.length === 0 ? (
-                <div className="py-6 text-center text-slate-400 text-xs">
-                  Hələ heç bir kitab istiqrazı formalaşmayıb.
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  {topBooks.map((b, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-200/60"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className="w-6 h-6 rounded-lg bg-emerald-600 text-white font-extrabold text-xs flex items-center justify-center flex-shrink-0">
-                          {idx + 1}
-                        </span>
-                        <div className="min-w-0">
-                          <h4 className="text-xs font-bold text-slate-900 truncate">{b.title}</h4>
-                          <p className="text-[10px] text-slate-400 truncate">{b.author} • {b.category}</p>
-                        </div>
-                      </div>
-
-                      <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-100 flex-shrink-0">
-                        {b.count} dəfə
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Aktiv Oxucu</span>
+              <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Users className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-3">
+              <span className="text-2xl font-black text-slate-900">{summaryStats.activeReaders}</span>
+              <p className="text-[10px] text-slate-400 mt-0.5">Təsdiqlənmiş oxucular</p>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Interactive Books Table */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-indigo-600" />
+                Əsas Kitab Fondu və Dövriyyə Cədvəli
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Bazada qeydiyyatda olan bütün nəşrlər, nüsxə sayları və real dövriyyə göstəriciləri
+              </p>
+            </div>
+
+            {/* Search & Category Filter */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={bookSearchQuery}
+                  onChange={(e) => setBookSearchQuery(e.target.value)}
+                  placeholder="Kitab, müəllif və ya inventar axtar..."
+                  className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-indigo-600 w-56 sm:w-64"
+                />
+              </div>
+
+              <select
+                value={selectedBookCategory}
+                onChange={(e) => setSelectedBookCategory(e.target.value)}
+                className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-indigo-600 text-slate-700"
+              >
+                <option value="all">Bütün Bölmələr</option>
+                {categoriesList.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {filteredBooksReport.length === 0 ? (
+            <div className="py-10 text-center text-slate-400 text-xs">
+              Axtarışa uyğun kitab tapılmadı.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                    <th className="py-2.5 px-3">№ / İnventar</th>
+                    <th className="py-2.5 px-3">Nəşrin Adı & Müəllif</th>
+                    <th className="py-2.5 px-3">İxtisas / Bölmə</th>
+                    <th className="py-2.5 px-3">Dil / İl</th>
+                    <th className="py-2.5 px-3">Rəf Ünvanı</th>
+                    <th className="py-2.5 px-3 text-center">Cəmi</th>
+                    <th className="py-2.5 px-3 text-center">Fondda</th>
+                    <th className="py-2.5 px-3 text-center">Oxucuda</th>
+                    <th className="py-2.5 px-3 text-center">Gecikən</th>
+                    <th className="py-2.5 px-3 text-center">Vəziyyəti</th>
+                    <th className="py-2.5 px-3 text-right">Ümumi Verilmə</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredBooksReport.map((b) => (
+                    <tr key={b.id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="py-2.5 px-3 font-mono font-bold text-indigo-700 whitespace-nowrap">
+                        {b.inventoryNumber}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <div className="font-bold text-slate-900">{b.title}</div>
+                        <div className="text-[11px] text-slate-500">{b.author}</div>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium">
+                          {b.category}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
+                        {b.language} {b.year !== "—" ? `• ${b.year}` : ""}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-600 text-[11px]">
+                        {b.shelf}
+                      </td>
+                      <td className="py-2.5 px-3 text-center font-bold text-slate-900">{b.total}</td>
+                      <td className="py-2.5 px-3 text-center font-bold text-emerald-600">{b.inLibrary}</td>
+                      <td className="py-2.5 px-3 text-center font-bold text-blue-600">{b.inUse}</td>
+                      <td className="py-2.5 px-3 text-center">
+                        {b.overdue > 0 ? (
+                          <span className="text-rose-600 font-extrabold">{b.overdue}</span>
+                        ) : (
+                          "0"
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                            (b.condition as string) === "Yaxşı" || (b.condition as string) === "Əla"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              : (b.condition as string) === "Təmirə ehtiyac var" || (b.condition as string) === "Köhnəlmiş"
+                              ? "bg-amber-50 text-amber-700 border border-amber-200"
+                              : (b.condition as string) === "Yararsız"
+                              ? "bg-rose-50 text-rose-700 border border-rose-200"
+                              : "bg-blue-50 text-blue-700 border border-blue-200"
+                          }`}
+                        >
+                          {b.condition}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
+                        {b.totalIssued} dəfə
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Delinquent Readers Table */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-rose-600" />
+                Borclu və Gecikdirən Oxucular
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Hazırda kitabxana fondundan kitab götürmüş və ya qaytarılma müddəti ötmüş oxucuların canlı siyahısı
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                {delinquentLoans.length} aktiv borc
+              </span>
+              {summaryStats.overdue > 0 && (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                  {summaryStats.overdue} gecikir
+                </span>
+              )}
+            </div>
+          </div>
+
+          {delinquentLoans.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 text-xs flex flex-col items-center justify-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <p className="font-semibold text-slate-700">Hazırda aktiv borclu və ya gecikdirən oxucu qeydə alınmayıb!</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Bütün nüsxələr vaxtında təhvil verilib və ya fonddadır.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                    <th className="py-2.5 px-3">Bilet №</th>
+                    <th className="py-2.5 px-3">Oxucu Adı Soyadı</th>
+                    <th className="py-2.5 px-3">Statusu / Qrupu / Vəzifəsi</th>
+                    <th className="py-2.5 px-3">Götürdüyü Kitab və İnventar</th>
+                    <th className="py-2.5 px-3">Verilmə Tarixi</th>
+                    <th className="py-2.5 px-3">Qaytarılmalı Tarix</th>
+                    <th className="py-2.5 px-3 text-right">Gecikmə Vəziyyəti</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {delinquentLoans.map((item) => (
+                    <tr
+                      key={item.id}
+                      className={`transition-colors ${
+                        item.isOverdue ? "hover:bg-rose-50/30 bg-rose-50/10" : "hover:bg-slate-50/60"
+                      }`}
+                    >
+                      <td className="py-2.5 px-3 font-mono font-bold text-indigo-700 whitespace-nowrap">
+                        {item.ticketNumber}
+                      </td>
+                      <td className="py-2.5 px-3 font-bold text-slate-900 whitespace-nowrap">
+                        {item.readerName}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-600">
+                        {item.statusInfo}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <div className="font-medium text-slate-900 leading-snug">{item.bookTitle}</div>
+                        <span className="font-mono text-[10px] text-indigo-600 font-bold">
+                          {item.inventoryNumber}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 font-mono text-slate-600 whitespace-nowrap">
+                        {formatDateAz(item.issueDate)}
+                      </td>
+                      <td className="py-2.5 px-3 font-mono whitespace-nowrap">
+                        <span className={item.isOverdue ? "text-rose-600 font-bold" : "text-slate-800"}>
+                          {formatDateAz(item.dueDate)}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                        {item.isOverdue ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                            <AlertTriangle className="w-3 h-3 text-rose-600" />
+                            <span>{item.delayStatus}</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600">
+                            <Clock className="w-3 h-3 text-slate-400" />
+                            <span>- (İstifadədə)</span>
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Rankings */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Users className="w-4 h-4 text-indigo-600" />
+                Ən Fəal Oxucular
+              </h2>
+              <span className="text-xs text-slate-400 font-medium">Top 5 Oxucu</span>
+            </div>
+
+            {topReaders.length === 0 ? (
+              <div className="py-6 text-center text-slate-400 text-xs">
+                Hələ heç bir oxu statistikası formalaşmayıb.
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {topReaders.map((r, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-200/60"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 rounded-lg bg-indigo-600 text-white font-extrabold text-xs flex items-center justify-center flex-shrink-0">
+                        {idx + 1}
+                      </span>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900">{r.readerName}</h4>
+                        <p className="text-[10px] text-slate-400 font-mono">Bilet: {r.ticket} • {r.dept}</p>
+                      </div>
+                    </div>
+
+                    <span className="text-xs font-extrabold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-lg border border-indigo-100">
+                      {r.count} kitab
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-indigo-600" />
+                Ən Çox Müraciət Olunan Nəşrlər
+              </h2>
+              <span className="text-xs text-slate-400 font-medium">Top 5 Nəşr</span>
+            </div>
+
+            {topBooks.length === 0 ? (
+              <div className="py-6 text-center text-slate-400 text-xs">
+                Hələ heç bir kitab istiqrazı formalaşmayıb.
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {topBooks.map((b, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-200/60"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="w-6 h-6 rounded-lg bg-emerald-600 text-white font-extrabold text-xs flex items-center justify-center flex-shrink-0">
+                        {idx + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-slate-900 truncate">{b.title}</h4>
+                        <p className="text-[10px] text-slate-400 truncate">{b.author} • {b.category}</p>
+                      </div>
+                    </div>
+
+                    <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-100 flex-shrink-0">
+                      {b.count} dəfə
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* ========================================================================= */}
-      {/* 4. OFFICIAL A4 REPORT DOCUMENT (EXACT LAYOUT OF image_5cebbd.jpg)         */}
-      {/* Populated 100% with real live data from Firebase (Zero mock/fake data)     */}
-      {/* Always printed on window.print(), previewed on screen when tab is active  */}
+      {/* 4. OFFICIAL A4 REPORT DOCUMENT (FOR WINDOW.PRINT ONLY)                     */}
+      {/* Strictly hidden on screen, prints as pure white A4 on window.print()       */}
       {/* ========================================================================= */}
       <div
-        className={`print-document-container ${
-          activeTab === "official_doc" ? "block" : "hidden print:block"
-        } bg-white shadow-xl print:shadow-none border border-slate-200 print:border-none rounded-xl print:rounded-none max-w-[210mm] mx-auto p-8 sm:p-12 print:p-0 text-black font-['Times_New_Roman',Times,Georgia,serif] leading-normal transition-all`}
+        className="print-document-container hidden print:block bg-white text-black font-['Times_New_Roman',Times,Georgia,serif] leading-normal"
       >
         {/* HEADER SECTION */}
         <div className="text-center">
@@ -1228,7 +1194,7 @@ export default function HesabatlarPage() {
         </div>
 
         {/* CIRCULATION TABLE (7 Columns with 1px solid #000 borders) */}
-        <div className="mt-6 overflow-x-auto">
+        <div className="mt-6">
           <table className="w-full border-collapse border border-black text-black text-xs sm:text-sm">
             <thead>
               <tr className="bg-white">
@@ -1295,9 +1261,9 @@ export default function HesabatlarPage() {
 
         {/* TWO-COLUMN BORDERED SUMMARY BOX (Below table, 1px solid #000 border) */}
         <div className="border border-black rounded-lg mt-6 overflow-hidden bg-white text-black text-xs sm:text-sm">
-          <div className="flex flex-col sm:flex-row">
+          <div className="flex flex-row">
             {/* Left Column */}
-            <div className="flex-1 p-3.5 sm:p-4 border-b sm:border-b-0 sm:border-r border-black space-y-1.5">
+            <div className="flex-1 p-3.5 sm:p-4 border-r border-black space-y-1.5">
               <p className="flex items-center gap-1.5">
                 <span className="font-bold">•</span>
                 <span>Cəmi Kitab Fondu:</span>
@@ -1341,7 +1307,7 @@ export default function HesabatlarPage() {
           </div>
         </div>
 
-        {/* CLEAN SIGNATURE & DATE FOOTER (NO stamp, NO hardcoded names) */}
+        {/* CLEAN SIGNATURE & DATE FOOTER (NO stamp, NO table gridlines) */}
         <div className="mt-10 sm:mt-12 pt-4 flex items-center justify-between text-xs sm:text-sm font-medium text-black">
           <div>
             <span>Kitabxana məsulu: ___________________</span>
