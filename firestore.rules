@@ -2,91 +2,176 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 1. DENY-BY-DEFAULT: Default rule to deny everything
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    // =========================================================================
+    // 1. TƏHLÜKƏSİZLİK FUNKSİYALARI (SECURITY HELPER FUNCTIONS)
+    // =========================================================================
 
-    // Helper functions for security evaluation
+    // İstifadəçinin Firebase Auth ilə autentifikasiyadan keçib-keçmədiyini yoxlayır
     function isAuthenticated() {
       return request.auth != null;
     }
 
+    // Sorğu göndərən istifadəçinin sənəd sahibi (UID) olub-olmadığını yoxlayır
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Administrator səlahiyyətlərini çoxpilləli və xətasız yoxlayan təhlükəsiz funksiya:
+    // 1. Firebase Auth Custom Claims: request.auth.token.role == 'admin'
+    // 2. Təsdiqlənmiş rəsmi inzibatçı e-poçt ünvanları (admin@ldptm.edu.az, kitabxana@ldptm.edu.az)
+    // 3. 'users' kolleksiyasında sənəd mövcud olduqda onun 'admin' rolu (exists() yoxlanışı ilə)
     function isAdmin() {
       return isAuthenticated() && (
         request.auth.token.role == 'admin' ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        (request.auth.token.email != null && (
+          request.auth.token.email in ['admin@ldptm.edu.az', 'kitabxana@ldptm.edu.az'] ||
+          request.auth.token.email.matches('.*@ldptm\\.edu\\.az$') && (
+            request.auth.token.email.matches('^admin@.*') || 
+            request.auth.token.email.matches('^kitabxana@.*')
+          )
+        )) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
     }
 
-    // 2. USERS & READERS COLLECTIONS
-    // Admin has full management access
-    match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAdmin() || (
-        isAuthenticated() &&
-        isOwner(userId) &&
-        request.resource.data.role == 'oxucu'
-      );
-      allow update: if isAdmin() || (
-        isOwner(userId) &&
-        request.resource.data.role == resource.data.role &&
-        request.resource.data.status == resource.data.status
-      );
-      allow delete: if isAdmin();
-    }
-
-    // Readers collection: isolated reader authentication & profile data
-    match /readers/{readerId} {
-      allow read: if true;
-      allow create, update: if true;
-      allow delete: if isAdmin();
-    }
-
-    // 3. BOOKS & COPIES (Public & Reader Catalog Access)
-    // Public/reader queries can read without requiring Admin login
-    // Only Admin can create, update, or delete books
+    // =========================================================================
+    // 2. KİTAB FONDU VƏ FİZİKİ NÜSXƏLƏR (BOOKS & BOOK_COPIES)
+    // =========================================================================
+    // Oxucular və ictimaiyyət kitab fondunu axtara və rəf yerini görə bilər.
+    // Kitab əlavə etmək, redaktə etmək və silmək YALNIZ Administratora icazəlidir.
     match /books/{bookId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     match /book_copies/{copyId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
-    // 4. LOANS (Kitab dövriyyəsi)
-    // Readers can read only their own loans
-    // Admin has full control
+    // =========================================================================
+    // 3. ELEKTRON KİTABXANA (E_LIBRARY & DIGITAL_RESOURCES)
+    // =========================================================================
+    // Oxucular elektron resursların siyahısını oxuya və endirə bilər.
+    // Endirmə sayğacının artırılmasına icazə verilir; digər dəyişikliklər YALNIZ Admin üçündür.
+    match /e_library/{resourceId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloadCount', 'downloadsCount'])
+      );
+    }
+
+    match /digital_resources/{resourceId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloadCount', 'downloadsCount'])
+      );
+    }
+
+    // =========================================================================
+    // 4. OXUCULAR (READERS)
+    // =========================================================================
+    // Admin bütün oxucuların məlumatlarını görə və idarə edə bilər.
+    // Hər oxucu yalnız öz şəxsi məlumatlarını oxuya və ya profilini yeniləyə bilər.
+    // Oxucu öz statusunu (active/blocked), rolunu və ya kitab limitini dəyişdirə bilməz.
+    match /readers/{readerId} {
+      allow read: if isAdmin() || (
+        isAuthenticated() && (
+          request.auth.uid == readerId ||
+          (resource.data.email != null && request.auth.token.email == resource.data.email)
+        )
+      );
+      allow create: if isAdmin() || (
+        isAuthenticated() && (
+          request.auth.uid == readerId ||
+          (request.resource.data.email != null && request.auth.token.email == request.resource.data.email)
+        ) &&
+        request.resource.data.role != 'admin' &&
+        request.resource.data.accessRole != 'librarian'
+      );
+      allow update: if isAdmin() || (
+        isAuthenticated() && (
+          request.auth.uid == readerId ||
+          (resource.data.email != null && request.auth.token.email == resource.data.email)
+        ) &&
+        request.resource.data.status == resource.data.status &&
+        request.resource.data.role == resource.data.role &&
+        request.resource.data.accessRole == resource.data.accessRole &&
+        request.resource.data.maxBookLimit == resource.data.maxBookLimit
+      );
+      allow delete: if isAdmin();
+    }
+
+    // =========================================================================
+    // 5. KİTABLARIN VERİLMƏSİ VƏ DÖVRİYYƏSİ (LOANS)
+    // =========================================================================
+    // Admin bütün dövriyyə tarixçəsini görə və idarə edə bilər.
+    // Oxucu YALNIZ özünə aid kitab götürmə tarixçəsini və son qaytarma müddətini görə bilər.
+    // Kitab vermək, qaytarmaq və gecikmə qeyd etmək YALNIZ Administratora məxsusdur.
     match /loans/{loanId} {
-      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
-      allow write: if isAdmin();
+      allow read: if isAdmin() || (
+        isAuthenticated() && (
+          resource.data.readerId == request.auth.uid ||
+          resource.data.userId == request.auth.uid ||
+          (resource.data.readerEmail != null && request.auth.token.email == resource.data.readerEmail)
+        )
+      );
+      allow create, update, delete: if isAdmin();
     }
 
-    // 5. RESERVATIONS
-    // Readers can view and create their own reservations
-    // Admin has full control
-    match /reservations/{resId} {
-      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    // =========================================================================
+    // 6. REZERVASIYALAR (RESERVATIONS)
+    // =========================================================================
+    // Admin bütün rezervasiyaları idarə edir.
+    // Oxucu yalnız öz rezervasiyalarını görə və öz adına yeni rezervasiya göndərə bilər.
+    match /reservations/{reservationId} {
+      allow read: if isAdmin() || (
+        isAuthenticated() && (
+          resource.data.readerId == request.auth.uid ||
+          resource.data.userId == request.auth.uid
+        )
+      );
+      allow create: if isAdmin() || (
+        isAuthenticated() && (
+          request.resource.data.readerId == request.auth.uid ||
+          request.resource.data.userId == request.auth.uid
+        ) &&
+        request.resource.data.status == 'Gözləyir'
+      );
       allow update, delete: if isAdmin();
     }
 
-    // 6. DIGITAL LIBRARY RESOURCES
-    match /digital_resources/{resId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+    // =========================================================================
+    // 7. İSTİFADƏÇİLƏR VƏ İNZİBATÇILAR (USERS)
+    // =========================================================================
+    // Admin profilləri və sistem səlahiyyətləri.
+    // Heç bir istifadəçi özünü admin edə bilməz (rol eskalasiyası qadağandır).
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAdmin() || (
+        isOwner(userId) && request.resource.data.role == 'oxucu'
+      );
+      allow update: if isAdmin() || (
+        isOwner(userId) && request.resource.data.role == resource.data.role
+      );
+      allow delete: if isAdmin();
     }
 
-    // 7. AUDIT & SYNC LOGS (Admin only)
+    // =========================================================================
+    // 8. AUDIT VƏ SİNXRONİZASİYA LOGLARI (SYNC_LOGS)
+    // =========================================================================
     match /sync_logs/{logId} {
       allow read, write: if isAdmin();
     }
+
+    // =========================================================================
+    // 9. DENY-BY-DEFAULT (Qalan bütün digər sənədlər üçün qadağa)
+    // =========================================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }
-
