@@ -104,12 +104,12 @@ export async function POST(req: NextRequest) {
     // Save reader directly to Firestore `readers` collection via REST API
     try {
       const apiKey =
-        process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
         process.env.FIREBASE_API_KEY ||
+        process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
         "AIzaSyBm37kJhdRy7sa7yxg0WbtSNAVhtUAisCE";
       const projectId =
-        process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
         process.env.FIREBASE_PROJECT_ID ||
+        process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
         "ldptm-kitabxana";
       const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/readers/${readerId}?key=${apiKey}`;
 

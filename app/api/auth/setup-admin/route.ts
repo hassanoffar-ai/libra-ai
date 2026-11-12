@@ -10,28 +10,12 @@ export async function POST(req: NextRequest) {
     // Security check: Must supply the server-side secret key from environment variables
     const serverSecret = process.env.ADMIN_SETUP_SECRET;
     
-    // If ADMIN_SETUP_SECRET is configured, it must match
-    if (serverSecret && secretKey !== serverSecret) {
+    // Strict security: ADMIN_SETUP_SECRET must be configured in environment variables and must match
+    if (!serverSecret || secretKey !== serverSecret) {
       return NextResponse.json(
-        { error: "İcazə verilmədi: Administrator açarı yanlışdır." },
+        { error: "İcazə verilmədi: Administrator açarı yanlışdır və ya sistemdə konfiqurasiya edilməyib." },
         { status: 403 }
       );
-    }
-
-    // If ADMIN_SETUP_SECRET is not configured, allow setup only if no admin exists yet
-    if (!serverSecret) {
-      const existingAdmins = await adminDb
-        .collection("users")
-        .where("role", "==", "admin")
-        .limit(1)
-        .get();
-
-      if (!existingAdmins.empty) {
-        return NextResponse.json(
-          { error: "Sistemdə artıq aktiv administrator mövcuddur. Təhlükəsizlik üçün ADMIN_SETUP_SECRET tələb olunur." },
-          { status: 403 }
-        );
-      }
     }
 
     const cleanEmail = (email || "").trim().toLowerCase();

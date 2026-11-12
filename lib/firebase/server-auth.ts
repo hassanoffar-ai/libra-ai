@@ -2,13 +2,13 @@ import "server-only";
 import { UserProfile, UserRole } from "@/lib/types/user";
 
 const apiKey =
-  process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
   process.env.FIREBASE_API_KEY ||
+  process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
   "AIzaSyBm37kJhdRy7sa7yxg0WbtSNAVhtUAisCE";
 
 const projectId =
-  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
   process.env.FIREBASE_PROJECT_ID ||
+  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
   "ldptm-kitabxana";
 
 // List of configured administrator emails
