@@ -30,14 +30,14 @@ export function middleware(request: NextRequest) {
 
   if (isAdminRoute) {
     if (!isAuthenticated) {
-      // Not logged in -> redirect to admin login
-      const adminLoginUrl = new URL("/admin", request.url);
-      adminLoginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(adminLoginUrl);
+      // Unauthenticated -> redirect to /auth/login as required
+      const loginUrl = new URL("/auth/login", request.url);
+      loginUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(loginUrl);
     }
 
     if (!isAdmin) {
-      // Logged in as regular reader -> strictly deny access to admin panels
+      // Logged in as regular reader -> strictly block access and redirect to /portal
       const readerPortalUrl = new URL("/portal", request.url);
       readerPortalUrl.searchParams.set("denied", "admin_only");
       return NextResponse.redirect(readerPortalUrl);
@@ -75,16 +75,26 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/dashboard",
     "/dashboard/:path*",
+    "/kitablar",
     "/kitablar/:path*",
+    "/nusxeler",
     "/nusxeler/:path*",
+    "/inventar",
     "/inventar/:path*",
+    "/oxucular",
     "/oxucular/:path*",
+    "/verilme",
     "/verilme/:path*",
+    "/qaytarilma",
     "/qaytarilma/:path*",
+    "/hesabatlar",
     "/hesabatlar/:path*",
+    "/rezervasiyalar",
     "/rezervasiyalar/:path*",
     "/admin",
+    "/admin/:path*",
     "/portal",
     "/portal/:path*",
     "/reader",

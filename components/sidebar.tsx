@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/firebase/auth-context";
 import {
   LayoutDashboard,
   BookOpen,
@@ -100,6 +101,13 @@ export function Sidebar({
   setIsMobileOpen,
 }: SidebarProps) {
   const pathname = usePathname();
+  const { role } = useAuth();
+  const isAdmin = role === "admin" || (role as string) === "librarian";
+
+  // Hide all Admin sidebar/navigation links from 'reader' accounts
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <>

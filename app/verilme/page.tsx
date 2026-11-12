@@ -35,6 +35,43 @@ import {
   getCopies,
 } from "@/services/books-service";
 
+type DurationMode = "days" | "months" | "academic_year" | "custom";
+
+function getAcademicYearTargetYear(): number {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth(); // 0-indexed: 0 = Jan, 5 = June, 6 = July
+  return currentMonth >= 6 ? currentYear + 1 : currentYear;
+}
+
+function getEndOfAcademicYearDate(): string {
+  return `${getAcademicYearTargetYear()}-06-30`;
+}
+
+function formatDueDatePreview(dateStr: string): string {
+  if (!dateStr) return "Tarix seçilməyib";
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return dateStr;
+  const formattedDate = `${parts[2]}.${parts[1]}.${parts[0]}`; // GG.AA.İİİİ
+
+  const target = new Date(dateStr + "T00:00:00");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const diffMs = target.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) return `${formattedDate} (Vaxtı keçib)`;
+  if (diffDays === 0) return `${formattedDate} (Bu gün qaytarılmalıdır)`;
+  if (diffDays === 1) return `${formattedDate} (Sabah, 1 gün qaldı)`;
+  if (diffDays < 30) return `${formattedDate} (${diffDays} gün qaldı)`;
+
+  const months = Math.floor(diffDays / 30);
+  const remDays = diffDays % 30;
+  if (remDays === 0) return `${formattedDate} (${months} ay qaldı)`;
+  return `${formattedDate} (${months} ay ${remDays} gün qaldı)`;
+}
+
 function VerilmeContent() {
   const searchParams = useSearchParams();
   const preselectedReaderId = searchParams.get("readerId");
@@ -85,8 +122,10 @@ function VerilmeContent() {
   const [readerQuery, setReaderQuery] = useState("");
   const [copyQuery, setCopyQuery] = useState("");
 
-  // Due date configuration
-  const [duePeriodPreset, setDuePeriodPreset] = useState<number | "custom">(14);
+  // Flexible Loan Duration configuration (Requirement 2)
+  const [durationMode, setDurationMode] = useState<DurationMode>("days");
+  const [durationDays, setDurationDays] = useState<number>(14);
+  const [durationMonths, setDurationMonths] = useState<number>(1);
   const [customDueDate, setCustomDueDate] = useState<string>("");
   const [notes, setNotes] = useState("");
 
@@ -180,11 +219,31 @@ function VerilmeContent() {
     }).slice(0, 5);
   }, [copies, copyQuery]);
 
-  const handlePresetChange = (days: number) => {
-    setDuePeriodPreset(days);
+  const handleDaysChange = (days: number) => {
+    const cleanDays = Math.max(1, days || 1);
+    setDurationDays(cleanDays);
     const d = new Date();
-    d.setDate(d.getDate() + days);
+    d.setDate(d.getDate() + cleanDays);
     setCustomDueDate(d.toISOString().split("T")[0]);
+  };
+
+  const handleMonthsChange = (months: number) => {
+    const cleanMonths = Math.max(1, months || 1);
+    setDurationMonths(cleanMonths);
+    const d = new Date();
+    d.setMonth(d.getMonth() + cleanMonths);
+    setCustomDueDate(d.toISOString().split("T")[0]);
+  };
+
+  const handleModeChange = (mode: DurationMode) => {
+    setDurationMode(mode);
+    if (mode === "days") {
+      handleDaysChange(durationDays);
+    } else if (mode === "months") {
+      handleMonthsChange(durationMonths);
+    } else if (mode === "academic_year") {
+      setCustomDueDate(getEndOfAcademicYearDate());
+    }
   };
 
   const handleApproveSelectedReader = async () => {
@@ -729,59 +788,208 @@ function VerilmeContent() {
               </div>
             )}
 
-            {/* Qaytarılma Müddəti Seçimi */}
-            <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
-              <label className="block font-semibold text-slate-700">
-                Qaytarılma Müddəti:
-              </label>
+            {/* ================= VERİLMƏ MÜDDƏTİ (FLEXIBLE LOAN DURATION) - Requirement 2 ================= */}
+            <div className="space-y-3 pt-3 border-t border-slate-100 text-xs">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4 text-indigo-600" />
+                  <span>Verilmə Müddəti</span>
+                </label>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  Kitabxanaçı tərəfindən tənzimlənən
+                </span>
+              </div>
 
-              <div className="flex items-center gap-2">
+              {/* Mode Selector Tabs (4 options) */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-slate-100/80 rounded-xl border border-slate-200/60">
                 <button
                   type="button"
-                  onClick={() => handlePresetChange(14)}
-                  className={`px-3 py-1.5 rounded-xl font-semibold transition-all ${duePeriodPreset === 14
-                      ? "bg-indigo-600 text-white shadow-2xs"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
+                  onClick={() => handleModeChange("days")}
+                  className={`py-1.5 px-2 rounded-lg font-semibold text-[11px] transition-all ${
+                    durationMode === "days"
+                      ? "bg-white text-indigo-700 shadow-2xs font-bold"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
                 >
-                  14 gün (Standart)
+                  Gün sayı ilə
                 </button>
                 <button
                   type="button"
-                  onClick={() => handlePresetChange(30)}
-                  className={`px-3 py-1.5 rounded-xl font-semibold transition-all ${duePeriodPreset === 30
-                      ? "bg-indigo-600 text-white shadow-2xs"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
+                  onClick={() => handleModeChange("months")}
+                  className={`py-1.5 px-2 rounded-lg font-semibold text-[11px] transition-all ${
+                    durationMode === "months"
+                      ? "bg-white text-indigo-700 shadow-2xs font-bold"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
                 >
-                  30 gün (1 ay)
+                  Ay sayı ilə
                 </button>
                 <button
                   type="button"
-                  onClick={() => handlePresetChange(90)}
-                  className={`px-3 py-1.5 rounded-xl font-semibold transition-all ${duePeriodPreset === 90
-                      ? "bg-indigo-600 text-white shadow-2xs"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
+                  onClick={() => handleModeChange("academic_year")}
+                  className={`py-1.5 px-2 rounded-lg font-semibold text-[11px] transition-all ${
+                    durationMode === "academic_year"
+                      ? "bg-white text-indigo-700 shadow-2xs font-bold"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
                 >
-                  Semestr sonu
+                  Tədris ili sonu
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleModeChange("custom")}
+                  className={`py-1.5 px-2 rounded-lg font-semibold text-[11px] transition-all ${
+                    durationMode === "custom"
+                      ? "bg-white text-indigo-700 shadow-2xs font-bold"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Konkret tarix
                 </button>
               </div>
 
-              <div className="pt-2">
-                <label className="block text-[11px] text-slate-500 mb-1">
-                  Son qaytarılma tarixi:
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={customDueDate}
-                  onChange={(e) => {
-                    setCustomDueDate(e.target.value);
-                    setDuePeriodPreset("custom");
-                  }}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-mono"
-                />
+              {/* Dynamic Mode Controls */}
+              {durationMode === "days" && (
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/70 space-y-2 animate-in fade-in duration-150">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <label className="text-[11px] font-semibold text-slate-700 whitespace-nowrap">
+                        Gün sayı daxil edin:
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="365"
+                        value={durationDays}
+                        onChange={(e) => handleDaysChange(Number(e.target.value))}
+                        className="w-20 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-bold text-slate-800 text-center"
+                      />
+                      <span className="text-slate-500 font-medium text-[11px]">gün</span>
+                    </div>
+
+                    {/* Quick day presets */}
+                    <div className="flex items-center gap-1">
+                      {[7, 14, 20, 30].map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => handleDaysChange(d)}
+                          className={`px-2 py-1 rounded-lg text-[10px] font-semibold border transition-all ${
+                            durationDays === d
+                              ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
+                              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                          }`}
+                        >
+                          {d} gün
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {durationMode === "months" && (
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/70 space-y-2 animate-in fade-in duration-150">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <label className="text-[11px] font-semibold text-slate-700 whitespace-nowrap">
+                        Ay sayı daxil edin:
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="24"
+                        value={durationMonths}
+                        onChange={(e) => handleMonthsChange(Number(e.target.value))}
+                        className="w-20 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-bold text-slate-800 text-center"
+                      />
+                      <span className="text-slate-500 font-medium text-[11px]">ay</span>
+                    </div>
+
+                    {/* Quick month presets */}
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 6].map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => handleMonthsChange(m)}
+                          className={`px-2 py-1 rounded-lg text-[10px] font-semibold border transition-all ${
+                            durationMonths === m
+                              ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
+                              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                          }`}
+                        >
+                          {m} ay
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {durationMode === "academic_year" && (
+                <div className="p-3 bg-amber-50/70 rounded-xl border border-amber-200/80 space-y-2.5 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-bold text-amber-950 block text-[11px]">
+                        Tədris ilinin yekun tarixi: 30 İyun {getAcademicYearTargetYear()}
+                      </span>
+                      <span className="text-[10px] text-amber-700">
+                        Bütün tədris ili boyunca dərsliklərin verilməsi üçün nəzərdə tutulub
+                      </span>
+                    </div>
+                    <span className="font-mono text-xs font-bold text-amber-900 bg-white px-2 py-1 rounded-lg border border-amber-200 shadow-2xs">
+                      30.06.{getAcademicYearTargetYear()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 pt-1 border-t border-amber-200/60">
+                    <label className="text-[10px] font-medium text-amber-900 whitespace-nowrap">
+                      Tarixi dəyişmək istəsəniz:
+                    </label>
+                    <input
+                      type="date"
+                      value={customDueDate}
+                      onChange={(e) => setCustomDueDate(e.target.value)}
+                      className="w-full px-2.5 py-1 text-xs bg-white border border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 font-mono text-slate-800"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {durationMode === "custom" && (
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/70 space-y-2 animate-in fade-in duration-150">
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    Konkret son qaytarılma tarixini seçin:
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    min={new Date().toISOString().split("T")[0]}
+                    value={customDueDate}
+                    onChange={(e) => setCustomDueDate(e.target.value)}
+                    className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-mono text-slate-800"
+                  />
+                </div>
+              )}
+
+              {/* Live Preview Badge - Requirement 2 */}
+              <div className="p-3 rounded-xl bg-indigo-50/80 border border-indigo-200/80 flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+                    <Calendar className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-indigo-500 font-bold uppercase tracking-wider block">
+                      Təyin olunmuş qaytarılma
+                    </span>
+                    <span className="font-bold text-indigo-950 text-xs truncate block">
+                      Qaytarılma tarixi: {formatDueDatePreview(customDueDate)}
+                    </span>
+                  </div>
+                </div>
+                <span className="font-mono text-xs font-bold text-indigo-700 bg-white px-2.5 py-1 rounded-lg border border-indigo-100 shadow-2xs whitespace-nowrap">
+                  {customDueDate}
+                </span>
               </div>
 
               <div>
@@ -792,7 +1000,7 @@ function VerilmeContent() {
                   type="text"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Məs: Kurs işi üçün verilib..."
+                  placeholder="Məs: Kurs işi və ya tədris semestri üçün verilib..."
                   className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
                 />
               </div>
