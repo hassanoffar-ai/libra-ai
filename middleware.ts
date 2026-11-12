@@ -11,6 +11,9 @@ const ADMIN_ONLY_ROUTES = [
   "/verilme",
   "/qaytarilma",
   "/hesabatlar",
+  "/kataloq",
+  "/e-kitabxana",
+  "/rezervasiyalar",
 ];
 
 export function middleware(request: NextRequest) {
@@ -44,15 +47,22 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // 2. If already logged in as Admin and visiting /admin, redirect to /dashboard
+  // 2. Admin Login Route (/admin) Access Control
   if (pathname === "/admin") {
-    if (isAuthenticated && isAdmin) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+    if (isAuthenticated) {
+      if (isAdmin) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      } else {
+        // Authenticated as reader -> block access to /admin and redirect to reader portal
+        const readerPortalUrl = new URL("/reader", request.url);
+        readerPortalUrl.searchParams.set("denied", "admin_only");
+        return NextResponse.redirect(readerPortalUrl);
+      }
     }
   }
 
-  // 3. Protect Reader Portal Route
-  if (pathname === "/reader") {
+  // 3. Protect Reader Portal Routes (/reader, /reader/kataloq, etc.)
+  if (pathname === "/reader" || pathname.startsWith("/reader/")) {
     if (!isAuthenticated) {
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -71,8 +81,12 @@ export const config = {
     "/verilme/:path*",
     "/qaytarilma/:path*",
     "/hesabatlar/:path*",
+    "/kataloq/:path*",
+    "/e-kitabxana/:path*",
+    "/rezervasiyalar/:path*",
     "/admin",
     "/reader",
+    "/reader/:path*",
   ],
 };
 

@@ -7,7 +7,7 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "./client";
 import { UserProfile, UserRole } from "@/lib/types/user";
 
@@ -21,6 +21,7 @@ interface AuthContextType {
   login: (email: string, pass: string, portal?: "admin" | "oxucu") => Promise<{ success: boolean; error?: string; role?: UserRole }>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  updateCategory: (newCategory: "Tələbə" | "Müəllim") => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -33,6 +34,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => ({ success: false }),
   logout: async () => {},
   refreshProfile: async () => {},
+  updateCategory: async () => ({ success: false }),
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -176,6 +178,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateCategory = async (newCategory: "Tələbə" | "Müəllim"): Promise<{ success: boolean; error?: string }> => {
+    if (!auth.currentUser) return { success: false, error: "İstifadəçi daxil olmayıb." };
+    try {
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      await setDoc(userRef, { category: newCategory, updatedAt: new Date().toISOString() }, { merge: true });
+      setProfile((prev) => (prev ? { ...prev, category: newCategory } : null));
+      return { success: true };
+    } catch (err: any) {
+      console.error("Error updating category:", err);
+      return { success: false, error: err?.message || "Xəta baş verdi." };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -188,6 +203,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         logout,
         refreshProfile,
+        updateCategory,
       }}
     >
       {children}

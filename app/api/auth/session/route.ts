@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyTokenSecurely } from "@/lib/firebase/server-auth";
+import {
+  verifyTokenSecurely,
+  getUserProfileViaRest,
+  saveUserProfileViaRest,
+  isEmailAdmin,
+} from "@/lib/firebase/server-auth";
 import { UserProfile, UserRole } from "@/lib/types/user";
 
 export const dynamic = "force-dynamic";
@@ -28,9 +33,18 @@ export async function POST(req: NextRequest) {
 
     const uid = verifiedUser.uid;
     const email = verifiedUser.email;
-    const role: UserRole = verifiedUser.role;
 
-    // 2. Strict Server-Side Portal Permission Check:
+    // 2. Fetch real user profile from Firestore to get their real category and details
+    const firestoreProfile = await getUserProfileViaRest(idToken, uid);
+
+    // Determine role securely:
+    // If admin by email or custom claims or Firestore role
+    let role: UserRole = "oxucu";
+    if (isEmailAdmin(email) || verifiedUser.role === "admin" || firestoreProfile?.role === "admin") {
+      role = "admin";
+    }
+
+    // 3. Strict Server-Side Portal Permission Check:
     // If logging into the /admin portal, strictly verify role is admin
     if (requestedPortal === "admin" && role !== "admin") {
       return NextResponse.json(
@@ -42,7 +56,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Set Session Cookies (expires in 5 days)
+    // 4. Set Session Cookies (expires in 5 days)
     const expiresIn = 5 * 24 * 60 * 60 * 1000;
     const isProd = process.env.NODE_ENV === "production";
     const cookieStore = cookies();
@@ -63,18 +77,36 @@ export async function POST(req: NextRequest) {
       path: "/",
     });
 
+    // 5. Build full user profile, respecting their selected category (Müəllim / Tələbə)
+    const category: "Tələbə" | "Müəllim" =
+      firestoreProfile?.category === "Müəllim" || (role === "admin" && !firestoreProfile?.category)
+        ? "Müəllim"
+        : "Tələbə";
+
     const userProfile: UserProfile = {
       uid,
       email,
       role,
-      firstName: verifiedUser.displayName?.split(" ")[0] || (role === "admin" ? "Admin" : "Oxucu"),
-      lastName: verifiedUser.displayName?.split(" ").slice(1).join(" ") || "",
-      phone: "",
-      category: role === "admin" ? "Müəllim" : "Tələbə",
-      status: "Aktiv",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      category,
+      firstName:
+        firestoreProfile?.firstName ||
+        verifiedUser.displayName?.split(" ")[0] ||
+        (role === "admin" ? "Admin" : "Oxucu"),
+      lastName:
+        firestoreProfile?.lastName ||
+        verifiedUser.displayName?.split(" ").slice(1).join(" ") ||
+        "",
+      phone: firestoreProfile?.phone || "",
+      ticketNumber: firestoreProfile?.ticketNumber || (role === "admin" ? "ADM-001" : `OX-${Math.floor(1000 + Math.random() * 9000)}`),
+      status: firestoreProfile?.status || "Aktiv",
+      createdAt: firestoreProfile?.createdAt || new Date().toISOString(),
+      updatedAt: firestoreProfile?.updatedAt || new Date().toISOString(),
     };
+
+    // If document didn't exist in Firestore (for previously registered users), safely heal/create it now
+    if (!firestoreProfile && role === "oxucu") {
+      await saveUserProfileViaRest(idToken, uid, userProfile).catch(() => null);
+    }
 
     return NextResponse.json({
       success: true,

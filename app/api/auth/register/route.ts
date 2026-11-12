@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAuthUserViaRest } from "@/lib/firebase/server-auth";
+import { createAuthUserViaRest, saveUserProfileViaRest } from "@/lib/firebase/server-auth";
 import { UserProfile } from "@/lib/types/user";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +22,9 @@ export async function POST(req: NextRequest) {
     const cleanLast = (lastName || "").trim();
     const cleanPhone = (phone || "").trim();
     const cleanEmail = (email || "").trim().toLowerCase();
-    const cleanCategory = category === "Müəllim" ? "Müəllim" : "Tələbə";
+    
+    // Explicitly validate user category: STRICTLY "Müəllim" or "Tələbə"
+    const cleanCategory: "Tələbə" | "Müəllim" = category === "Müəllim" ? "Müəllim" : "Tələbə";
 
     if (!cleanFirst || cleanFirst.length < 2) {
       return NextResponse.json(
@@ -74,7 +76,7 @@ export async function POST(req: NextRequest) {
       `${cleanFirst} ${cleanLast}`
     );
 
-    if (!createRes.success) {
+    if (!createRes.success || !createRes.uid) {
       return NextResponse.json(
         { error: createRes.error || "Qeydiyyat zamanı xəta baş verdi." },
         { status: 400 }
@@ -82,12 +84,33 @@ export async function POST(req: NextRequest) {
     }
 
     const ticketNumber = `OX-${Math.floor(1000 + Math.random() * 9000)}`;
+    const now = new Date().toISOString();
+
+    const userProfile: UserProfile = {
+      uid: createRes.uid,
+      email: cleanEmail,
+      role: "oxucu", // STRICTLY Oxucu - cannot escalate to admin
+      category: cleanCategory, // Saved correctly as Müəllim or Tələbə
+      firstName: cleanFirst,
+      lastName: cleanLast,
+      phone: cleanPhone,
+      ticketNumber,
+      status: "Aktiv",
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    // 3. Save profile directly to Firestore using the returned ID token
+    if (createRes.idToken) {
+      await saveUserProfileViaRest(createRes.idToken, createRes.uid, userProfile);
+    }
 
     return NextResponse.json({
       success: true,
       message: "Qeydiyyat uğurla tamamlandı! Giriş edə bilərsiniz.",
       ticketNumber,
       uid: createRes.uid,
+      user: userProfile,
     });
   } catch (err: any) {
     console.error("Registration error:", err);

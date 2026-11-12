@@ -10,12 +10,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  // Dedicated full-page layouts (reader login, registration, admin login, reader portal)
+  // Dedicated full-page layouts (reader login, registration, admin login, reader portal & subpages)
   const isDedicatedPage =
     pathname === "/" ||
     pathname === "/register" ||
     pathname === "/admin" ||
     pathname === "/reader" ||
+    pathname?.startsWith("/reader/") ||
     pathname?.startsWith("/auth");
 
   if (isDedicatedPage) {

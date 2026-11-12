@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyTokenSecurely } from "@/lib/firebase/server-auth";
-import { UserProfile } from "@/lib/types/user";
+import {
+  verifyTokenSecurely,
+  getUserProfileViaRest,
+  isEmailAdmin,
+} from "@/lib/firebase/server-auth";
+import { UserProfile, UserRole } from "@/lib/types/user";
 
 export const dynamic = "force-dynamic";
 
@@ -25,17 +29,40 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const uid = verifiedUser.uid;
+    const email = verifiedUser.email;
+
+    // Fetch user profile from Firestore to get their real category and details
+    const firestoreProfile = await getUserProfileViaRest(sessionCookie, uid);
+
+    let role: UserRole = "oxucu";
+    if (isEmailAdmin(email) || verifiedUser.role === "admin" || firestoreProfile?.role === "admin") {
+      role = "admin";
+    }
+
+    const category: "Tələbə" | "Müəllim" =
+      firestoreProfile?.category === "Müəllim" || (role === "admin" && !firestoreProfile?.category)
+        ? "Müəllim"
+        : "Tələbə";
+
     const user: UserProfile = {
-      uid: verifiedUser.uid,
-      email: verifiedUser.email,
-      role: verifiedUser.role,
-      firstName: verifiedUser.displayName?.split(" ")[0] || (verifiedUser.role === "admin" ? "Admin" : "Oxucu"),
-      lastName: verifiedUser.displayName?.split(" ").slice(1).join(" ") || "",
-      phone: "",
-      category: verifiedUser.role === "admin" ? "Müəllim" : "Tələbə",
-      status: "Aktiv",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      uid,
+      email,
+      role,
+      category,
+      firstName:
+        firestoreProfile?.firstName ||
+        verifiedUser.displayName?.split(" ")[0] ||
+        (role === "admin" ? "Admin" : "Oxucu"),
+      lastName:
+        firestoreProfile?.lastName ||
+        verifiedUser.displayName?.split(" ").slice(1).join(" ") ||
+        "",
+      phone: firestoreProfile?.phone || "",
+      ticketNumber: firestoreProfile?.ticketNumber || (role === "admin" ? "ADM-001" : "OX-1001"),
+      status: firestoreProfile?.status || "Aktiv",
+      createdAt: firestoreProfile?.createdAt || new Date().toISOString(),
+      updatedAt: firestoreProfile?.updatedAt || new Date().toISOString(),
     };
 
     return NextResponse.json({

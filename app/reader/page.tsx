@@ -21,6 +21,8 @@ import {
   Briefcase,
   ArrowRight,
   ShieldAlert,
+  RefreshCw,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/lib/firebase/auth-context";
 import { getLoans, Loan } from "@/services/circulation-service";
@@ -30,9 +32,11 @@ function ReaderPortalContent() {
   const searchParams = useSearchParams();
   const isDeniedAdmin = searchParams.get("denied") === "admin_only";
 
-  const { user, profile, role, isLoading, logout } = useAuth();
+  const { user, profile, role, isLoading, logout, updateCategory } = useAuth();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [isLoansLoading, setIsLoansLoading] = useState(true);
+  const [isUpdatingCategory, setIsUpdatingCategory] = useState(false);
+  const [categoryFeedback, setCategoryFeedback] = useState<string | null>(null);
 
   // If not logged in, redirect to reader login
   useEffect(() => {
@@ -70,6 +74,26 @@ function ReaderPortalContent() {
   }
 
   const activeLoans = loans.filter((l) => l.status === "Aktiv" || l.status === "Gecikib");
+
+  const handleToggleCategory = async () => {
+    const nextCategory: "Tələbə" | "Müəllim" =
+      profile?.category === "Müəllim" ? "Tələbə" : "Müəllim";
+    setIsUpdatingCategory(true);
+    setCategoryFeedback(null);
+    try {
+      const res = await updateCategory(nextCategory);
+      if (res.success) {
+        setCategoryFeedback(`Kateqoriyanız "${nextCategory}" olaraq uğurla yeniləndi.`);
+        setTimeout(() => setCategoryFeedback(null), 4000);
+      } else {
+        setCategoryFeedback(res.error || "Xəta baş verdi.");
+      }
+    } catch {
+      setCategoryFeedback("Yeniləmə xətası baş verdi.");
+    } finally {
+      setIsUpdatingCategory(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col selection:bg-indigo-600 selection:text-white">
@@ -130,7 +154,7 @@ function ReaderPortalContent() {
                 {profile?.firstName?.[0] || "O"}
                 {profile?.lastName?.[0] || "X"}
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                     {profile?.firstName} {profile?.lastName}
@@ -139,6 +163,7 @@ function ReaderPortalContent() {
                     Aktiv Oxucu
                   </span>
                 </div>
+
                 <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
                   <span className="inline-flex items-center gap-1">
                     <Ticket className="w-3.5 h-3.5 text-indigo-600" />
@@ -147,7 +172,7 @@ function ReaderPortalContent() {
                     </span>
                   </span>
                   <span>•</span>
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1 font-semibold text-slate-800">
                     {profile?.category === "Müəllim" ? (
                       <Briefcase className="w-3.5 h-3.5 text-indigo-600" />
                     ) : (
@@ -161,24 +186,38 @@ function ReaderPortalContent() {
                     <span>{profile?.email}</span>
                   </span>
                 </div>
+
+                {/* Role/Category Correction Mechanism for existing and new users */}
+                <div className="pt-1 flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] text-slate-400">Status yanlış qeyd olunub?</span>
+                  <button
+                    type="button"
+                    disabled={isUpdatingCategory}
+                    onClick={handleToggleCategory}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isUpdatingCategory ? "animate-spin" : ""}`} />
+                    <span>
+                      {profile?.category === "Müəllim" ? "Tələbəyə keçir" : "Müəllimə keçir"}
+                    </span>
+                  </button>
+                  {categoryFeedback && (
+                    <span className="text-[11px] font-semibold text-emerald-600 animate-in fade-in">
+                      ✓ {categoryFeedback}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Quick Actions */}
             <div className="flex flex-wrap gap-2.5">
               <Link
-                href="/kataloq"
+                href="/reader/kataloq"
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/30 transition-all"
               >
                 <Search className="w-4 h-4" />
-                <span>Kitab Axtar</span>
-              </Link>
-              <Link
-                href="/e-kitabxana"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
-              >
-                <Laptop className="w-4 h-4" />
-                <span>E-Kitabxana</span>
+                <span>Kitab Fondunu Axtar</span>
               </Link>
             </div>
           </div>
@@ -187,49 +226,47 @@ function ReaderPortalContent() {
         {/* Quick Service Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
-            href="/kataloq"
+            href="/reader/kataloq"
             className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all group"
           >
             <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-3 group-hover:scale-105 transition-transform">
               <Search className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-              Elektron Kataloq
+              Kitab Fondu və Axtarış
             </h3>
             <p className="text-xs text-slate-500 mt-1">
-              Kitabxana fondunda olan dərslik və nəşrləri axtarın, rəf yerlərini öyrənin.
+              Kitabxana fondunda olan dərslik və nəşrləri axtarın, rəf yerlərini və mövcudluq sayını öyrənin.
             </p>
           </Link>
 
-          <Link
-            href="/e-kitabxana"
-            className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 mb-3 group-hover:scale-105 transition-transform">
-              <Laptop className="w-5 h-5" />
+          <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 mb-3">
+              <Ticket className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-slate-900 group-hover:text-purple-600 transition-colors">
-              Rəqəmsal Resurslar
+            <h3 className="text-sm font-bold text-slate-900">
+              Oxucu Bileti
             </h3>
             <p className="text-xs text-slate-500 mt-1">
-              Elektron formatda dərsliklər, PDF və metodiki vəsaitləri onlayn oxuyun.
+              Bilet №: <span className="font-mono font-bold text-slate-800">{profile?.ticketNumber || "OX-1001"}</span>. Kitabxanadan kitab götürərkən bu nömrəni təqdim edin.
             </p>
-          </Link>
+          </div>
 
-          <Link
-            href="/rezervasiyalar"
-            className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mb-3 group-hover:scale-105 transition-transform">
-              <BookmarkCheck className="w-5 h-5" />
+          <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mb-3">
+              {profile?.category === "Müəllim" ? (
+                <Briefcase className="w-5 h-5" />
+              ) : (
+                <GraduationCap className="w-5 h-5" />
+              )}
             </div>
-            <h3 className="text-sm font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">
-              Rezervasiyalarım
+            <h3 className="text-sm font-bold text-slate-900">
+              Oxucu Kateqoriyası
             </h3>
             <p className="text-xs text-slate-500 mt-1">
-              Nüsxəsi bitmiş kitablar üçün növbə tutun və sifariş statusunu izləyin.
+              Cari kateqoriya: <span className="font-bold text-slate-800">{profile?.category || "Tələbə"}</span>. Səhifə yeniləndikdə məlumatınız dəyişmir.
             </p>
-          </Link>
+          </div>
         </div>
 
         {/* My Borrowed Books Section */}
@@ -251,13 +288,13 @@ function ReaderPortalContent() {
               </div>
               <h4 className="text-sm font-bold text-slate-800">Hazırda borcda kitabınız yoxdur</h4>
               <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                Elektron kataloqdan istədiyiniz kitabı seçib kitabxanaya yaxınlaşaraq biletinizlə əldə edə bilərsiniz.
+                Elektron kitab fondundan istədiyiniz kitabı seçib kitabxanaya yaxınlaşaraq biletinizlə əldə edə bilərsiniz.
               </p>
               <Link
-                href="/kataloq"
+                href="/reader/kataloq"
                 className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-xs"
               >
-                <span>Kataloqa bax</span>
+                <span>Fondda Axtarış</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>

@@ -31,7 +31,7 @@ export function isEmailAdmin(email: string): boolean {
     if (list.includes(clean)) return true;
   }
 
-  // Any @ldptm.edu.az address starting with admin
+  // Any @ldptm.edu.az address starting with admin or kitabxana
   if (clean.startsWith("admin@") || clean.startsWith("kitabxana@")) {
     return true;
   }
@@ -90,13 +90,14 @@ export async function verifyTokenSecurely(idToken: string): Promise<VerifiedUser
 }
 
 /**
- * Creates a new user in Firebase Auth via Google Identity Toolkit REST API
+ * Creates a new user in Firebase Auth via Google Identity Toolkit REST API.
+ * Returns the created user's localId (uid) AND the initial idToken so Firestore document can be written immediately.
  */
 export async function createAuthUserViaRest(
   email: string,
   pass: string,
   displayName?: string
-): Promise<{ success: boolean; uid?: string; error?: string }> {
+): Promise<{ success: boolean; uid?: string; idToken?: string; error?: string }> {
   try {
     const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`;
     const res = await fetch(url, {
@@ -124,6 +125,7 @@ export async function createAuthUserViaRest(
     return {
       success: true,
       uid: data.localId,
+      idToken: data.idToken,
     };
   } catch (err: any) {
     console.error("Create user via REST error:", err);
@@ -131,3 +133,77 @@ export async function createAuthUserViaRest(
   }
 }
 
+/**
+ * Saves or updates a user profile document in Firestore via REST API using user's ID token.
+ */
+export async function saveUserProfileViaRest(
+  idToken: string,
+  uid: string,
+  profile: Partial<UserProfile>
+): Promise<boolean> {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${uid}?key=${apiKey}`;
+    const fields: Record<string, any> = {};
+
+    for (const [k, v] of Object.entries(profile)) {
+      if (v === undefined || v === null) continue;
+      if (typeof v === "string") fields[k] = { stringValue: v };
+      else if (typeof v === "number") fields[k] = { integerValue: String(v) };
+      else if (typeof v === "boolean") fields[k] = { booleanValue: v };
+    }
+
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ fields }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      console.warn("Firestore user save warning:", err?.error?.message || res.status);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("Firestore user save network error:", e);
+    return false;
+  }
+}
+
+/**
+ * Reads a user profile document from Firestore via REST API.
+ */
+export async function getUserProfileViaRest(
+  idToken: string,
+  uid: string
+): Promise<Partial<UserProfile> | null> {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${uid}?key=${apiKey}`;
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.fields) return null;
+
+    const profile: any = {};
+    for (const [k, v] of Object.entries(data.fields as Record<string, any>)) {
+      if (v.stringValue !== undefined) profile[k] = v.stringValue;
+      else if (v.integerValue !== undefined) profile[k] = Number(v.integerValue);
+      else if (v.booleanValue !== undefined) profile[k] = v.booleanValue;
+      else if (v.timestampValue !== undefined) profile[k] = v.timestampValue;
+    }
+    return profile;
+  } catch (e) {
+    console.error("Firestore get user profile error:", e);
+    return null;
+  }
+}
