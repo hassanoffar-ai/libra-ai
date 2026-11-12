@@ -60,26 +60,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex text-slate-800 antialiased">
+    <div className="min-h-screen bg-[#F8FAFC] flex text-slate-800 antialiased print:bg-white print:min-h-0">
       {/* Sidebar Navigation */}
-      <Sidebar
-        isCollapsed={isCollapsed}
-        setIsCollapsed={setIsCollapsed}
-        isMobileOpen={isMobileOpen}
-        setIsMobileOpen={setIsMobileOpen}
-      />
+      <div className="print:hidden">
+        <Sidebar
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+          isMobileOpen={isMobileOpen}
+          setIsMobileOpen={setIsMobileOpen}
+        />
+      </div>
 
       {/* Main Content Area */}
       <div
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${
           isCollapsed ? "lg:pl-20" : "lg:pl-64"
-        }`}
+        } print:pl-0`}
       >
         {/* Top Navigation Bar */}
-        <Topbar onToggleMobileSidebar={() => setIsMobileOpen(true)} />
+        <div className="print:hidden">
+          <Topbar onToggleMobileSidebar={() => setIsMobileOpen(true)} />
+        </div>
 
         {/* Page Main Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto print:p-0 print:max-w-none print:w-full">
           {children}
         </main>
       </div>
