@@ -34,7 +34,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         router.replace(`/auth/login?redirect=${encodeURIComponent(pathname || "/dashboard")}`);
       } else if (!isAdmin) {
         // Logged-in reader trying to view admin page -> strictly block & redirect to /portal
-        router.replace("/portal?denied=admin_only");
+        router.replace("/portal");
       }
     }
   }, [user, role, isAdmin, isLoading, isDedicatedPage, pathname, router]);

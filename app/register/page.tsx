@@ -136,6 +136,7 @@ export default function ReaderRegisterPage() {
         role: category === "Müəllim" ? "teacher" : "student",
         accessRole: "reader",
         ticketNumber: assignedTicket,
+        password: password,
         status: "pending",
         maxBookLimit: category === "Müəllim" ? 10 : 5,
         notes: "Onlayn qeydiyyatdan keçib (Təsdiq gözləyir)",

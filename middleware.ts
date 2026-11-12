@@ -19,8 +19,10 @@ export function middleware(request: NextRequest) {
 
   const sessionCookie = request.cookies.get("libra_session")?.value;
   const roleCookie = request.cookies.get("libra_role")?.value;
+  const readerCookie = request.cookies.get("libra_reader_session")?.value;
 
   const isAuthenticated = Boolean(sessionCookie);
+  const isReaderAuthenticated = Boolean(readerCookie);
   const isAdmin = roleCookie === "admin" || roleCookie === "librarian";
 
   // 1. Protect Admin Management Routes
@@ -29,32 +31,25 @@ export function middleware(request: NextRequest) {
   );
 
   if (isAdminRoute) {
-    if (!isAuthenticated) {
-      // Unauthenticated -> redirect to /auth/login as required
+    if (!isAuthenticated || !isAdmin) {
+      if (isReaderAuthenticated) {
+        // Reader trying to access admin panel -> redirect cleanly to reader portal without warning query param
+        return NextResponse.redirect(new URL("/portal", request.url));
+      }
+      // Unauthenticated -> redirect to /auth/login
       const loginUrl = new URL("/auth/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(loginUrl);
-    }
-
-    if (!isAdmin) {
-      // Logged in as regular reader -> strictly block access and redirect to /portal
-      const readerPortalUrl = new URL("/portal", request.url);
-      readerPortalUrl.searchParams.set("denied", "admin_only");
-      return NextResponse.redirect(readerPortalUrl);
     }
   }
 
   // 2. Admin Login Route (/admin) Access Control
   if (pathname === "/admin") {
-    if (isAuthenticated) {
-      if (isAdmin) {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
-      } else {
-        // Authenticated as reader -> block access to /admin and redirect to reader portal
-        const readerPortalUrl = new URL("/portal", request.url);
-        readerPortalUrl.searchParams.set("denied", "admin_only");
-        return NextResponse.redirect(readerPortalUrl);
-      }
+    if (isAuthenticated && isAdmin) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+    if (isReaderAuthenticated && !isAdmin) {
+      return NextResponse.redirect(new URL("/portal", request.url));
     }
   }
 
@@ -65,7 +60,7 @@ export function middleware(request: NextRequest) {
     pathname === "/reader" ||
     pathname.startsWith("/reader/")
   ) {
-    if (!isAuthenticated) {
+    if (!isReaderAuthenticated && !isAuthenticated) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
   }

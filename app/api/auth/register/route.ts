@@ -78,24 +78,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Create user in Firebase Authentication via Google Identity Toolkit
-    const createRes = await createAuthUserViaRest(
-      cleanEmail,
-      password,
-      `${cleanFirst} ${cleanLast}`
-    );
-
-    if (!createRes.success || !createRes.uid) {
-      return NextResponse.json(
-        { error: createRes.error || "Qeydiyyat zamanı xəta baş verdi." },
-        { status: 400 }
-      );
-    }
-
+    // 2. Generate unique Reader ID & save to Firestore readers collection
+    // IMPORTANT: Keep Firebase Authentication strictly for Librarians/Admins only!
+    // Readers are stored independently in the Firestore `readers` collection.
+    const readerId = `reader-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const now = new Date().toISOString();
 
     const userProfile: UserProfile = {
-      uid: createRes.uid,
+      uid: readerId,
       email: cleanEmail,
       role: "oxucu", // STRICTLY Oxucu - cannot escalate to admin
       accessRole: "reader",
@@ -111,9 +101,44 @@ export async function POST(req: NextRequest) {
       updatedAt: now,
     };
 
-    // 3. Save profile directly to Firestore using the returned ID token
-    if (createRes.idToken) {
-      await saveUserProfileViaRest(createRes.idToken, createRes.uid, userProfile);
+    // Save reader directly to Firestore `readers` collection via REST API
+    try {
+      const apiKey =
+        process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+        process.env.FIREBASE_API_KEY ||
+        "AIzaSyBm37kJhdRy7sa7yxg0WbtSNAVhtUAisCE";
+      const projectId =
+        process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+        process.env.FIREBASE_PROJECT_ID ||
+        "ldptm-kitabxana";
+      const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/readers/${readerId}?key=${apiKey}`;
+
+      const fields: Record<string, any> = {
+        id: { stringValue: readerId },
+        ticketNumber: { stringValue: ticketNumber },
+        firstName: { stringValue: cleanFirst },
+        lastName: { stringValue: cleanLast },
+        phone: { stringValue: cleanPhone },
+        email: { stringValue: cleanEmail },
+        department: { stringValue: cleanDept },
+        category: { stringValue: cleanCategory },
+        role: { stringValue: categoryRole },
+        accessRole: { stringValue: "reader" },
+        status: { stringValue: "pending" },
+        password: { stringValue: password },
+        registeredDate: { stringValue: now.split("T")[0] },
+        maxBookLimit: { integerValue: cleanCategory === "Müəllim" ? 10 : 5 },
+        createdAt: { stringValue: now },
+        updatedAt: { stringValue: now },
+      };
+
+      await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fields }),
+      });
+    } catch (e) {
+      console.warn("Firestore reader save via REST warning:", e);
     }
 
     return NextResponse.json({
@@ -121,7 +146,7 @@ export async function POST(req: NextRequest) {
       message: "Qeydiyyat tamamlandı! Hesabınız kitabxanaçı təsdiqindən sonra aktivləşəcək.",
       ticketNumber,
       status: "pending",
-      uid: createRes.uid,
+      uid: readerId,
       user: userProfile,
     });
   } catch (err: any) {

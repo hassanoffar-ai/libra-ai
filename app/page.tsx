@@ -15,14 +15,12 @@ import {
   Loader2,
   BookOpen,
 } from "lucide-react";
-import { useAuth } from "@/lib/firebase/auth-context";
+import { readerLogin, getStoredReaderSession } from "@/services/reader-auth-service";
 
 function ReaderLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isRegisteredRedirect = searchParams.get("registered") === "1";
-
-  const { login, user, role, isLoading: isAuthLoading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,16 +38,13 @@ function ReaderLoginForm() {
     }
   }, [isRegisteredRedirect]);
 
-  // If already logged in, redirect to appropriate area
+  // If already logged in as a Reader, redirect directly to /portal
   useEffect(() => {
-    if (!isAuthLoading && user && role) {
-      if (role === "admin" || (role as string) === "librarian") {
-        router.push("/dashboard");
-      } else {
-        router.push("/portal");
-      }
+    const existingSession = getStoredReaderSession();
+    if (existingSession) {
+      router.push("/portal");
     }
-  }, [user, role, isAuthLoading, router]);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +64,9 @@ function ReaderLoginForm() {
     setIsSubmitting(true);
 
     try {
-      const res = await login(cleanEmail, password, "oxucu");
+      // Independent Reader login against Firestore readers collection
+      // NEVER calls Firebase Auth, preserving the Librarian/Admin session in browser
+      const res = await readerLogin(cleanEmail, password);
 
       if (!res.success) {
         setErrorMessage(res.error || "E-poçt və ya şifrə yanlışdır.");
@@ -77,15 +74,12 @@ function ReaderLoginForm() {
         return;
       }
 
-      setSuccessMessage("Uğurla daxil oldunuz! Yönləndirilirsiniz...");
+      setSuccessMessage("Uğurla daxil oldunuz! Oxucu portalına yönləndirilirsiniz...");
 
+      // Redirect directly to /portal (Requirement 2)
       setTimeout(() => {
-        if (res.role === "admin" || (res.role as string) === "librarian") {
-          router.push("/dashboard");
-        } else {
-          router.push("/portal");
-        }
-      }, 700);
+        router.push("/portal");
+      }, 500);
     } catch (err: any) {
       setErrorMessage(err?.message || "Giriş zamanı gözlənilməz xəta baş verdi.");
       setIsSubmitting(false);

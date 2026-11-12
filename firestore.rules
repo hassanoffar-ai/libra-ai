@@ -23,42 +23,40 @@ service cloud.firestore {
       );
     }
 
-    // 2. USERS COLLECTION
-    // Reader can ONLY read and update their own document
-    // Reader CANNOT see other readers' personal data
+    // 2. USERS & READERS COLLECTIONS
     // Admin has full management access
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-
-      // Creation is handled server-side via Firebase Admin SDK.
-      // If done via client, enforce oxucu role only (no user can set role to admin)
       allow create: if isAdmin() || (
         isAuthenticated() &&
         isOwner(userId) &&
         request.resource.data.role == 'oxucu'
       );
-
-      // Reader can update only their non-sensitive fields; cannot escalate to admin or alter status
       allow update: if isAdmin() || (
         isOwner(userId) &&
         request.resource.data.role == resource.data.role &&
         request.resource.data.status == resource.data.status
       );
-
-      // Deletion is strictly reserved for Admin
       allow delete: if isAdmin();
     }
 
-    // 3. BOOKS & COPIES
-    // Authenticated users (both readers and admin) can read book catalog
+    // Readers collection: isolated reader authentication & profile data
+    match /readers/{readerId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // 3. BOOKS & COPIES (Public & Reader Catalog Access)
+    // Public/reader queries can read without requiring Admin login
     // Only Admin can create, update, or delete books
     match /books/{bookId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     match /book_copies/{copyId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
