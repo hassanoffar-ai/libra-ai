@@ -135,7 +135,7 @@ export default function RezervasiyalarPage() {
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs sm:text-sm font-semibold shadow-sm shadow-indigo-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
         >
           <Plus className="w-4 h-4" />
-          <span>+ Yeni Rezervasiya</span>
+          <span>Yeni Rezervasiya</span>
         </button>
       </div>
 

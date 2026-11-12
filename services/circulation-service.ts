@@ -7,6 +7,8 @@
  */
 
 import { getCopies, updateCopy, getBooks, getBookById } from "./books-service";
+import { db } from "@/lib/firebase/client";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
 
 export type ReaderCategory = "Tələbə" | "Müəllim" | "Əməkdaş";
 export type ReaderRole = "student" | "teacher" | "staff";
@@ -239,6 +241,12 @@ export async function createReader(
 
   const updatedReaders = [newReader, ...readers];
   saveCirculationData(updatedReaders, loans, reservations);
+
+  // Firestore sync
+  try {
+    setDoc(doc(db, "readers", readerId), newReader, { merge: true }).catch(() => {});
+  } catch {}
+
   return newReader;
 }
 
@@ -254,6 +262,12 @@ export async function updateReader(id: string, updates: Partial<Reader>): Promis
   const updatedReader = { ...readers[index], ...updates };
   readers[index] = updatedReader;
   saveCirculationData(readers, loans, reservations);
+
+  // Firestore sync
+  try {
+    setDoc(doc(db, "readers", id), updatedReader, { merge: true }).catch(() => {});
+  } catch {}
+
   return updatedReader;
 }
 
@@ -261,6 +275,11 @@ export async function deleteReader(id: string): Promise<void> {
   const { readers, loans, reservations } = loadCirculationData();
   const updated = readers.filter((r) => r.id !== id);
   saveCirculationData(updated, loans, reservations);
+
+  // Firestore sync
+  try {
+    deleteDoc(doc(db, "readers", id)).catch(() => {});
+  } catch {}
 }
 
 // ------------------- KİTAB VERİLMƏSİ (LOANS) ------------------- //

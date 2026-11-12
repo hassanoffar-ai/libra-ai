@@ -15,6 +15,8 @@ import {
   Calendar,
   X,
   Eye,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 import {
   DigitalResource,
@@ -36,6 +38,7 @@ export default function EKitabxanaPage() {
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingResource, setEditingResource] = useState<DigitalResource | null>(null);
   const [previewResource, setPreviewResource] = useState<DigitalResource | null>(null);
 
   const fetchResources = async () => {
@@ -120,11 +123,14 @@ export default function EKitabxanaPage() {
         </div>
 
         <button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => {
+            setEditingResource(null);
+            setIsAddModalOpen(true);
+          }}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs sm:text-sm font-semibold shadow-sm shadow-indigo-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
         >
           <Plus className="w-4 h-4" />
-          <span>+ Yeni Elektron Resurs</span>
+          <span>Yeni Elektron Resurs</span>
         </button>
       </div>
 
@@ -319,6 +325,27 @@ export default function EKitabxanaPage() {
                   </span>
 
                   <div className="flex items-center gap-1.5">
+                    {/* Admin Edit & Delete Actions (Requirement 3) */}
+                    <div className="flex items-center gap-1 border-r border-slate-200/80 pr-1.5 mr-0.5">
+                      <button
+                        onClick={() => {
+                          setEditingResource(res);
+                          setIsAddModalOpen(true);
+                        }}
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        title="Redaktə et"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteResource(res)}
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        title="Sil"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
                     <button
                       onClick={() => setPreviewResource(res)}
                       className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition-colors"
@@ -343,10 +370,14 @@ export default function EKitabxanaPage() {
         </div>
       )}
 
-      {/* Add Resource Modal */}
+      {/* Add / Edit Resource Modal */}
       <AddResourceModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        editResource={editingResource}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingResource(null);
+        }}
         onSuccess={fetchResources}
       />
 

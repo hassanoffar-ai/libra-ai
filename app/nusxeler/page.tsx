@@ -377,21 +377,22 @@ export default function NusxelerPage() {
 
                     {/* Actions */}
                     <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setEditingCopy(copy)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 transition-all font-medium text-[11px]"
-                          title="Vəziyyəti və Rəf yerini dəyiş"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 transition-all font-medium text-[11px]"
+                          title="Redaktə et (Vəziyyət və Rəf yeri)"
                         >
-                          <Edit className="w-3.5 h-3.5" />
-                          <span>Dəyiş</span>
+                          <Edit className="w-3.5 h-3.5 text-blue-600" />
+                          <span>Redaktə et</span>
                         </button>
                         <button
                           onClick={() => handleDeleteCopy(copy)}
-                          className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                          title="Nüsxəni sil"
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition-all font-medium text-[11px]"
+                          title="Fiziki nüsxəni sil"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                          <span>Sil</span>
                         </button>
                       </div>
                     </td>

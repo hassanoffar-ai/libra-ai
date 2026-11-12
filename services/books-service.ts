@@ -8,6 +8,9 @@
  * Qeyd: Heç bir saxta statik mock massiv daxil edilməyib; başlanğıcda təmiz boş vəziyyət (zero state) təmin olunur.
  */
 
+import { db } from "@/lib/firebase/client";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
+
 export type BookLanguage = "Azərbaycan" | "Rus" | "İngilis" | "Türk" | "Digər";
 
 export type CopyCondition = "Əla" | "Yaxşı" | "Təmirə ehtiyac var" | "Yararsız";
@@ -186,6 +189,18 @@ export async function createBook(input: CreateBookInput): Promise<{ book: Book; 
   const updatedCopies = [...newCopies, ...copies];
 
   saveToStorage(updatedBooks, updatedCopies);
+
+  // Firestore sync
+  try {
+    const bookRef = doc(db, "books", bookId);
+    setDoc(bookRef, newBook, { merge: true }).catch(() => {});
+    for (const copy of newCopies) {
+      setDoc(doc(db, "book_copies", copy.id), copy, { merge: true }).catch(() => {});
+    }
+  } catch {
+    // fallback
+  }
+
   return { book: newBook, copies: newCopies };
 }
 
@@ -208,11 +223,20 @@ export async function updateBook(id: string, updates: Partial<Book>): Promise<Bo
       if (c.bookId === id) {
         if (updates.title) c.bookTitle = updates.title;
         if (updates.author) c.bookAuthor = updates.author;
+        try {
+          setDoc(doc(db, "book_copies", c.id), { bookTitle: c.bookTitle, bookAuthor: c.bookAuthor }, { merge: true }).catch(() => {});
+        } catch {}
       }
     });
   }
 
   saveToStorage(books, copies);
+
+  // Firestore sync
+  try {
+    setDoc(doc(db, "books", id), updatedBook, { merge: true }).catch(() => {});
+  } catch {}
+
   return updatedBook;
 }
 
@@ -221,9 +245,18 @@ export async function updateBook(id: string, updates: Partial<Book>): Promise<Bo
  */
 export async function deleteBook(id: string): Promise<void> {
   const { books, copies } = loadFromStorage();
+  const bookCopies = copies.filter((c) => c.bookId === id);
   const updatedBooks = books.filter((b) => b.id !== id);
   const updatedCopies = copies.filter((c) => c.bookId !== id);
   saveToStorage(updatedBooks, updatedCopies);
+
+  // Firestore sync
+  try {
+    deleteDoc(doc(db, "books", id)).catch(() => {});
+    for (const c of bookCopies) {
+      deleteDoc(doc(db, "book_copies", c.id)).catch(() => {});
+    }
+  } catch {}
 }
 
 /**
@@ -247,10 +280,19 @@ export async function updateCopy(id: string, updates: Partial<BookCopy>): Promis
       const bookCopies = copies.filter((c) => c.bookId === book.id);
       book.copiesCount = bookCopies.filter((c) => c.status !== "Silinib").length;
       book.availableCount = bookCopies.filter((c) => c.status === "Fondda").length;
+      try {
+        setDoc(doc(db, "books", book.id), { copiesCount: book.copiesCount, availableCount: book.availableCount }, { merge: true }).catch(() => {});
+      } catch {}
     }
   }
 
   saveToStorage(books, copies);
+
+  // Firestore sync
+  try {
+    setDoc(doc(db, "book_copies", id), updatedCopy, { merge: true }).catch(() => {});
+  } catch {}
+
   return updatedCopy;
 }
 
@@ -270,9 +312,17 @@ export async function deleteCopy(id: string): Promise<void> {
     const bookCopies = updatedCopies.filter((c) => c.bookId === book.id);
     book.copiesCount = bookCopies.filter((c) => c.status !== "Silinib").length;
     book.availableCount = bookCopies.filter((c) => c.status === "Fondda").length;
+    try {
+      setDoc(doc(db, "books", book.id), { copiesCount: book.copiesCount, availableCount: book.availableCount }, { merge: true }).catch(() => {});
+    } catch {}
   }
 
   saveToStorage(books, updatedCopies);
+
+  // Firestore sync
+  try {
+    deleteDoc(doc(db, "book_copies", id)).catch(() => {});
+  } catch {}
 }
 
 /**

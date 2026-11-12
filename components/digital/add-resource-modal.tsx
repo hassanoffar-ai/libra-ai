@@ -1,11 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, FileUp, CheckCircle2, AlertCircle, FileText, Globe } from "lucide-react";
-import { createDigitalResource, DigitalResource } from "@/services/digital-library-service";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  X,
+  FileUp,
+  CheckCircle2,
+  AlertCircle,
+  FileText,
+  Globe,
+  Upload,
+  Link2,
+  File,
+  Loader2,
+  Check,
+} from "lucide-react";
+import {
+  createDigitalResource,
+  updateDigitalResource,
+  DigitalResource,
+} from "@/services/digital-library-service";
+import { storage } from "@/lib/firebase/client";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface AddResourceModalProps {
   isOpen: boolean;
+  editResource?: DigitalResource | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -18,10 +37,22 @@ const CATEGORIES = [
   "Bədii Ədəbiyyat",
   "Riyaziyyat və Təbiət Elmləri",
   "İqtisadiyyat və Menecment",
+  "Qaynaq və Metal İstehsalı",
+  "Turizm və İaşə",
   "Digər",
 ];
 
-export function AddResourceModal({ isOpen, onClose, onSuccess }: AddResourceModalProps) {
+export function AddResourceModal({
+  isOpen,
+  editResource,
+  onClose,
+  onSuccess,
+}: AddResourceModalProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [activeTab, setActiveTab] = useState<"file" | "url">("file");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -33,41 +64,154 @@ export function AddResourceModal({ isOpen, onClose, onSuccess }: AddResourceModa
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+
+  // Sync state when editing or opening
+  useEffect(() => {
+    if (editResource) {
+      setTitle(editResource.title || "");
+      setAuthor(editResource.author || "");
+      setCategory(editResource.category || CATEGORIES[0]);
+      setFormat(editResource.format || "PDF");
+      setFileSize(editResource.fileSize || "4.5 MB");
+      setFileUrl(editResource.fileUrl || "");
+      setDescription(editResource.description || "");
+      setActiveTab(editResource.fileUrl?.startsWith("http") ? "url" : "file");
+      setSelectedFile(null);
+    } else {
+      setTitle("");
+      setAuthor("");
+      setCategory(CATEGORIES[0]);
+      setFormat("PDF");
+      setFileSize("4.5 MB");
+      setFileUrl("");
+      setDescription("");
+      setActiveTab("file");
+      setSelectedFile(null);
+    }
+    setError(null);
+    setIsSuccess(false);
+  }, [editResource, isOpen]);
 
   if (!isOpen) return null;
+
+  const handleFileSelection = (file: File) => {
+    setSelectedFile(file);
+
+    // Auto-detect format
+    const ext = file.name.split(".").pop()?.toUpperCase() || "";
+    if (ext === "PDF") setFormat("PDF");
+    else if (ext === "EPUB") setFormat("EPUB");
+    else if (ext === "DOC" || ext === "DOCX") setFormat("DOCX");
+
+    // Auto-calculate size
+    const mb = file.size / (1024 * 1024);
+    if (mb >= 1) {
+      setFileSize(`${mb.toFixed(1)} MB`);
+    } else {
+      const kb = file.size / 1024;
+      setFileSize(`${kb.toFixed(0)} KB`);
+    }
+
+    // Pre-fill title if empty
+    if (!title.trim()) {
+      const cleanName = file.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[_-]/g, " ");
+      setTitle(cleanName);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileSelection(e.target.files[0]);
+    }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileSelection(e.dataTransfer.files[0]);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !author.trim()) {
-      setError("Başlıq və müəllif sahələri tələb olunur");
+      setError("Başlıq və müəllif sahələri mütləq doldurulmalıdır.");
       return;
     }
 
     setIsSubmitting(true);
     setError(null);
+
     try {
-      await createDigitalResource({
-        title: title.trim(),
-        author: author.trim(),
-        category,
-        format,
-        fileSize: fileSize.trim() || "3.2 MB",
-        fileUrl: fileUrl.trim(),
-        description: description.trim(),
-      });
+      let finalFileUrl = fileUrl.trim();
+      let storagePath = editResource?.storagePath || "";
+
+      // If user uploaded a new local file from device
+      if (activeTab === "file" && selectedFile) {
+        try {
+          const cleanFileName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+          storagePath = `digital_resources/${Date.now()}_${cleanFileName}`;
+          const storageRef = ref(storage, storagePath);
+          await uploadBytes(storageRef, selectedFile);
+          finalFileUrl = await getDownloadURL(storageRef);
+        } catch (storageErr) {
+          console.warn("Storage upload fallback to DataURL:", storageErr);
+          finalFileUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = () => resolve(URL.createObjectURL(selectedFile));
+            reader.readAsDataURL(selectedFile);
+          });
+        }
+      }
+
+      if (editResource) {
+        await updateDigitalResource(editResource.id, {
+          title: title.trim(),
+          author: author.trim(),
+          category,
+          format,
+          fileSize: fileSize.trim() || "4.0 MB",
+          fileUrl: finalFileUrl,
+          storagePath,
+          description: description.trim(),
+        });
+      } else {
+        await createDigitalResource({
+          title: title.trim(),
+          author: author.trim(),
+          category,
+          format,
+          fileSize: fileSize.trim() || "4.0 MB",
+          fileUrl: finalFileUrl,
+          storagePath,
+          description: description.trim(),
+        });
+      }
 
       setIsSuccess(true);
       setTimeout(() => {
         setIsSuccess(false);
-        setTitle("");
-        setAuthor("");
-        setFileUrl("");
-        setDescription("");
         onSuccess();
         onClose();
-      }, 900);
+      }, 700);
     } catch (err: any) {
-      setError(err.message || "Xəta baş verdi");
+      setError(err?.message || "Resurs yadda saxlanılarkən xəta baş verdi.");
     } finally {
       setIsSubmitting(false);
     }
@@ -82,7 +226,7 @@ export function AddResourceModal({ isOpen, onClose, onSuccess }: AddResourceModa
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200 my-8">
+      <div className="relative w-full max-w-xl bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200 my-8">
         {/* Header */}
         <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -90,8 +234,16 @@ export function AddResourceModal({ isOpen, onClose, onSuccess }: AddResourceModa
               <FileUp className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Yeni Elektron Resurs Əlavə Et</h3>
-              <p className="text-xs text-slate-400">Rəqəmsal dərslik, vəsait və ya elektron kitab yüklənməsi</p>
+              <h3 className="text-base font-bold text-white">
+                {editResource
+                  ? "Elektron Resursu Redaktə Et"
+                  : "Yeni Elektron Resurs Əlavə Et"}
+              </h3>
+              <p className="text-xs text-slate-400">
+                {editResource
+                  ? "Mövcud rəqəmsal vəsaitin məlumatlarını yeniləyin"
+                  : "Rəqəmsal dərslik, vəsait və ya elektron kitab yüklənməsi"}
+              </p>
             </div>
           </div>
           <button
@@ -108,140 +260,266 @@ export function AddResourceModal({ isOpen, onClose, onSuccess }: AddResourceModa
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <h4 className="text-base font-bold text-slate-800 mb-1">
-              Elektron resurs uğurla əlavə edildi!
+              {editResource ? "Resurs Yeniləndi!" : "Resurs Əlavə Edildi!"}
             </h4>
             <p className="text-xs text-slate-500">
-              Resurs elektron kitabxanada oxucular üçün aktivləşdirildi.
+              Məlumatlar uğurla elektron kitabxana bazasında saxlanıldı.
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+          <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
             {error && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
+            {/* TAB SELECTOR: Local Device File vs External Link (Requirement 2) */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Faylın Mənbəyi
+              </label>
+              <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("file")}
+                  className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+                    activeTab === "file"
+                      ? "bg-white text-indigo-700 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Kompüterdən Yüklə</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("url")}
+                  className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+                    activeTab === "url"
+                      ? "bg-white text-indigo-700 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <Link2 className="w-4 h-4" />
+                  <span>URL / Keçid Əlavə Et</span>
+                </button>
+              </div>
+            </div>
+
+            {/* TAB 1: Local Device File Picker / Drag and Drop */}
+            {activeTab === "file" && (
+              <div className="space-y-2">
+                <div
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
+                    dragActive
+                      ? "border-indigo-500 bg-indigo-50/50"
+                      : selectedFile
+                      ? "border-emerald-400 bg-emerald-50/30"
+                      : "border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50"
+                  }`}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.epub,.doc,.docx,.ppt,.pptx"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+
+                  {selectedFile ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                        <File className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-800 break-all">
+                          {selectedFile.name}
+                        </p>
+                        <p className="text-[11px] text-slate-500">
+                          {fileSize} • {format} formatı müəyyən edildi
+                        </p>
+                      </div>
+                      <span className="text-[10px] font-semibold text-indigo-600 hover:underline mt-1">
+                        Faylı dəyişmək üçün klikləyin
+                      </span>
+                    </div>
+                  ) : editResource?.fileUrl ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <p className="text-xs font-semibold text-slate-700">
+                        Mövcud fayl saxlanılır ({editResource.fileSize})
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        Yeni fayl seçmək üçün bura klikləyin və ya faylı sürükləyin
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center">
+                        <Upload className="w-5 h-5" />
+                      </div>
+                      <p className="text-xs font-bold text-slate-800">
+                        Faylı bura sürükləyin və ya seçmək üçün klikləyin
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        PDF, EPUB, DOC, DOCX, PPTX (Format və ölçü avtomatik təyin edilir)
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: External Link Input */}
+            {activeTab === "url" && (
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Faylın Xarici Keçidi (URL)
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Globe className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="url"
+                    value={fileUrl}
+                    onChange={(e) => setFileUrl(e.target.value)}
+                    placeholder="https://example.com/kitab.pdf"
+                    className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Title */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Resursun Başlığı (Adı) <span className="text-rose-500">*</span>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Resursun Adı / Başlığı *
               </label>
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Məs: Python ilə Proqramlaşdırma Praktikumu"
-                className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-medium"
+                placeholder="Məs: Veb Proqramlaşdırma Əsasları"
+                className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800"
               />
             </div>
 
+            {/* Author */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Müəllif(lər) və ya Tərtibçi *
+              </label>
+              <input
+                type="text"
+                required
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="Məs: R. Məmmədov"
+                className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800"
+              />
+            </div>
+
+            {/* Category & Format */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Müəllif(lər) <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
-                  placeholder="Məs: Dr. Cavid Həsənov"
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   İxtisas / Kateqoriya
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
+                  className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800"
                 >
-                  {CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
                     </option>
                   ))}
                 </select>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Fayl Formatı
                 </label>
                 <select
                   value={format}
                   onChange={(e) => setFormat(e.target.value as any)}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-bold text-slate-800"
+                  className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800 font-bold"
                 >
-                  <option value="PDF">PDF Sənədi (.pdf)</option>
-                  <option value="EPUB">EPUB E-Kitab (.epub)</option>
-                  <option value="DOCX">Word Sənədi (.docx)</option>
+                  <option value="PDF">PDF Sənədi</option>
+                  <option value="EPUB">EPUB E-Kitab</option>
+                  <option value="DOCX">Word (.docx)</option>
                 </select>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Təxmini Ölçü
-                </label>
-                <input
-                  type="text"
-                  value={fileSize}
-                  onChange={(e) => setFileSize(e.target.value)}
-                  placeholder="Məs: 5.2 MB"
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-mono"
-                />
               </div>
             </div>
 
+            {/* File Size */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Fayl Keçidi (URL və ya Saxlanc ünvanı)
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Təxmini Fayl Ölçüsü
               </label>
               <input
                 type="text"
-                value={fileUrl}
-                onChange={(e) => setFileUrl(e.target.value)}
-                placeholder="https://cloud.ldptm.edu.az/resurslar/kitab.pdf"
-                className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-mono"
+                value={fileSize}
+                onChange={(e) => setFileSize(e.target.value)}
+                placeholder="Məs: 4.5 MB"
+                className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800 font-mono"
               />
             </div>
 
+            {/* Description */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Məzmunun Qısa Təsviri
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Təsvir / Qısa Qeyd (İxtiyari)
               </label>
               <textarea
                 rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Bu vəsait hansı ixtisas dərsləri üçün nəzərdə tutulub..."
-                className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all resize-none"
+                placeholder="Vəsaitin təyinatı və ya laboratoriya işləri haqqında..."
+                className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800 resize-none"
               />
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+            {/* Submit & Cancel Buttons */}
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={onClose}
-                disabled={isSubmitting}
-                className="px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-xl"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
               >
                 İmtina
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-xl shadow-2xs transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs sm:text-sm font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
               >
-                <FileUp className="w-4 h-4" />
-                <span>{isSubmitting ? "Əlavə olunur..." : "Resursu Yerləşdir"}</span>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Yadda saxlanılır...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>
+                      {editResource ? "Dəyişiklikləri Saxla" : "Resursu Əlavə Et"}
+                    </span>
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -250,4 +528,3 @@ export function AddResourceModal({ isOpen, onClose, onSuccess }: AddResourceModa
     </div>
   );
 }
-
