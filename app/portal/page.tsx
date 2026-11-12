@@ -411,7 +411,7 @@ function ReaderPortalContent() {
                 </h2>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Firebase Firestore bazasından birbaşa mövcudluq statusu və rəf məlumatları
+                Kitabxana bazasından birbaşa mövcudluq statusu və rəf məlumatları
               </p>
             </div>
 

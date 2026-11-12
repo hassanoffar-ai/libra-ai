@@ -3,18 +3,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Printer,
-  FileSpreadsheet,
   FileText,
   Calendar,
   Search,
-  Filter,
   CheckCircle2,
   Clock,
   BookOpen,
   Users,
   AlertTriangle,
   Layers,
-  ArrowRight,
   ShieldAlert,
   Eye,
 } from "lucide-react";
@@ -34,10 +31,9 @@ import {
   DigitalResource,
   getDigitalResources,
 } from "@/services/digital-library-service";
-import * as XLSX from "xlsx";
 
 type PeriodPreset = "academic" | "month" | "week" | "today" | "all" | "custom";
-type ActiveTab = "official_doc" | "dashboard";
+type ActiveTab = "dashboard" | "official_doc";
 
 // Helper: Format date as DD.MM.YYYY
 function formatDateAz(dateStr?: string): string {
@@ -98,8 +94,8 @@ export default function HesabatlarPage() {
   const [digitalResources, setDigitalResources] = useState<DigitalResource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Active view tab on screen: official A4 report document (default) or interactive dashboard
-  const [activeTab, setActiveTab] = useState<ActiveTab>("official_doc");
+  // Active view tab on screen: 1st "dashboard" (default), 2nd "official_doc"
+  const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
 
   // Time Period Filter: default "academic" (from 01.09 of current academic year to today)
   const [period, setPeriod] = useState<PeriodPreset>("academic");
@@ -157,11 +153,12 @@ export default function HesabatlarPage() {
     let s = new Date(2000, 0, 1);
     const e = new Date();
 
+    const currentYear = now.getFullYear();
+    const academicStartYear = now.getMonth() >= 8 ? currentYear : currentYear - 1;
+
     if (period === "all") {
       return { filterStart: "2000-01-01", filterEnd: todayStr };
     } else if (period === "academic") {
-      const currentYear = now.getFullYear();
-      const academicStartYear = now.getMonth() >= 8 ? currentYear : currentYear - 1;
       return {
         filterStart: `${academicStartYear}-09-01`,
         filterEnd: todayStr,
@@ -173,9 +170,11 @@ export default function HesabatlarPage() {
     } else if (period === "month") {
       s = new Date(now.getFullYear(), now.getMonth(), 1);
     } else if (period === "custom") {
+      const sDate = startDate || `${academicStartYear}-09-01`;
+      const eDate = endDate || todayStr;
       return {
-        filterStart: startDate || "2000-01-01",
-        filterEnd: endDate || todayStr,
+        filterStart: sDate <= eDate ? sDate : eDate,
+        filterEnd: sDate <= eDate ? eDate : sDate,
       };
     }
 
@@ -436,93 +435,159 @@ export default function HesabatlarPage() {
       .slice(0, 5);
   }, [loans, books]);
 
-  // ================= 4. REAL DATABASE EXCEL EXPORT GENERATOR (.xlsx) =================
-  const handleExportXLSX = () => {
-    const wsData: any[][] = [];
+  // ================= 4. REAL DATABASE MICROSOFT WORD EXPORT (.doc) =================
+  const handleExportWord = () => {
+    const tableRowsHtml = circulationRecords.length === 0
+      ? `<tr><td colspan="7" style="border: 1pt solid #000000; padding: 6pt; text-align: center; font-size: 10pt;">Seçilmiş hesabat dövrü üzrə heç bir kitab dövriyyəsi qeydə alınmayıb.</td></tr>`
+      : circulationRecords.map((item) => `
+        <tr>
+          <td style="border: 1pt solid #000000; padding: 5pt 6pt; text-align: center; font-family: monospace; font-size: 9.5pt;">${item.inventoryNumber}</td>
+          <td style="border: 1pt solid #000000; padding: 5pt 6pt; text-align: center; font-size: 10pt; font-weight: bold;">${item.title}</td>
+          <td style="border: 1pt solid #000000; padding: 5pt 6pt; text-align: center; font-size: 10pt;">${item.author}</td>
+          <td style="border: 1pt solid #000000; padding: 5pt 6pt; text-align: center; font-size: 10pt;">${item.readerName}</td>
+          <td style="border: 1pt solid #000000; padding: 5pt 6pt; text-align: center; font-size: 10pt;">${item.issueDate}</td>
+          <td style="border: 1pt solid #000000; padding: 5pt 6pt; text-align: center; font-size: 10pt;">${item.returnDate}</td>
+          <td style="border: 1pt solid #000000; padding: 5pt 6pt; text-align: center; font-size: 10pt; white-space: nowrap;">${item.status}</td>
+        </tr>
+      `).join("");
 
-    // Row 1-2: Title header in Bold
-    wsData.push(["LƏNKƏRAN DÖVLƏT PEŞƏ TƏHSİL MƏRKƏZİ — KİTABXANA İDARƏETMƏ VƏ DÖVRİYYƏ HESABATI"]);
-    wsData.push([`Tərtib edilmə tarixi: ${formatDateAz(todayStr)} | Sistem: LIBRA AI Real Verilənlər Bazası`]);
-    wsData.push([]);
+    const wordContent = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>Kitabxana Dövriyyə Hesabatı</title>
+        <!--[if gte mso 9]>
+        <xml>
+          <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+          </w:WordDocument>
+        </xml>
+        <![endif]-->
+        <style>
+          @page Section1 {
+            size: 595.3pt 841.9pt; /* A4 Portrait */
+            margin: 42.5pt 42.5pt 42.5pt 42.5pt; /* 15mm */
+            mso-header-margin: 35.4pt;
+            mso-footer-margin: 35.4pt;
+            mso-paper-source: 0;
+          }
+          div.Section1 {
+            page: Section1;
+          }
+          body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11pt;
+            color: #000000;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+          }
+          p, h1, h2, h3 {
+            margin: 0;
+            padding: 0;
+          }
+          table.report-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 14pt;
+          }
+          table.report-table th {
+            border: 1pt solid #000000;
+            padding: 5pt 6pt;
+            font-size: 10pt;
+            font-weight: bold;
+            text-align: center;
+            background-color: #ffffff;
+          }
+          table.summary-box {
+            border: 1pt solid #000000;
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 16pt;
+          }
+          table.summary-box td {
+            border: 1pt solid #000000;
+            padding: 8pt 12pt;
+            vertical-align: top;
+            font-size: 10.5pt;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="Section1">
+          <div style="text-align: center;">
+            <p style="font-size: 11pt; font-weight: bold; letter-spacing: 1pt; text-transform: uppercase;">AZƏRBAYCAN RESPUBLİKASI ELM VƏ TƏHSİL NAZİRLİYİ</p>
+            <p style="font-size: 13pt; font-weight: bold; text-transform: uppercase; margin-top: 3pt;">LƏNKƏRAN DÖVLƏT PEŞƏ TƏHSİL MƏRKƏZİ</p>
+            <div style="border-bottom: 2pt solid #000000; margin: 10pt 0;"></div>
+            <p style="font-size: 14pt; font-weight: bold; text-transform: uppercase; margin-top: 8pt;">KİTABXANA DÖVRİYYƏ HESABATI</p>
+            <p style="font-size: 11pt; font-weight: bold; margin-top: 3pt;">(${formatDateAz(filterStart)} – ${formatDateAz(filterEnd)}-cı il tarixləri üzrə)</p>
+          </div>
 
-    // I. Ümumi İcmal və Statistika Göstəriciləri
-    wsData.push(["I. ÜMUMİ İCMAL VƏ STATİSTİKA GÖSTƏRİCİLƏRİ"]);
-    wsData.push([
-      "Cəmi Kitab Fondu",
-      "Fondda (Rəfdə)",
-      "Oxucuda",
-      "Vaxtı Keçmiş (Gecikən)",
-      "Yeni Gələn Kitablar",
-      "Müəllim Oxucular",
-      "Tələbə Oxucular",
-    ]);
-    wsData.push([
-      summaryStats.totalCopies,
-      summaryStats.inLibrary,
-      summaryStats.inUse,
-      summaryStats.overdue,
-      summaryStats.newlyAddedCopies,
-      summaryStats.teacherReaders,
-      summaryStats.studentReaders,
-    ]);
-    wsData.push([]);
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th style="width: 12%;">İnventar №</th>
+                <th style="width: 22%;">Nəşrin Adı</th>
+                <th style="width: 14%;">Müəllif</th>
+                <th style="width: 18%;">Oxucu Adı Soyadı</th>
+                <th style="width: 11%;">Verilmə Tarixi</th>
+                <th style="width: 11%;">Qaytarılma Tarixi</th>
+                <th style="width: 12%;">Statusu</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRowsHtml}
+            </tbody>
+          </table>
 
-    // II. Kitabxana Dövriyyə Cədvəli
-    wsData.push(["II. KİTABXANA DÖVRİYYƏ HESABATI"]);
-    wsData.push([
-      "İnventar №",
-      "Nəşrin Adı",
-      "Müəllif",
-      "Oxucu Adı Soyadı",
-      "Verilmə Tarixi",
-      "Qaytarılma Tarixi",
-      "Statusu",
-    ]);
+          <table class="summary-box">
+            <tr>
+              <td style="width: 50%;">
+                <p style="margin-bottom: 4pt;">• <b>Cəmi Kitab Fondu:</b> ${summaryStats.totalCopies.toLocaleString("az-AZ")} nüsxə</p>
+                <p style="margin-bottom: 4pt;">• <b>Fondda (Rəfdə):</b> ${summaryStats.inLibrary.toLocaleString("az-AZ")} nüsxə</p>
+                <p style="margin-bottom: 4pt;">• <b>Oxucuda:</b> ${summaryStats.inUse.toLocaleString("az-AZ")} nüsxə</p>
+                <p>• <b>Vaxtı Keçmiş (Gecikən):</b> ${summaryStats.overdue.toLocaleString("az-AZ")} nüsxə</p>
+              </td>
+              <td style="width: 50%;">
+                <p style="margin-bottom: 4pt;">• <b>Yeni Gələn Kitablar:</b> ${summaryStats.newlyAddedCopies.toLocaleString("az-AZ")} nüsxə</p>
+                <p style="margin-bottom: 4pt;">• <b>Müəllim Oxucular:</b> ${summaryStats.teacherReaders.toLocaleString("az-AZ")} nəfər</p>
+                <p>• <b>Tələbə Oxucular:</b> ${summaryStats.studentReaders.toLocaleString("az-AZ")} nəfər</p>
+              </td>
+            </tr>
+          </table>
 
-    if (circulationRecords.length === 0) {
-      wsData.push(["—", "Seçilmiş dövr üzrə heç bir dövriyyə qeydə alınmayıb", "—", "—", "—", "—", "Normal"]);
-    } else {
-      circulationRecords.forEach((c) => {
-        wsData.push([
-          { t: "s", v: c.inventoryNumber },
-          c.title,
-          c.author,
-          c.readerName,
-          c.issueDate,
-          c.returnDate,
-          c.status,
-        ]);
-      });
-    }
-    wsData.push([]);
-    wsData.push([]);
+          <table style="width: 100%; border: none; margin-top: 36pt; font-size: 11pt;">
+            <tr>
+              <td style="border: none; text-align: left; width: 50%; padding: 0;">
+                <b>Kitabxana məsulu:</b> ___________________
+              </td>
+              <td style="border: none; text-align: right; width: 50%; padding: 0;">
+                <b>Təsdiq etdi / Rəhbərlik:</b> ___________________
+              </td>
+            </tr>
+          </table>
 
-    // Official signing sections
-    wsData.push([
-      "Kitabxana məsulu: ___________________________",
-      "",
-      "",
-      "Təsdiq etdi / Rəhbərlik: ___________________________",
-    ]);
-    wsData.push([
-      `Tarix: ${formatDateAz(todayStr)}`,
-    ]);
+          <p style="margin-top: 24pt; font-size: 11pt;">
+            <b>Tarix:</b> ${formatDateAz(todayStr)}
+          </p>
+        </div>
+      </body>
+      </html>
+    `;
 
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-    ws["!cols"] = [
-      { wch: 20 },
-      { wch: 36 },
-      { wch: 24 },
-      { wch: 26 },
-      { wch: 16 },
-      { wch: 18 },
-      { wch: 22 },
-    ];
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Dövriyyə Hesabatı");
-    XLSX.writeFile(wb, `Lenkeran_Kitabxana_Dovriyye_Hesabat_${todayStr}.xlsx`);
+    const blob = new Blob(["\ufeff", wordContent], {
+      type: "application/msword;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Kitabxana_Dovriyye_Hesabati_${todayStr}.doc`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   // Trigger Print Dialog
@@ -590,25 +655,21 @@ export default function HesabatlarPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
               Hesabatlar və Statistika
             </h1>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-              Canlı Firebase Bazası
-            </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
             Lənkəran Dövlət Peşə Təhsil Mərkəzi — rəsmi A4 çap forması və canlı analitika
           </p>
         </div>
 
-        {/* Action Buttons: Export XLSX & Print / Save PDF */}
+        {/* Action Buttons: Export Word (.doc) & Print / Save PDF */}
         <div className="flex items-center gap-2.5">
           <button
-            onClick={handleExportXLSX}
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
-            title="Microsoft Excel formatında (.xlsx) rəsmi hesabatı endir"
+            onClick={handleExportWord}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-800 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+            title="Microsoft Word sənədi (.doc) kimi rəsmi hesabatı yüklə"
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-            <span>Excel-ə köçür (.xlsx)</span>
+            <FileText className="w-4 h-4 text-blue-700" />
+            <span>Word kimi saxla (.doc)</span>
           </button>
 
           <button
@@ -625,19 +686,8 @@ export default function HesabatlarPage() {
       {/* 2. Filtrlər və Baxış Rejimi Paneli (Screen Only) */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs space-y-3 print:hidden">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-          {/* View Mode Switcher */}
+          {/* View Mode Switcher: 1st Interactive Dashboard, 2nd Official A4 Preview */}
           <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold">
-            <button
-              onClick={() => setActiveTab("official_doc")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
-                activeTab === "official_doc"
-                  ? "bg-white text-slate-950 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <FileText className="w-4 h-4 text-indigo-600" />
-              <span>Rəsmi A4 Hesabat Forması (Önbaxış)</span>
-            </button>
             <button
               onClick={() => setActiveTab("dashboard")}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
@@ -646,8 +696,19 @@ export default function HesabatlarPage() {
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              <Eye className="w-4 h-4 text-slate-600" />
+              <Eye className="w-4 h-4 text-indigo-600" />
               <span>İnteraktiv Göstəricilər Paneli</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("official_doc")}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
+                activeTab === "official_doc"
+                  ? "bg-white text-slate-950 shadow-2xs font-bold"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <FileText className="w-4 h-4 text-slate-600" />
+              <span>Rəsmi A4 Hesabat Forması (Önbaxış)</span>
             </button>
           </div>
 
@@ -749,169 +810,7 @@ export default function HesabatlarPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. OFFICIAL A4 REPORT DOCUMENT (EXACT LAYOUT OF image_5cebbd.jpg)         */}
-      {/* Populated 100% with real live data from Firebase (Zero mock/fake data)     */}
-      {/* Always printed on window.print(), previewed on screen when tab is active  */}
-      {/* ========================================================================= */}
-      <div
-        className={`print-document-container ${
-          activeTab === "official_doc" ? "block" : "hidden print:block"
-        } bg-white shadow-xl print:shadow-none border border-slate-200 print:border-none rounded-xl print:rounded-none max-w-[210mm] mx-auto p-8 sm:p-12 print:p-0 text-black font-['Times_New_Roman',Times,Georgia,serif] leading-normal transition-all`}
-      >
-        {/* HEADER SECTION */}
-        <div className="text-center">
-          <p className="text-xs sm:text-sm font-semibold tracking-wider uppercase text-black">
-            AZƏRBAYCAN RESPUBLİKASI ELM VƏ TƏHSİL NAZİRLİYİ
-          </p>
-          <h2 className="text-sm sm:text-base font-extrabold tracking-wide uppercase text-black mt-1">
-            LƏNKƏRAN DÖVLƏT PEŞƏ TƏHSİL MƏRKƏZİ
-          </h2>
-
-          {/* Full-width solid black line (2px solid #000) */}
-          <div className="w-full border-b-2 border-black my-4" />
-
-          {/* Report Title & Period Subtitle */}
-          <div className="space-y-1">
-            <h1 className="text-base sm:text-lg font-bold tracking-wider uppercase text-black">
-              KİTABXANA DÖVRİYYƏ HESABATI
-            </h1>
-            <p className="text-xs sm:text-sm font-bold text-black">
-              ({formatDateAz(filterStart)} – {formatDateAz(filterEnd)}-cı il tarixləri üzrə)
-            </p>
-          </div>
-        </div>
-
-        {/* CIRCULATION TABLE (7 Columns with 1px solid #000 borders) */}
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full border-collapse border border-black text-black text-xs sm:text-sm">
-            <thead>
-              <tr className="bg-white">
-                <th className="border border-black p-2 font-bold text-center w-[12%]">
-                  İnventar №
-                </th>
-                <th className="border border-black p-2 font-bold text-center w-[22%]">
-                  Nəşrin Adı
-                </th>
-                <th className="border border-black p-2 font-bold text-center w-[14%]">
-                  Müəllif
-                </th>
-                <th className="border border-black p-2 font-bold text-center w-[18%]">
-                  Oxucu Adı Soyadı
-                </th>
-                <th className="border border-black p-2 font-bold text-center w-[11%]">
-                  Verilmə Tarixi
-                </th>
-                <th className="border border-black p-2 font-bold text-center w-[11%]">
-                  Qaytarılma Tarixi
-                </th>
-                <th className="border border-black p-2 font-bold text-center w-[12%]">
-                  Statusu
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {circulationRecords.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="border border-black p-4 text-center font-medium text-slate-600">
-                    Seçilmiş hesabat dövrü üzrə heç bir kitab dövriyyəsi qeydə alınmayıb.
-                  </td>
-                </tr>
-              ) : (
-                circulationRecords.map((item, idx) => (
-                  <tr key={item.id || idx}>
-                    <td className="border border-black p-1.5 sm:p-2 text-center font-mono text-xs sm:text-sm">
-                      {item.inventoryNumber}
-                    </td>
-                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm font-medium">
-                      {item.title}
-                    </td>
-                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm">
-                      {item.author}
-                    </td>
-                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm">
-                      {item.readerName}
-                    </td>
-                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm">
-                      {item.issueDate}
-                    </td>
-                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm">
-                      {item.returnDate}
-                    </td>
-                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm whitespace-nowrap">
-                      {item.status}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* TWO-COLUMN BORDERED SUMMARY BOX (Below table, 1px solid #000 border) */}
-        <div className="border border-black rounded-lg mt-6 overflow-hidden bg-white text-black text-xs sm:text-sm">
-          <div className="flex flex-col sm:flex-row">
-            {/* Left Column */}
-            <div className="flex-1 p-3.5 sm:p-4 border-b sm:border-b-0 sm:border-r border-black space-y-1.5">
-              <p className="flex items-center gap-1.5">
-                <span className="font-bold">•</span>
-                <span>Cəmi Kitab Fondu:</span>
-                <span className="font-semibold">{summaryStats.totalCopies.toLocaleString("az-AZ")} nüsxə</span>
-              </p>
-              <p className="flex items-center gap-1.5">
-                <span className="font-bold">•</span>
-                <span>Fondda (Rəfdə):</span>
-                <span className="font-semibold">{summaryStats.inLibrary.toLocaleString("az-AZ")} nüsxə</span>
-              </p>
-              <p className="flex items-center gap-1.5">
-                <span className="font-bold">•</span>
-                <span>Oxucuda:</span>
-                <span className="font-semibold">{summaryStats.inUse.toLocaleString("az-AZ")} nüsxə</span>
-              </p>
-              <p className="flex items-center gap-1.5">
-                <span className="font-bold">•</span>
-                <span>Vaxtı Keçmiş (Gecikən):</span>
-                <span className="font-semibold">{summaryStats.overdue.toLocaleString("az-AZ")} nüsxə</span>
-              </p>
-            </div>
-
-            {/* Right Column */}
-            <div className="flex-1 p-3.5 sm:p-4 space-y-1.5">
-              <p className="flex items-center gap-1.5">
-                <span className="font-bold">•</span>
-                <span>Yeni Gələn Kitablar:</span>
-                <span className="font-semibold">{summaryStats.newlyAddedCopies.toLocaleString("az-AZ")} nüsxə</span>
-              </p>
-              <p className="flex items-center gap-1.5">
-                <span className="font-bold">•</span>
-                <span>Müəllim Oxucular:</span>
-                <span className="font-semibold">{summaryStats.teacherReaders.toLocaleString("az-AZ")} nəfər</span>
-              </p>
-              <p className="flex items-center gap-1.5">
-                <span className="font-bold">•</span>
-                <span>Tələbə Oxucular:</span>
-                <span className="font-semibold">{summaryStats.studentReaders.toLocaleString("az-AZ")} nəfər</span>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* CLEAN SIGNATURE & DATE FOOTER (NO stamp, NO hardcoded names) */}
-        <div className="mt-10 sm:mt-12 pt-4 flex items-center justify-between text-xs sm:text-sm font-medium text-black">
-          <div>
-            <span>Kitabxana məsulu: ___________________</span>
-          </div>
-          <div>
-            <span>Təsdiq etdi / Rəhbərlik: ___________________</span>
-          </div>
-        </div>
-
-        <div className="mt-6 text-xs sm:text-sm font-medium text-black">
-          <span>Tarix: {formatDateAz(todayStr)}</span>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 4. INTERACTIVE DASHBOARD VIEW (Visible when "İnteraktiv Göstəricilər" tab) */}
+      {/* 3. INTERACTIVE DASHBOARD VIEW (1st Tab - Active by default)                */}
       {/* ========================================================================= */}
       {activeTab === "dashboard" && (
         <div className="space-y-6 print:hidden">
@@ -1294,6 +1193,168 @@ export default function HesabatlarPage() {
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* 4. OFFICIAL A4 REPORT DOCUMENT (EXACT LAYOUT OF image_5cebbd.jpg)         */}
+      {/* Populated 100% with real live data from Firebase (Zero mock/fake data)     */}
+      {/* Always printed on window.print(), previewed on screen when tab is active  */}
+      {/* ========================================================================= */}
+      <div
+        className={`print-document-container ${
+          activeTab === "official_doc" ? "block" : "hidden print:block"
+        } bg-white shadow-xl print:shadow-none border border-slate-200 print:border-none rounded-xl print:rounded-none max-w-[210mm] mx-auto p-8 sm:p-12 print:p-0 text-black font-['Times_New_Roman',Times,Georgia,serif] leading-normal transition-all`}
+      >
+        {/* HEADER SECTION */}
+        <div className="text-center">
+          <p className="text-xs sm:text-sm font-semibold tracking-wider uppercase text-black">
+            AZƏRBAYCAN RESPUBLİKASI ELM VƏ TƏHSİL NAZİRLİYİ
+          </p>
+          <h2 className="text-sm sm:text-base font-extrabold tracking-wide uppercase text-black mt-1">
+            LƏNKƏRAN DÖVLƏT PEŞƏ TƏHSİL MƏRKƏZİ
+          </h2>
+
+          {/* Full-width solid black line (2px solid #000) */}
+          <div className="w-full border-b-2 border-black my-4" />
+
+          {/* Report Title & Period Subtitle */}
+          <div className="space-y-1">
+            <h1 className="text-base sm:text-lg font-bold tracking-wider uppercase text-black">
+              KİTABXANA DÖVRİYYƏ HESABATI
+            </h1>
+            <p className="text-xs sm:text-sm font-bold text-black">
+              ({formatDateAz(filterStart)} – {formatDateAz(filterEnd)}-cı il tarixləri üzrə)
+            </p>
+          </div>
+        </div>
+
+        {/* CIRCULATION TABLE (7 Columns with 1px solid #000 borders) */}
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full border-collapse border border-black text-black text-xs sm:text-sm">
+            <thead>
+              <tr className="bg-white">
+                <th className="border border-black p-2 font-bold text-center w-[12%]">
+                  İnventar №
+                </th>
+                <th className="border border-black p-2 font-bold text-center w-[22%]">
+                  Nəşrin Adı
+                </th>
+                <th className="border border-black p-2 font-bold text-center w-[14%]">
+                  Müəllif
+                </th>
+                <th className="border border-black p-2 font-bold text-center w-[18%]">
+                  Oxucu Adı Soyadı
+                </th>
+                <th className="border border-black p-2 font-bold text-center w-[11%]">
+                  Verilmə Tarixi
+                </th>
+                <th className="border border-black p-2 font-bold text-center w-[11%]">
+                  Qaytarılma Tarixi
+                </th>
+                <th className="border border-black p-2 font-bold text-center w-[12%]">
+                  Statusu
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {circulationRecords.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="border border-black p-4 text-center font-medium text-slate-600">
+                    Seçilmiş hesabat dövrü üzrə heç bir kitab dövriyyəsi qeydə alınmayıb.
+                  </td>
+                </tr>
+              ) : (
+                circulationRecords.map((item, idx) => (
+                  <tr key={item.id || idx}>
+                    <td className="border border-black p-1.5 sm:p-2 text-center font-mono text-xs sm:text-sm">
+                      {item.inventoryNumber}
+                    </td>
+                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm font-medium">
+                      {item.title}
+                    </td>
+                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm">
+                      {item.author}
+                    </td>
+                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm">
+                      {item.readerName}
+                    </td>
+                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm">
+                      {item.issueDate}
+                    </td>
+                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm">
+                      {item.returnDate}
+                    </td>
+                    <td className="border border-black p-1.5 sm:p-2 text-center text-xs sm:text-sm whitespace-nowrap">
+                      {item.status}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* TWO-COLUMN BORDERED SUMMARY BOX (Below table, 1px solid #000 border) */}
+        <div className="border border-black rounded-lg mt-6 overflow-hidden bg-white text-black text-xs sm:text-sm">
+          <div className="flex flex-col sm:flex-row">
+            {/* Left Column */}
+            <div className="flex-1 p-3.5 sm:p-4 border-b sm:border-b-0 sm:border-r border-black space-y-1.5">
+              <p className="flex items-center gap-1.5">
+                <span className="font-bold">•</span>
+                <span>Cəmi Kitab Fondu:</span>
+                <span className="font-semibold">{summaryStats.totalCopies.toLocaleString("az-AZ")} nüsxə</span>
+              </p>
+              <p className="flex items-center gap-1.5">
+                <span className="font-bold">•</span>
+                <span>Fondda (Rəfdə):</span>
+                <span className="font-semibold">{summaryStats.inLibrary.toLocaleString("az-AZ")} nüsxə</span>
+              </p>
+              <p className="flex items-center gap-1.5">
+                <span className="font-bold">•</span>
+                <span>Oxucuda:</span>
+                <span className="font-semibold">{summaryStats.inUse.toLocaleString("az-AZ")} nüsxə</span>
+              </p>
+              <p className="flex items-center gap-1.5">
+                <span className="font-bold">•</span>
+                <span>Vaxtı Keçmiş (Gecikən):</span>
+                <span className="font-semibold">{summaryStats.overdue.toLocaleString("az-AZ")} nüsxə</span>
+              </p>
+            </div>
+
+            {/* Right Column */}
+            <div className="flex-1 p-3.5 sm:p-4 space-y-1.5">
+              <p className="flex items-center gap-1.5">
+                <span className="font-bold">•</span>
+                <span>Yeni Gələn Kitablar:</span>
+                <span className="font-semibold">{summaryStats.newlyAddedCopies.toLocaleString("az-AZ")} nüsxə</span>
+              </p>
+              <p className="flex items-center gap-1.5">
+                <span className="font-bold">•</span>
+                <span>Müəllim Oxucular:</span>
+                <span className="font-semibold">{summaryStats.teacherReaders.toLocaleString("az-AZ")} nəfər</span>
+              </p>
+              <p className="flex items-center gap-1.5">
+                <span className="font-bold">•</span>
+                <span>Tələbə Oxucular:</span>
+                <span className="font-semibold">{summaryStats.studentReaders.toLocaleString("az-AZ")} nəfər</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* CLEAN SIGNATURE & DATE FOOTER (NO stamp, NO hardcoded names) */}
+        <div className="mt-10 sm:mt-12 pt-4 flex items-center justify-between text-xs sm:text-sm font-medium text-black">
+          <div>
+            <span>Kitabxana məsulu: ___________________</span>
+          </div>
+          <div>
+            <span>Təsdiq etdi / Rəhbərlik: ___________________</span>
+          </div>
+        </div>
+
+        <div className="mt-6 text-xs sm:text-sm font-medium text-black">
+          <span>Tarix: {formatDateAz(todayStr)}</span>
+        </div>
+      </div>
     </div>
   );
 }

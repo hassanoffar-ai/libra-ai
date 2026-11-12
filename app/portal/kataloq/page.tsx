@@ -144,7 +144,7 @@ function ReaderCatalogContent() {
           <div className="relative z-10 max-w-2xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/30 border border-indigo-400/30 text-indigo-200 text-xs font-semibold backdrop-blur-xs">
               <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
-              <span>Real-vaxt Firebase Kitab Fondu</span>
+              <span>Real-vaxt Kitab Fondu</span>
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-tight">
               Kitabxana Fondunu Axtarın
@@ -211,7 +211,7 @@ function ReaderCatalogContent() {
 
           <div className="text-[11px] text-slate-400 flex items-center justify-between pt-2 border-t border-slate-100">
             <span>Tapılan nəşrlər: <strong className="text-slate-700">{filteredBooks.length}</strong></span>
-            <span>Mənbə: Firebase Firestore Real-Time Fondu</span>
+            <span>Mənbə: Kitabxana Fondu</span>
           </div>
         </div>
 
@@ -219,7 +219,7 @@ function ReaderCatalogContent() {
         {isBooksLoading ? (
           <div className="py-16 flex flex-col items-center justify-center gap-3">
             <div className="w-9 h-9 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs font-medium text-slate-500">Firebase fondundan kitablar yüklənir...</p>
+            <p className="text-xs font-medium text-slate-500">Kitabxana fondundan kitablar yüklənir...</p>
           </div>
         ) : filteredBooks.length === 0 ? (
           <div className="py-16 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-8 space-y-2">
