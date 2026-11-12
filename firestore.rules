@@ -54,21 +54,15 @@ service cloud.firestore {
     // 3. ELEKTRON KİTABXANA (E_LIBRARY & DIGITAL_RESOURCES)
     // =========================================================================
     // Oxucular elektron resursların siyahısını oxuya və endirə bilər.
-    // Endirmə sayğacının artırılmasına icazə verilir; digər dəyişikliklər YALNIZ Admin üçündür.
-    match /e_library/{resourceId} {
+    // Elektron resursların əlavə edilməsi, redaktəsi və silinməsi YALNIZ Admin üçündür.
+    match /e_library/{docId} {
       allow read: if true;
-      allow create, delete: if isAdmin();
-      allow update: if isAdmin() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloadCount', 'downloadsCount'])
-      );
+      allow write: if isAdmin();
     }
 
-    match /digital_resources/{resourceId} {
+    match /digital_resources/{docId} {
       allow read: if true;
-      allow create, delete: if isAdmin();
-      allow update: if isAdmin() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloadCount', 'downloadsCount'])
-      );
+      allow write: if isAdmin();
     }
 
     // =========================================================================

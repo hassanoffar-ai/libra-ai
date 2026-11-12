@@ -294,8 +294,10 @@ export async function updateReader(id: string, updates: Partial<Reader>): Promis
 
   // Firestore sync
   try {
-    setDoc(doc(db, "readers", id), updatedReader, { merge: true }).catch(() => {});
-  } catch {}
+    await setDoc(doc(db, "readers", id), cleanData(updatedReader), { merge: true });
+  } catch (err) {
+    console.warn("Firestore reader update warning:", err);
+  }
 
   return updatedReader;
 }

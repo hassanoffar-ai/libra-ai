@@ -284,8 +284,10 @@ export async function updateBook(id: string, updates: Partial<Book>): Promise<Bo
 
   // Firestore sync
   try {
-    setDoc(doc(db, "books", id), updatedBook, { merge: true }).catch(() => {});
-  } catch {}
+    await setDoc(doc(db, "books", id), cleanData(updatedBook), { merge: true });
+  } catch (err) {
+    console.warn("Firestore book update warning:", err);
+  }
 
   return updatedBook;
 }
@@ -340,8 +342,10 @@ export async function updateCopy(id: string, updates: Partial<BookCopy>): Promis
 
   // Firestore sync
   try {
-    setDoc(doc(db, "book_copies", id), updatedCopy, { merge: true }).catch(() => {});
-  } catch {}
+    await setDoc(doc(db, "book_copies", id), cleanData(updatedCopy), { merge: true });
+  } catch (err) {
+    console.warn("Firestore copy update warning:", err);
+  }
 
   return updatedCopy;
 }

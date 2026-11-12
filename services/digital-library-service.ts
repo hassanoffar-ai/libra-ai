@@ -156,12 +156,12 @@ export async function getDigitalResources(): Promise<DigitalResource[]> {
       saveDigitalData(remote);
       // Migrate documents to e_library
       for (const item of remote) {
-        setDoc(doc(db, "e_library", item.id), item, { merge: true }).catch(() => {});
+        setDoc(doc(db, "e_library", item.id), cleanData(item), { merge: true }).catch(() => {});
       }
       return remote;
     } else if (local.length > 0) {
       for (const item of local) {
-        setDoc(doc(db, "e_library", item.id), item, { merge: true }).catch(() => {});
+        setDoc(doc(db, "e_library", item.id), cleanData(item), { merge: true }).catch(() => {});
       }
     }
   } catch (err) {
