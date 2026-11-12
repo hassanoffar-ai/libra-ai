@@ -124,6 +124,36 @@ export function ViewReaderModal({ isOpen, onClose, reader, onEdit }: ViewReaderM
               </div>
             </div>
 
+            {/* Academic / Staff Details (Tədris / Vəzifə Məlumatları) */}
+            {(reader.specialty || reader.courseYear || reader.position) && (
+              <div className="pt-2 border-t border-slate-200/60 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-100/70">
+                {reader.specialty && (
+                  <div>
+                    <span className="text-[10px] text-indigo-500 block font-semibold uppercase tracking-wider">İxtisas</span>
+                    <span className="font-bold text-slate-900 block mt-0.5">
+                      {reader.specialty}
+                    </span>
+                  </div>
+                )}
+                {reader.courseYear && (
+                  <div>
+                    <span className="text-[10px] text-indigo-500 block font-semibold uppercase tracking-wider">Kurs</span>
+                    <span className="font-bold text-slate-900 block mt-0.5">
+                      {reader.courseYear}
+                    </span>
+                  </div>
+                )}
+                {reader.position && (
+                  <div className="sm:col-span-2">
+                    <span className="text-[10px] text-indigo-500 block font-semibold uppercase tracking-wider">Vəzifə / Fənn</span>
+                    <span className="font-bold text-slate-900 block mt-0.5">
+                      {reader.position}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200/60">
               <div className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />

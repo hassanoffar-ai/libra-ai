@@ -25,6 +25,9 @@ export interface Reader {
   role?: ReaderRole; // 'student' | 'teacher' | 'staff'
   accessRole?: UserAccessRole; // 'reader' | 'librarian'
   department: string; // Qrup / Kafedra / Şöbə
+  specialty?: string; // İxtisas (for students, e.g. "Kompüter sistemlərində proqramlaşdırma")
+  courseYear?: string; // Kurs (for students, e.g. "1-ci kurs", "2-ci kurs")
+  position?: string; // Vəzifə / Fənn (for teachers, e.g. "İxtisas fənn müəllimi")
   phone: string;
   email: string; // unikal
   password?: string; // Heşlənmiş təhlükəsiz şifrə (Auth)
@@ -57,6 +60,12 @@ export interface Loan {
   readerId: string;
   readerName: string;
   readerTicket: string;
+  readerRole?: ReaderRole;
+  readerCategory?: ReaderCategory;
+  specialty?: string;
+  courseYear?: string;
+  position?: string;
+  readerTypeSnapshot?: string; // e.g. "Tələbə • Kompüter sistemləri (2-ci kurs)" or "Müəllim • İxtisas fənn müəllimi"
   bookId: string;
   bookTitle: string;
   bookAuthor: string;
@@ -284,6 +293,11 @@ export interface IssueBookInput {
   dueDays?: number;
   customDueDate?: string;
   notes?: string;
+  // Reader Academic / Staff details captured at lending time (Requirement 1 & 2):
+  readerType?: "Tələbə" | "Müəllim";
+  specialty?: string; // İxtisas (for students)
+  courseYear?: string; // Kurs (for students)
+  position?: string; // Vəzifə / Fənn (for teachers)
 }
 
 /**
@@ -312,12 +326,44 @@ export async function issueBook(input: IssueBookInput): Promise<Loan> {
     dueDateStr = due.toISOString().split("T")[0];
   }
 
+  // Determine reader type details
+  const readerType: ReaderCategory =
+    input.readerType || (reader.category === "Müəllim" ? "Müəllim" : "Tələbə");
+  const readerRole: ReaderRole = readerType === "Müəllim" ? "teacher" : "student";
+  const specialty = readerType === "Tələbə" ? (input.specialty?.trim() || reader.specialty) : undefined;
+  const courseYear = readerType === "Tələbə" ? (input.courseYear?.trim() || reader.courseYear) : undefined;
+  const position = readerType === "Müəllim" ? (input.position?.trim() || reader.position) : undefined;
+
+  const readerTypeSnapshot =
+    readerType === "Müəllim"
+      ? `Müəllim${position ? ` • ${position}` : ""}`
+      : `Tələbə${specialty ? ` • ${specialty}` : ""}${courseYear ? ` (${courseYear})` : ""}`;
+
+  // Update Reader profile so it stays saved for future visits (Requirement 3)
+  const readerIdx = readers.findIndex((r) => r.id === reader.id);
+  if (readerIdx !== -1) {
+    readers[readerIdx] = {
+      ...readers[readerIdx],
+      category: readerType,
+      role: readerRole,
+      specialty: specialty !== undefined ? specialty : readers[readerIdx].specialty,
+      courseYear: courseYear !== undefined ? courseYear : readers[readerIdx].courseYear,
+      position: position !== undefined ? position : readers[readerIdx].position,
+    };
+  }
+
   const loanId = `loan-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
   const newLoan: Loan = {
     id: loanId,
     readerId: reader.id,
     readerName: `${reader.firstName} ${reader.lastName}`,
     readerTicket: reader.ticketNumber,
+    readerRole,
+    readerCategory: readerType,
+    specialty,
+    courseYear,
+    position,
+    readerTypeSnapshot,
     bookId: copy.bookId,
     bookTitle: copy.bookTitle,
     bookAuthor: copy.bookAuthor,

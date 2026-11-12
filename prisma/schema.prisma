@@ -58,6 +58,10 @@ model Reader {
   lastName       String
   fatherName     String?
   category       ReaderCategory  @default(TELEBE)
+  role           String          @default("student") // 'student' | 'teacher'
+  specialty      String?         // İxtisas (for students, e.g. "Kompüter sistemlərində proqramlaşdırma")
+  courseYear     String?         // Kurs (for students, e.g. "1-ci kurs", "2-ci kurs")
+  position       String?         // Vəzifə / Fənn (for teachers, e.g. "İxtisas fənn müəllimi")
   department     String          // Qrup / İxtisas və ya Kafedra / Şöbə
   phone          String
   maxBookLimit   Int             @default(5)
@@ -121,6 +125,10 @@ model Loan {
   bookId            String
   copyId            String
   inventoryNumber   String
+  role              String?    // 'student' | 'teacher' snapshot at time of lending
+  specialty         String?    // İxtisas snapshot (for students)
+  courseYear        String?    // Kurs snapshot (for students)
+  position          String?    // Vəzifə snapshot (for teachers)
   issueDate         DateTime   @default(now())
   dueDate           DateTime
   returnDate        DateTime?

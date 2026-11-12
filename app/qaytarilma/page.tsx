@@ -311,6 +311,13 @@ export default function QaytarilmaPage() {
                         <div className="font-semibold text-slate-800">
                           {loan.readerName}
                         </div>
+                        <div className="text-[11px] text-indigo-600 font-medium truncate max-w-[240px]">
+                          {loan.readerTypeSnapshot || (
+                            loan.readerCategory === "Müəllim" || (loan as any).readerRole === "teacher"
+                              ? `Müəllim${loan.position ? ` • ${loan.position}` : ""}`
+                              : `Tələbə${loan.specialty ? ` • ${loan.specialty}` : ""}${loan.courseYear ? ` (${loan.courseYear})` : ""}`
+                          )}
+                        </div>
                       </td>
 
                       {/* Issue Date */}

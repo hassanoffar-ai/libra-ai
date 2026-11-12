@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, Suspense } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowUpRight,
@@ -13,6 +14,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   AlertCircle,
+  GraduationCap,
+  Briefcase,
   Layers,
   X,
   Sparkles,
@@ -46,6 +49,37 @@ function VerilmeContent() {
   // Selection states
   const [selectedReader, setSelectedReader] = useState<Reader | null>(null);
   const [selectedCopy, setSelectedCopy] = useState<BookCopy | null>(null);
+
+  // Reader Academic / Staff details (Requirements 1 & 2)
+  const [readerType, setReaderType] = useState<"Tələbə" | "Müəllim">("Tələbə");
+  const [specialty, setSpecialty] = useState<string>("");
+  const [courseYear, setCourseYear] = useState<string>("1-ci kurs");
+  const [position, setPosition] = useState<string>("");
+
+  // Pre-fill when selectedReader changes
+  useEffect(() => {
+    if (selectedReader) {
+      const type: "Tələbə" | "Müəllim" =
+        selectedReader.category === "Müəllim" ? "Müəllim" : "Tələbə";
+      setReaderType(type);
+      setSpecialty(
+        selectedReader.specialty ||
+          (type === "Tələbə" && selectedReader.department && selectedReader.department !== "Tələbə qrupu"
+            ? selectedReader.department
+            : "")
+      );
+      setCourseYear(selectedReader.courseYear || "1-ci kurs");
+      setPosition(
+        selectedReader.position ||
+          (type === "Müəllim" && selectedReader.department && selectedReader.department !== "Pedaqoji heyət"
+            ? selectedReader.department
+            : "")
+      );
+    } else {
+      setSpecialty("");
+      setPosition("");
+    }
+  }, [selectedReader]);
 
   // Search queries
   const [readerQuery, setReaderQuery] = useState("");
@@ -115,6 +149,10 @@ function VerilmeContent() {
     return readerActiveLoans.length >= selectedReader.maxBookLimit;
   }, [selectedReader, readerActiveLoans]);
 
+  const activeLoansList = useMemo(() => {
+    return loans.filter((l) => l.status === "Aktiv" || l.status === "Gecikib");
+  }, [loans]);
+
   // Reader search filter
   const searchResultsReaders = useMemo(() => {
     const q = readerQuery.toLowerCase().trim();
@@ -181,6 +219,23 @@ function VerilmeContent() {
       return;
     }
 
+    // Validate academic / staff details (Requirements 1 & 2)
+    if (readerType === "Tələbə") {
+      if (!specialty.trim()) {
+        setErrorMessage("Zəhmət olmasa tələbənin İxtisas sahəsini daxil edin.");
+        return;
+      }
+      if (!courseYear.trim()) {
+        setErrorMessage("Zəhmət olmasa tələbənin Kurs məlumatını seçin.");
+        return;
+      }
+    } else {
+      if (!position.trim()) {
+        setErrorMessage("Zəhmət olmasa müəllimin Vəzifə / Fənn sahəsini daxil edin.");
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setErrorMessage(null);
     try {
@@ -189,6 +244,10 @@ function VerilmeContent() {
         copyId: selectedCopy.id,
         customDueDate: customDueDate,
         notes: notes.trim(),
+        readerType,
+        specialty: readerType === "Tələbə" ? specialty.trim() : undefined,
+        courseYear: readerType === "Tələbə" ? courseYear.trim() : undefined,
+        position: readerType === "Müəllim" ? position.trim() : undefined,
       });
 
       setSuccessMessage(
@@ -421,6 +480,107 @@ function VerilmeContent() {
                   <span className="font-bold text-indigo-900 bg-white px-2.5 py-0.5 rounded-md border border-indigo-100">
                     {readerActiveLoans.length} / {selectedReader.maxBookLimit} limit
                   </span>
+                </div>
+
+                {/* Editable Oxucu Məlumatları (Reader Details) - Requirements 1 & 2 */}
+                <div className="pt-3 border-t border-indigo-200/70 space-y-3 bg-white/90 p-3.5 rounded-xl border border-indigo-100 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <GraduationCap className="w-4 h-4 text-indigo-600" />
+                      <span>Oxucu Məlumatları (Tədris / Vəzifə)</span>
+                    </span>
+                    <span className="text-[10px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                      Yadda saxlanılır
+                    </span>
+                  </div>
+
+                  {/* Oxucu Statusu / Növü Segmented Selector */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Oxucu Statusu / Növü <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setReaderType("Tələbə")}
+                        className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition-all ${
+                          readerType === "Tələbə"
+                            ? "bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-500/20"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        <GraduationCap className="w-3.5 h-3.5" />
+                        <span>Tələbə</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setReaderType("Müəllim")}
+                        className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition-all ${
+                          readerType === "Müəllim"
+                            ? "bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-500/20"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        <Briefcase className="w-3.5 h-3.5" />
+                        <span>Müəllim</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Conditional inputs based on selection */}
+                  {readerType === "Tələbə" ? (
+                    <div className="space-y-2.5 animate-in fade-in duration-200">
+                      {/* İxtisas text input */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          İxtisas <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Məs: Kompüter sistemlərində proqramlaşdırma"
+                          value={specialty}
+                          onChange={(e) => setSpecialty(e.target.value)}
+                          className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
+                        />
+                      </div>
+
+                      {/* Kurs selector */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Kurs <span className="text-rose-500">*</span>
+                        </label>
+                        <select
+                          value={courseYear}
+                          onChange={(e) => setCourseYear(e.target.value)}
+                          className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
+                        >
+                          <option value="1-ci kurs">1-ci kurs</option>
+                          <option value="2-ci kurs">2-ci kurs</option>
+                          <option value="3-cü kurs">3-cü kurs</option>
+                          <option value="4-cü kurs">4-cü kurs</option>
+                        </select>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5 animate-in fade-in duration-200">
+                      {/* Vəzifə / Fənn keyboard input */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Vəzifə / Fənn <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Məs: İxtisas fənn müəllimi və ya Direktor müavini"
+                          value={position}
+                          onChange={(e) => setPosition(e.target.value)}
+                          className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Warnings */}
@@ -661,6 +821,111 @@ function VerilmeContent() {
             Adım 2: Fiziki nüsxəni seçin və müddəti təsdiq edin.
           </div>
         </div>
+      </div>
+
+      {/* ================= ACTIVE CIRCULATIONS (AKTİV DÖVRİYYƏ) ================= */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-indigo-600" />
+              <span>Aktiv Dövriyyə (Hal-hazırda Oxucularda Olan Kitablar)</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Fonddan oxuculara verilmiş aktiv nüsxələr və qeydə alınmış təhsil/vəzifə məlumatları
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
+              {activeLoansList.length} aktiv nüsxə
+            </span>
+            <Link
+              href="/qaytarilma"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-slate-50 border border-slate-200 transition-colors"
+            >
+              <span>Qaytarılma Paneli</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        {activeLoansList.length === 0 ? (
+          <div className="py-8 text-center text-slate-400 text-xs">
+            Hal-hazırda fonddan heç bir aktiv verilmiş kitab yoxdur.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-slate-200 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
+                  <th className="py-2.5 px-3">İnventar / Kitab</th>
+                  <th className="py-2.5 px-3">Oxucu və Status (Tədris/Vəzifə)</th>
+                  <th className="py-2.5 px-3">Verilmə Tarixi</th>
+                  <th className="py-2.5 px-3">Son Qaytarma</th>
+                  <th className="py-2.5 px-3 text-center">Vəziyyət</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {activeLoansList.map((loan) => {
+                  const today = new Date().toISOString().split("T")[0];
+                  const isOverdue = loan.dueDate < today;
+                  return (
+                    <tr key={loan.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-3">
+                        <span className="font-mono text-[11px] font-bold text-indigo-700 block">
+                          {loan.inventoryNumber}
+                        </span>
+                        <span className="font-bold text-slate-900 block truncate max-w-[200px]">
+                          {loan.bookTitle}
+                        </span>
+                        <span className="text-[11px] text-slate-500 block truncate max-w-[200px]">
+                          {loan.bookAuthor}
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-3">
+                        <div className="font-semibold text-slate-800">
+                          {loan.readerName}
+                        </div>
+                        <div className="text-[11px] text-indigo-600 font-medium truncate max-w-[240px]">
+                          {loan.readerTypeSnapshot || (
+                            loan.readerCategory === "Müəllim" || (loan as any).readerRole === "teacher"
+                              ? `Müəllim${loan.position ? ` • ${loan.position}` : ""}`
+                              : `Tələbə${loan.specialty ? ` • ${loan.specialty}` : ""}${loan.courseYear ? ` (${loan.courseYear})` : ""}`
+                          )}
+                        </div>
+                      </td>
+
+                      <td className="py-3 px-3 text-slate-600 font-mono text-[11px]">
+                        {loan.issueDate}
+                      </td>
+
+                      <td className="py-3 px-3 font-mono text-[11px]">
+                        <span className={isOverdue ? "text-rose-600 font-bold" : "text-slate-700"}>
+                          {loan.dueDate}
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-3 text-center">
+                        {isOverdue ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                            <AlertTriangle className="w-3 h-3 text-rose-600" />
+                            Gecikir
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                            <Clock className="w-3 h-3 text-emerald-500" />
+                            Vaxtındadır
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
