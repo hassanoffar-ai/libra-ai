@@ -32,6 +32,16 @@ const STORAGE_KEY_DIGITAL = "libra_ai_digital_resources_v1";
 
 let inMemoryDigital: DigitalResource[] = [];
 
+function cleanData<T extends Record<string, any>>(data: T): Record<string, any> {
+  const cleaned: Record<string, any> = {};
+  for (const [key, val] of Object.entries(data)) {
+    if (val !== undefined) {
+      cleaned[key] = val;
+    }
+  }
+  return cleaned;
+}
+
 function isClient(): boolean {
   return typeof window !== "undefined";
 }
@@ -228,9 +238,9 @@ export async function createDigitalResource(input: {
   };
 
   try {
-    await setDoc(doc(db, "e_library", id), firestoreRecord, { merge: true });
+    await setDoc(doc(db, "e_library", id), cleanData(firestoreRecord), { merge: true });
     // Also mirror to digital_resources for backward compatibility
-    await setDoc(doc(db, "digital_resources", id), firestoreRecord, { merge: true });
+    await setDoc(doc(db, "digital_resources", id), cleanData(firestoreRecord), { merge: true });
   } catch (err) {
     console.warn("Firestore save error:", err);
   }
@@ -287,8 +297,8 @@ export async function updateDigitalResource(
   };
 
   try {
-    await setDoc(doc(db, "e_library", id), firestoreRecord, { merge: true });
-    await setDoc(doc(db, "digital_resources", id), firestoreRecord, { merge: true });
+    await setDoc(doc(db, "e_library", id), cleanData(firestoreRecord), { merge: true });
+    await setDoc(doc(db, "digital_resources", id), cleanData(firestoreRecord), { merge: true });
   } catch (err) {
     console.warn("Firestore update error:", err);
   }

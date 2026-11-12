@@ -73,6 +73,16 @@ const STORAGE_KEY_COPIES = "libra_ai_copies_v1";
 let inMemoryBooks: Book[] = [];
 let inMemoryCopies: BookCopy[] = [];
 
+function cleanData<T extends Record<string, any>>(data: T): Record<string, any> {
+  const cleaned: Record<string, any> = {};
+  for (const [key, val] of Object.entries(data)) {
+    if (val !== undefined) {
+      cleaned[key] = val;
+    }
+  }
+  return cleaned;
+}
+
 function isClient(): boolean {
   return typeof window !== "undefined";
 }
@@ -120,6 +130,13 @@ export async function getBooks(): Promise<Book[]> {
       const remoteBooks: Book[] = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Book));
       saveToStorage(remoteBooks, copies);
       return remoteBooks;
+    } else if (books.length > 0) {
+      // If Firestore collection is empty but local storage has books, sync them up
+      for (const b of books) {
+        setDoc(doc(db, "books", b.id), cleanData(b), { merge: true }).catch((e) =>
+          console.warn("Firestore book auto-sync warning:", e)
+        );
+      }
     }
   } catch (err) {
     console.warn("Firestore books fetch warning:", err);
@@ -226,12 +243,12 @@ export async function createBook(input: CreateBookInput): Promise<{ book: Book; 
   // Firestore sync
   try {
     const bookRef = doc(db, "books", bookId);
-    setDoc(bookRef, newBook, { merge: true }).catch(() => {});
+    await setDoc(bookRef, cleanData(newBook), { merge: true });
     for (const copy of newCopies) {
-      setDoc(doc(db, "book_copies", copy.id), copy, { merge: true }).catch(() => {});
+      await setDoc(doc(db, "book_copies", copy.id), cleanData(copy), { merge: true });
     }
-  } catch {
-    // fallback
+  } catch (err) {
+    console.warn("Firestore book creation warning:", err);
   }
 
   return { book: newBook, copies: newCopies };

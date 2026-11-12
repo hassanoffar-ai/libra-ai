@@ -105,6 +105,16 @@ let inMemoryReaders: Reader[] = [];
 let inMemoryLoans: Loan[] = [];
 let inMemoryReservations: Reservation[] = [];
 
+function cleanData<T extends Record<string, any>>(data: T): Record<string, any> {
+  const cleaned: Record<string, any> = {};
+  for (const [key, val] of Object.entries(data)) {
+    if (val !== undefined) {
+      cleaned[key] = val;
+    }
+  }
+  return cleaned;
+}
+
 function isClient(): boolean {
   return typeof window !== "undefined";
 }
@@ -175,6 +185,13 @@ export async function getReaders(): Promise<Reader[]> {
       const remoteReaders = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Reader));
       saveCirculationData(remoteReaders, loans, reservations);
       return remoteReaders;
+    } else if (readers.length > 0) {
+      // Sync local readers to Firestore if collection is empty
+      for (const r of readers) {
+        setDoc(doc(db, "readers", r.id), cleanData(r), { merge: true }).catch((e) =>
+          console.warn("Firestore reader auto-sync warning:", e)
+        );
+      }
     }
   } catch (err) {
     console.warn("Firestore readers fetch warning:", err);
@@ -254,8 +271,10 @@ export async function createReader(
 
   // Firestore sync
   try {
-    setDoc(doc(db, "readers", readerId), newReader, { merge: true }).catch(() => {});
-  } catch {}
+    await setDoc(doc(db, "readers", readerId), cleanData(newReader), { merge: true });
+  } catch (err) {
+    console.warn("Firestore reader save warning:", err);
+  }
 
   return newReader;
 }
@@ -303,6 +322,13 @@ export async function getLoans(filter?: { status?: LoanStatus; readerId?: string
     if (!snap.empty) {
       currentLoans = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Loan));
       saveCirculationData(readers, currentLoans, reservations);
+    } else if (loans.length > 0) {
+      // Sync local loans to Firestore if collection is empty
+      for (const l of loans) {
+        setDoc(doc(db, "loans", l.id), cleanData(l), { merge: true }).catch((e) =>
+          console.warn("Firestore loan auto-sync warning:", e)
+        );
+      }
     }
   } catch (err) {
     console.warn("Firestore loans fetch warning:", err);
@@ -425,8 +451,10 @@ export async function issueBook(input: IssueBookInput): Promise<Loan> {
 
   // Firestore sync
   try {
-    setDoc(doc(db, "loans", loanId), newLoan, { merge: true }).catch(() => {});
-  } catch {}
+    await setDoc(doc(db, "loans", loanId), cleanData(newLoan), { merge: true });
+  } catch (err) {
+    console.warn("Firestore loan issue warning:", err);
+  }
 
   return newLoan;
 }
@@ -467,8 +495,10 @@ export async function returnBook(input: ReturnBookInput): Promise<Loan> {
 
   // Firestore sync
   try {
-    setDoc(doc(db, "loans", loan.id), updatedLoan, { merge: true }).catch(() => {});
-  } catch {}
+    await setDoc(doc(db, "loans", loan.id), cleanData(updatedLoan), { merge: true });
+  } catch (err) {
+    console.warn("Firestore loan return warning:", err);
+  }
 
   return updatedLoan;
 }
@@ -483,6 +513,12 @@ export async function getReservations(): Promise<Reservation[]> {
       const remoteRes = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Reservation));
       saveCirculationData(readers, loans, remoteRes);
       return remoteRes;
+    } else if (reservations.length > 0) {
+      for (const res of reservations) {
+        setDoc(doc(db, "reservations", res.id), cleanData(res), { merge: true }).catch((e) =>
+          console.warn("Firestore reservation auto-sync warning:", e)
+        );
+      }
     }
   } catch (err) {
     console.warn("Firestore reservations fetch warning:", err);
@@ -525,6 +561,14 @@ export async function createReservation(input: {
 
   const updated = [newRes, ...reservations];
   saveCirculationData(readers, loans, updated);
+
+  // Firestore sync
+  try {
+    await setDoc(doc(db, "reservations", resId), cleanData(newRes), { merge: true });
+  } catch (err) {
+    console.warn("Firestore reservation save warning:", err);
+  }
+
   return newRes;
 }
 

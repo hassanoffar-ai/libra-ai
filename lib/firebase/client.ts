@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore, Firestore } from "firebase/firestore";
 import { getStorage, FirebaseStorage } from "firebase/storage";
 
 // Public Firebase Client configuration for LDPTM Kitabxana
@@ -17,7 +17,17 @@ export const firebaseConfig = {
 // Initialize Firebase client safely (singleton)
 const app: FirebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth: Auth = getAuth(app);
-const db: Firestore = getFirestore(app);
+
+// Enable ignoreUndefinedProperties so Firestore never rejects documents with undefined fields
+let db: Firestore;
+try {
+  db = initializeFirestore(app, {
+    ignoreUndefinedProperties: true,
+  });
+} catch {
+  db = getFirestore(app);
+}
+
 const storage: FirebaseStorage = getStorage(app);
 
 export { app, auth, db, storage };
