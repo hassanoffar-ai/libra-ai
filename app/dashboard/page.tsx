@@ -18,11 +18,16 @@ import { NewBookModal } from "@/components/dashboard/new-book-modal";
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData>(initialZeroDashboardData);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string>("");
 
-  const loadData = async () => {
-    setIsLoading(true);
+  const loadData = async (isManual = false) => {
+    if (isManual) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
     try {
       const result = await getDashboardData();
       setData(result);
@@ -33,14 +38,15 @@ export default function DashboardPage() {
     } catch (err) {
       console.error("Dashboard məlumatları yüklənərkən xəta baş verdi:", err);
     } finally {
+      setIsRefreshing(false);
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadData();
+    loadData(false);
 
-    const handleUpdate = () => loadData();
+    const handleUpdate = () => loadData(false);
     window.addEventListener("libra-data-updated", handleUpdate);
     return () => window.removeEventListener("libra-data-updated", handleUpdate);
   }, []);
@@ -89,11 +95,13 @@ export default function DashboardPage() {
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
           <button
-            onClick={loadData}
+            type="button"
+            onClick={() => loadData(true)}
+            disabled={isRefreshing || isLoading}
             title="Məlumatları yenilə"
-            className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-2xs transition-colors"
+            className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-2xs transition-colors disabled:opacity-50"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin text-indigo-600" : ""}`} />
           </button>
 
           <button

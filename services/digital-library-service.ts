@@ -78,7 +78,7 @@ function loadDigitalData(): DigitalResource[] {
   }
 }
 
-function saveDigitalData(data: DigitalResource[]): void {
+function saveDigitalData(data: DigitalResource[], emitEvent: boolean = true): void {
   // Strip any accidental heavy data URLs before persisting
   const safeData = data.map((item) => ({
     ...item,
@@ -88,7 +88,9 @@ function saveDigitalData(data: DigitalResource[]): void {
   if (isClient()) {
     try {
       localStorage.setItem(STORAGE_KEY_DIGITAL, JSON.stringify(safeData));
-      window.dispatchEvent(new CustomEvent("libra-data-updated"));
+      if (emitEvent) {
+        window.dispatchEvent(new CustomEvent("libra-data-updated"));
+      }
     } catch (err) {
       console.error("Elektron resurslar saxlanarkən xəta:", err);
     }
@@ -125,7 +127,7 @@ export async function getDigitalResources(): Promise<DigitalResource[]> {
           downloadsCount: data.downloadCount ?? data.downloadsCount ?? 0,
         } as DigitalResource;
       });
-      saveDigitalData(remote);
+      saveDigitalData(remote, false);
       return remote;
     }
 
@@ -153,7 +155,7 @@ export async function getDigitalResources(): Promise<DigitalResource[]> {
           downloadsCount: data.downloadCount ?? data.downloadsCount ?? 0,
         } as DigitalResource;
       });
-      saveDigitalData(remote);
+      saveDigitalData(remote, false);
       // Migrate documents to e_library
       for (const item of remote) {
         setDoc(doc(db, "e_library", item.id), cleanData(item), { merge: true }).catch(() => {});

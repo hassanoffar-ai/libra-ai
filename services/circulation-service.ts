@@ -158,7 +158,8 @@ function loadCirculationData(): {
 function saveCirculationData(
   readers: Reader[],
   loans: Loan[],
-  reservations: Reservation[]
+  reservations: Reservation[],
+  emitEvent: boolean = true
 ): void {
   inMemoryReaders = readers;
   inMemoryLoans = loans;
@@ -168,7 +169,9 @@ function saveCirculationData(
       localStorage.setItem(STORAGE_KEY_READERS, JSON.stringify(readers));
       localStorage.setItem(STORAGE_KEY_LOANS, JSON.stringify(loans));
       localStorage.setItem(STORAGE_KEY_RESERVATIONS, JSON.stringify(reservations));
-      window.dispatchEvent(new CustomEvent("libra-data-updated"));
+      if (emitEvent) {
+        window.dispatchEvent(new CustomEvent("libra-data-updated"));
+      }
     } catch (err) {
       console.error("Dövriyyə məlumatları saxlanarkən xəta:", err);
     }
@@ -183,7 +186,7 @@ export async function getReaders(): Promise<Reader[]> {
     const snap = await getDocs(collection(db, "readers"));
     if (!snap.empty) {
       const remoteReaders = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Reader));
-      saveCirculationData(remoteReaders, loans, reservations);
+      saveCirculationData(remoteReaders, loans, reservations, false);
       return remoteReaders;
     } else if (readers.length > 0) {
       // Sync local readers to Firestore if collection is empty
@@ -323,7 +326,7 @@ export async function getLoans(filter?: { status?: LoanStatus; readerId?: string
     const snap = await getDocs(collection(db, "loans"));
     if (!snap.empty) {
       currentLoans = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Loan));
-      saveCirculationData(readers, currentLoans, reservations);
+      saveCirculationData(readers, currentLoans, reservations, false);
     } else if (loans.length > 0) {
       // Sync local loans to Firestore if collection is empty
       for (const l of loans) {
@@ -513,7 +516,7 @@ export async function getReservations(): Promise<Reservation[]> {
     const snap = await getDocs(collection(db, "reservations"));
     if (!snap.empty) {
       const remoteRes = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Reservation));
-      saveCirculationData(readers, loans, remoteRes);
+      saveCirculationData(readers, loans, remoteRes, false);
       return remoteRes;
     } else if (reservations.length > 0) {
       for (const res of reservations) {

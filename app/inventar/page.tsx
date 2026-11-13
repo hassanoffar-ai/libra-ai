@@ -43,25 +43,31 @@ export default function InventarPage() {
   // Shelf Filter
   const [selectedShelf, setSelectedShelf] = useState<string>("all");
   const [auditFilter, setAuditFilter] = useState<"all" | "verified" | "pending">("all");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const fetchCopies = async () => {
-    setIsLoading(true);
+  const fetchCopies = async (isManual = false) => {
+    if (isManual) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
     try {
       const data = await getCopies();
       setCopies(data);
     } catch (err) {
       console.error("Nüsxələr yüklənərkən xəta:", err);
     } finally {
+      setIsRefreshing(false);
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCopies();
+    fetchCopies(false);
 
-    const handleUpdate = () => fetchCopies();
+    const handleUpdate = () => fetchCopies(false);
     window.addEventListener("libra-data-updated", handleUpdate);
     return () => window.removeEventListener("libra-data-updated", handleUpdate);
   }, []);
@@ -209,10 +215,12 @@ export default function InventarPage() {
         </div>
 
         <button
-          onClick={fetchCopies}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold shadow-2xs transition-colors self-start sm:self-auto"
+          type="button"
+          onClick={() => fetchCopies(true)}
+          disabled={isRefreshing || isLoading}
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold shadow-2xs transition-colors self-start sm:self-auto disabled:opacity-50"
         >
-          <RefreshCw className="w-3.5 h-3.5 text-indigo-600" />
+          <RefreshCw className={`w-3.5 h-3.5 text-indigo-600 ${isRefreshing ? "animate-spin" : ""}`} />
           <span>Məlumatları Yenilə</span>
         </button>
       </div>

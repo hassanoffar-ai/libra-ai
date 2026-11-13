@@ -23,6 +23,7 @@ import { DeleteBookDialog } from "@/components/books/delete-book-dialog";
 export default function KitablarPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,23 +36,28 @@ export default function KitablarPage() {
   const [viewingBook, setViewingBook] = useState<Book | null>(null);
   const [deletingBook, setDeletingBook] = useState<Book | null>(null);
 
-  const fetchBooks = async () => {
-    setIsLoading(true);
+  const fetchBooks = async (isManual = false) => {
+    if (isManual) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
     try {
       const data = await getBooks();
       setBooks(data);
     } catch (err) {
       console.error("Kitablar yüklənərkən xəta:", err);
     } finally {
+      setIsRefreshing(false);
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBooks();
+    fetchBooks(false);
 
-    // Digər səhifələrdən və ya modallardan gələn dəyişiklikləri dinləmək
-    const handleUpdate = () => fetchBooks();
+    // Digər səhifələrdən və ya modallardan gələn dəyişiklikləri dinləmək (təkrarlanan dövr yaratmamaq üçün)
+    const handleUpdate = () => fetchBooks(false);
     window.addEventListener("libra-data-updated", handleUpdate);
     return () => window.removeEventListener("libra-data-updated", handleUpdate);
   }, []);
@@ -108,16 +114,31 @@ export default function KitablarPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            setEditingBook(null);
-            setIsAddModalOpen(true);
-          }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs sm:text-sm font-semibold shadow-sm shadow-indigo-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Yeni Kitab Əlavə Et</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => fetchBooks(true)}
+            disabled={isRefreshing || isLoading}
+            title="Məlumatları yenilə"
+            className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-2xs transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          >
+            <RefreshCw
+              className={`w-4 h-4 ${isRefreshing ? "animate-spin text-indigo-600" : ""}`}
+            />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setEditingBook(null);
+              setIsAddModalOpen(true);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs sm:text-sm font-semibold shadow-sm shadow-indigo-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Yeni Kitab Əlavə Et</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. Top Bar: Search & Filters */}

@@ -105,14 +105,16 @@ function loadFromStorage(): { books: Book[]; copies: BookCopy[] } {
   }
 }
 
-function saveToStorage(books: Book[], copies: BookCopy[]): void {
+function saveToStorage(books: Book[], copies: BookCopy[], emitEvent: boolean = true): void {
   inMemoryBooks = books;
   inMemoryCopies = copies;
   if (isClient()) {
     try {
       localStorage.setItem(STORAGE_KEY_BOOKS, JSON.stringify(books));
       localStorage.setItem(STORAGE_KEY_COPIES, JSON.stringify(copies));
-      window.dispatchEvent(new CustomEvent("libra-data-updated"));
+      if (emitEvent) {
+        window.dispatchEvent(new CustomEvent("libra-data-updated"));
+      }
     } catch (err) {
       console.error("Storage yazılarkən xəta:", err);
     }
@@ -128,7 +130,8 @@ export async function getBooks(): Promise<Book[]> {
     const snap = await getDocs(collection(db, "books"));
     if (!snap.empty) {
       const remoteBooks: Book[] = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Book));
-      saveToStorage(remoteBooks, copies);
+      // Read operations cache data silently without re-triggering update events
+      saveToStorage(remoteBooks, copies, false);
       return remoteBooks;
     } else if (books.length > 0) {
       // If Firestore collection is empty but local storage has books, sync them up
@@ -171,7 +174,8 @@ export async function getCopies(bookId?: string): Promise<BookCopy[]> {
     const snap = await getDocs(collection(db, "book_copies"));
     if (!snap.empty) {
       const remoteCopies: BookCopy[] = snap.docs.map((d) => ({ id: d.id, ...d.data() } as BookCopy));
-      saveToStorage(books, remoteCopies);
+      // Read operations cache data silently without re-triggering update events
+      saveToStorage(books, remoteCopies, false);
       if (bookId) {
         return remoteCopies.filter((c) => c.bookId === bookId);
       }
