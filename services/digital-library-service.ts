@@ -1,13 +1,12 @@
 /**
  * Peşə Kitabxanası - Rəqəmsal Kitabxana Servisi (Digital Library Service)
  * 
- * 100% Real Verilənlər Bazası (Firebase Firestore & Firebase Storage)
+ * 100% Real Verilənlər Bazası (Firebase Firestore & Vercel Blob)
  * Heç bir saxta və ya mock resurs daxil edilməyib.
  */
 
-import { db, storage } from "@/lib/firebase/client";
+import { db } from "@/lib/firebase/client";
 import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "firebase/firestore";
-import { ref, deleteObject } from "firebase/storage";
 
 export interface DigitalResource {
   id: string;
@@ -309,7 +308,7 @@ export async function updateDigitalResource(
 }
 
 /**
- * Elektron resursu bazadan (Firestore) və Storage-dan silir
+ * Elektron resursu bazadan (Firestore) və Vercel Blob yaddaşından silir
  */
 export async function deleteDigitalResource(id: string): Promise<void> {
   const data = loadDigitalData();
@@ -327,13 +326,20 @@ export async function deleteDigitalResource(id: string): Promise<void> {
     await deleteDoc(doc(db, "digital_resources", id));
   } catch {}
 
-  // 2. Firebase Storage automatic file cleanup so storage never wastes space
-  if (target?.storagePath) {
+  // 2. Vercel Blob file cleanup
+  const fileUrl = target?.fileUrl;
+  if (
+    fileUrl &&
+    (fileUrl.includes("vercel-storage.com") || fileUrl.includes("blob.vercel-storage"))
+  ) {
     try {
-      const storageRef = ref(storage, target.storagePath);
-      await deleteObject(storageRef);
+      if (isClient()) {
+        await fetch(`/api/upload-resource?url=${encodeURIComponent(fileUrl)}`, {
+          method: "DELETE",
+        });
+      }
     } catch (err) {
-      console.warn("Firebase Storage file delete error:", err);
+      console.warn("Vercel Blob file delete warning:", err);
     }
   }
 }

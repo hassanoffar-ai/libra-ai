@@ -19,8 +19,6 @@ import {
   updateDigitalResource,
   DigitalResource,
 } from "@/services/digital-library-service";
-import { storage } from "@/lib/firebase/client";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 interface AddResourceModalProps {
   isOpen: boolean;
@@ -170,47 +168,60 @@ export function AddResourceModal({
       // If user uploaded a new local file from device
       if (activeTab === "file" && selectedFile) {
         finalFileName = selectedFile.name;
-        const sanitized = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        // Store directly under e-library/{timestamp}_{filename} using uploadBytesResumable
-        storagePath = `e-library/${Date.now()}_${sanitized}`;
-        const storageRef = ref(storage, storagePath);
-
         setUploadProgress(0);
 
-        try {
-          const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        formData.append("filename", selectedFile.name);
 
-          finalFileUrl = await new Promise<string>((resolve, reject) => {
-            uploadTask.on(
-              "state_changed",
-              (snapshot) => {
-                if (snapshot.totalBytes > 0) {
-                  const progress = Math.round(
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                  );
-                  setUploadProgress(progress);
-                }
-              },
-              (storageErr) => {
-                reject(storageErr);
-              },
-              async () => {
+        try {
+          const uploadResult = await new Promise<{ url: string; pathname?: string }>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/upload-resource");
+
+            xhr.upload.onprogress = (event) => {
+              if (event.lengthComputable && event.total > 0) {
+                const progress = Math.round((event.loaded / event.total) * 100);
+                setUploadProgress(progress);
+              }
+            };
+
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
                 try {
-                  const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                  resolve(downloadUrl);
-                } catch (urlErr) {
-                  reject(urlErr);
+                  const response = JSON.parse(xhr.responseText);
+                  if (response.url) {
+                    resolve(response);
+                  } else {
+                    reject(new Error(response.error || "Fayl URL-i alına bilmədi."));
+                  }
+                } catch {
+                  reject(new Error("Server cavabı oxunmadı."));
+                }
+              } else {
+                try {
+                  const response = JSON.parse(xhr.responseText);
+                  reject(new Error(response.error || `Yükləmə xətası (Status: ${xhr.status})`));
+                } catch {
+                  reject(new Error(`Yükləmə xətası (Status: ${xhr.status})`));
                 }
               }
-            );
+            };
+
+            xhr.onerror = () => {
+              reject(new Error("Şəbəkə xətası: Serverlə əlaqə qurula bilmədi."));
+            };
+
+            xhr.send(formData);
           });
-        } catch (storageErr: any) {
-          console.error("Firebase Storage upload error:", storageErr);
+
+          finalFileUrl = uploadResult.url;
+          storagePath = uploadResult.pathname || uploadResult.url;
+        } catch (uploadErr: any) {
+          console.error("Vercel Blob upload error:", uploadErr);
           setUploadProgress(null);
           throw new Error(
-            `Fayl Firebase Storage yaddaşına yüklənə bilmədi (${
-              storageErr?.message || "İcazə və ya bağlantı xətası"
-            }). Zəhmət olmasa internet bağlantınızı yoxlayın və ya 'URL / Keçid' tabından istifadə edin.`
+            `Fayl yüklənə bilmədi: ${uploadErr?.message || "Xəta baş verdi"}. Zəhmət olmasa internet bağlantınızı yoxlayın və ya 'URL / Keçid' bölməsindən istifadə edin.`
           );
         }
       } else if (activeTab === "url" && !finalFileUrl) {
