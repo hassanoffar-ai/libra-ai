@@ -1,70 +1,54 @@
-import { put, del } from "@vercel/blob";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { del } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /**
- * Vercel Blob File Upload Endpoint
- * Receives FormData with file and uploads directly to Vercel Blob with public access.
- * Up to 50MB PDFs, DOCX, EPUB, etc.
+ * Vercel Blob Client Upload Endpoint
+ * Handles token generation so client browser uploads files directly to Vercel Blob.
+ * Completely bypasses Vercel's 4.5MB Serverless Function payload limit (supports up to 50MB).
  */
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const formData = await request.formData();
-    const file = formData.get("file") as File | null;
+    const body = (await request.json()) as HandleUploadBody;
 
-    if (!file) {
-      return NextResponse.json(
-        { error: "Yükləmək üçün fayl tapılmadı." },
-        { status: 400 }
-      );
-    }
-
-    // Check file size (e.g. 50MB maximum limit)
-    const MAX_SIZE_MB = 50;
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      return NextResponse.json(
-        { error: `Fayl həcmi maksimum ${MAX_SIZE_MB}MB ola bilər.` },
-        { status: 400 }
-      );
-    }
-
-    // Sanitize filename and create structured path
-    const rawName = file.name || "e-resurs";
-    const cleanName = rawName.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const filename = `e-library/${Date.now()}_${cleanName}`;
-
-    // Upload to Vercel Blob (automatically utilizes process.env.BLOB_READ_WRITE_TOKEN)
-    const blob = await put(filename, file, {
-      access: "public",
-      addRandomSuffix: true,
-    });
-
-    return NextResponse.json({
-      success: true,
-      url: blob.url,
-      downloadUrl: blob.downloadUrl,
-      pathname: blob.pathname,
-      contentType: blob.contentType,
-      size: file.size,
-    });
-  } catch (error: any) {
-    console.error("Vercel Blob upload error:", error);
-    return NextResponse.json(
-      {
-        error:
-          error?.message ||
-          "Fayl Vercel Blob yaddaşına yüklənə bilmədi. Zəhmət olmasa BLOB_READ_WRITE_TOKEN parametrlərini yoxlayın.",
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async (pathname /*, clientPayload */) => {
+        return {
+          allowedContentTypes: [
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/msword",
+            "application/epub+zip",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "application/vnd.ms-powerpoint",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-excel",
+            "application/octet-stream",
+          ],
+          maximumSizeInBytes: 50 * 1024 * 1024, // 50MB
+        };
       },
-      { status: 500 }
+      onUploadCompleted: async ({ blob, tokenPayload }) => {
+        console.log("Vercel Blob client upload completed:", blob.url);
+      },
+    });
+
+    return NextResponse.json(jsonResponse);
+  } catch (error: any) {
+    console.error("Vercel Blob client upload token error:", error);
+    return NextResponse.json(
+      { error: error?.message || "Vercel Blob token xətası" },
+      { status: 400 }
     );
   }
 }
 
 /**
  * Vercel Blob File Deletion Endpoint
- * Deletes a file from Vercel Blob given its public URL
  */
 export async function DELETE(request: Request) {
   try {

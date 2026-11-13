@@ -7,6 +7,33 @@
 
 import { db } from "@/lib/firebase/client";
 import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "firebase/firestore";
+import { upload } from "@vercel/blob/client";
+
+/**
+ * Faylı birbaşa brauzerdən Vercel Blob yaddaşına yükləyir (Vercel Serverless 4.5MB limitini aşaraq 50MB-a qədər)
+ */
+export async function uploadDigitalResourceFile(
+  file: File,
+  onProgress?: (percentage: number) => void
+): Promise<{ url: string; pathname: string }> {
+  const sanitized = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const pathname = `e-library/${Date.now()}_${sanitized}`;
+
+  const blob = await upload(pathname, file, {
+    access: "public",
+    handleUploadUrl: "/api/upload-resource",
+    onUploadProgress: (progressEvent) => {
+      if (onProgress) {
+        onProgress(Math.round(progressEvent.percentage));
+      }
+    },
+  });
+
+  return {
+    url: blob.url,
+    pathname: blob.pathname,
+  };
+}
 
 export interface DigitalResource {
   id: string;

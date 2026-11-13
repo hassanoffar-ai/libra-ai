@@ -17,6 +17,7 @@ import {
 import {
   createDigitalResource,
   updateDigitalResource,
+  uploadDigitalResourceFile,
   DigitalResource,
 } from "@/services/digital-library-service";
 
@@ -170,55 +171,18 @@ export function AddResourceModal({
         finalFileName = selectedFile.name;
         setUploadProgress(0);
 
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-        formData.append("filename", selectedFile.name);
-
         try {
-          const uploadResult = await new Promise<{ url: string; pathname?: string }>((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "/api/upload-resource");
-
-            xhr.upload.onprogress = (event) => {
-              if (event.lengthComputable && event.total > 0) {
-                const progress = Math.round((event.loaded / event.total) * 100);
-                setUploadProgress(progress);
-              }
-            };
-
-            xhr.onload = () => {
-              if (xhr.status >= 200 && xhr.status < 300) {
-                try {
-                  const response = JSON.parse(xhr.responseText);
-                  if (response.url) {
-                    resolve(response);
-                  } else {
-                    reject(new Error(response.error || "Fayl URL-i alına bilmədi."));
-                  }
-                } catch {
-                  reject(new Error("Server cavabı oxunmadı."));
-                }
-              } else {
-                try {
-                  const response = JSON.parse(xhr.responseText);
-                  reject(new Error(response.error || `Yükləmə xətası (Status: ${xhr.status})`));
-                } catch {
-                  reject(new Error(`Yükləmə xətası (Status: ${xhr.status})`));
-                }
-              }
-            };
-
-            xhr.onerror = () => {
-              reject(new Error("Şəbəkə xətası: Serverlə əlaqə qurula bilmədi."));
-            };
-
-            xhr.send(formData);
-          });
+          const uploadResult = await uploadDigitalResourceFile(
+            selectedFile,
+            (percentage) => {
+              setUploadProgress(percentage);
+            }
+          );
 
           finalFileUrl = uploadResult.url;
           storagePath = uploadResult.pathname || uploadResult.url;
         } catch (uploadErr: any) {
-          console.error("Vercel Blob upload error:", uploadErr);
+          console.error("Vercel Blob client upload error:", uploadErr);
           setUploadProgress(null);
           throw new Error(
             `Fayl yüklənə bilmədi: ${uploadErr?.message || "Xəta baş verdi"}. Zəhmət olmasa internet bağlantınızı yoxlayın və ya 'URL / Keçid' bölməsindən istifadə edin.`
@@ -233,7 +197,7 @@ export function AddResourceModal({
 
       // STRICT VALIDATION: Ensure NO base64 data URLs or raw blobs enter the database
       if (finalFileUrl.startsWith("data:")) {
-        throw new Error("Fayl məzmunu (Base64) birbaşa verilənlər bazasında saxlanıla bilməz. Yalnız yüngül Firebase Storage və ya birbaşa keçid (URL) qəbul edilir.");
+        throw new Error("Fayl məzmunu (Base64) birbaşa verilənlər bazasında saxlanıla bilməz. Yalnız yüngül bulud yaddaşı (Vercel Blob) və ya birbaşa keçid (URL) qəbul edilir.");
       }
 
       if (editResource) {
@@ -445,7 +409,7 @@ export function AddResourceModal({
                     <div className="flex items-center justify-between text-xs font-bold text-indigo-900">
                       <span className="flex items-center gap-2">
                         <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
-                        <span>Fayl Firebase Storage-a yüklənir...</span>
+                        <span>Fayl bulud yaddaşına yüklənir...</span>
                       </span>
                       <span className="font-mono text-indigo-700 bg-white px-2.5 py-0.5 rounded-md border border-indigo-200 text-xs font-bold shadow-2xs">
                         {uploadProgress}%
