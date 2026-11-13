@@ -100,7 +100,7 @@ function ReaderLoginForm() {
           {/* Top Institutional Header */}
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug max-w-3xl mx-auto">
-              Lənkəran Dövlət Peşə Təhsil Mərkəzinin kitabxanasına
+              Lənkəran Dövlət Peşə Təhsil Mərkəzinin elektron kitabxanasına
               <br className="hidden sm:inline" /> xoş gəlmisiniz.
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-500 font-medium">
@@ -110,7 +110,7 @@ function ReaderLoginForm() {
 
           {/* Grid Layout: Building Photo on Left, Login Card on Right */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
-            
+
             {/* Left Column: Lənkəran Dövlət Peşə Təhsil Mərkəzi Building Photo */}
             <div className="lg:col-span-7 flex flex-col">
               <div className="h-64 sm:h-80 lg:h-full lg:min-h-[480px] relative rounded-3xl overflow-hidden border border-slate-200/90 shadow-xl shadow-slate-200/60 group">
