@@ -241,7 +241,7 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
                   required
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Məs: Rəşad"
+                  placeholder=""
                   className={`w-full px-3 py-2 text-sm bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all ${
                     errors.firstName ? "border-rose-400 bg-rose-50/30" : "border-slate-200"
                   }`}
@@ -257,7 +257,7 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
                   required
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Məs: Qasımov"
+                  placeholder=""
                   className={`w-full px-3 py-2 text-sm bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all ${
                     errors.lastName ? "border-rose-400 bg-rose-50/30" : "border-slate-200"
                   }`}
@@ -272,7 +272,7 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
                   type="text"
                   value={fatherName}
                   onChange={(e) => setFatherName(e.target.value)}
-                  placeholder="Məs: İlham"
+                  placeholder=""
                   className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
                 />
               </div>
@@ -289,7 +289,7 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
                   required
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  placeholder="Məs: Qrup 204 - Veb Dizayn və Proqram təminatı"
+                  placeholder=""
                   className={`w-full pl-9 pr-3.5 py-2 text-sm bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all ${
                     errors.department ? "border-rose-400 bg-rose-50/30" : "border-slate-200"
                   }`}
@@ -310,7 +310,7 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+994 50 123 45 67"
+                    placeholder=""
                     className="w-full pl-9 pr-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
                   />
                   <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
@@ -326,7 +326,7 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="oxucu@ldptm.edu.az"
+                    placeholder=""
                     className="w-full pl-9 pr-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
                   />
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
@@ -379,7 +379,7 @@ export function AddReaderModal({ isOpen, onClose, onSuccess, editReader }: AddRe
                 rows={2}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Oxucu haqqında fərdi qeydlər və ya xüsusi icazələr..."
+                placeholder=""
                 className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all resize-none"
               />
             </div>

@@ -114,17 +114,21 @@ function AdminLoginContent() {
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-violet-600/30 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-900/40 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Top: Emblem & Agency Title */}
+        {/* Top: Institutional LDPTM Official Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-12 h-12 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-[#DDD6FE] shadow-lg backdrop-blur-xs">
-            <GraduationCap className="w-6 h-6 text-[#C4B5FD]" />
+          <div className="w-12 h-12 rounded-xl bg-white p-1.5 shadow-lg flex items-center justify-center flex-shrink-0">
+            <img
+              src="/ldptm-logo.png"
+              alt="Lənkəran Dövlət Peşə Təhsil Mərkəzi"
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
-            <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#C4B5FD] block">
-              AZƏRBAYCAN RESPUBLİKASI ELM VƏ TƏHSİL NAZİRLİYİ
-            </span>
-            <span className="text-xs sm:text-sm font-extrabold tracking-tight text-white block">
+            <span className="text-sm sm:text-base font-extrabold tracking-tight text-white block">
               Lənkəran Dövlət Peşə Təhsil Mərkəzi
+            </span>
+            <span className="text-[11px] text-[#C4B5FD] font-semibold block">
+              İnzibati İdarəetmə Paneli
             </span>
           </div>
         </div>
@@ -159,7 +163,7 @@ function AdminLoginContent() {
 
         {/* Bottom */}
         <div className="relative z-10 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] text-violet-300/80">
-          <span>Təhlükəsiz Administrasiya Şəbəkəsi</span>
+          <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi</span>
           <span>© 2026 Lənkəran DPTM</span>
         </div>
       </div>
@@ -211,7 +215,7 @@ function AdminLoginContent() {
                   type="email"
                   required
                   autoComplete="email"
-                  placeholder="Məs: admin@ldptm.edu.az"
+                  placeholder=""
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -238,7 +242,7 @@ function AdminLoginContent() {
                   type={showPassword ? "text" : "password"}
                   required
                   autoComplete="current-password"
-                  placeholder="••••••••"
+                  placeholder=""
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);

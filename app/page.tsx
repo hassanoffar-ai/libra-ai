@@ -104,42 +104,60 @@ function ReaderLoginForm() {
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-violet-600/30 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-800/40 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Top: Institutional Emblem & Agency badge */}
+        {/* Top: Institutional LDPTM Official Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-12 h-12 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-[#DDD6FE] shadow-lg backdrop-blur-xs">
-            <GraduationCap className="w-6 h-6 text-[#C4B5FD]" />
+          <div className="w-12 h-12 rounded-xl bg-white p-1.5 shadow-lg flex items-center justify-center flex-shrink-0">
+            <img
+              src="/ldptm-logo.png"
+              alt="Lənkəran Dövlət Peşə Təhsil Mərkəzi"
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
-            <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-[#C4B5FD] block">
-              AZƏRBAYCAN RESPUBLİKASI ELM VƏ TƏHSİL NAZİRLİYİ
-            </span>
-            <span className="text-xs sm:text-sm font-extrabold tracking-tight text-white block">
+            <span className="text-sm sm:text-base font-extrabold tracking-tight text-white block">
               Lənkəran Dövlət Peşə Təhsil Mərkəzi
+            </span>
+            <span className="text-[11px] text-[#C4B5FD] font-semibold block">
+              Elektron Kitabxana
             </span>
           </div>
         </div>
 
-        {/* Middle: Brand Core Information */}
-        <div className="relative z-10 my-10 lg:my-auto max-w-lg">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 border border-white/15 text-[#DDD6FE] text-xs font-semibold mb-4 backdrop-blur-xs">
+        {/* Middle: Brand Core Information & LDPTM Building Visual */}
+        <div className="relative z-10 my-8 lg:my-auto max-w-lg">
+          {/* LDPTM Building Card */}
+          <div className="relative rounded-2xl overflow-hidden border border-white/20 shadow-2xl mb-6 group">
+            <img
+              src="/ldptm-building.jpg"
+              alt="Lənkəran Dövlət Peşə Təhsil Mərkəzi"
+              className="w-full h-44 sm:h-48 object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#2E1065]/90 via-[#2E1065]/30 to-transparent flex items-end p-4">
+              <span className="text-xs font-bold text-white tracking-wide">
+                Lənkəran Dövlət Peşə Təhsil Mərkəzinin Tədris Binası
+              </span>
+            </div>
+          </div>
+
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 border border-white/15 text-[#DDD6FE] text-xs font-semibold mb-3 backdrop-blur-xs">
             <BookOpen className="w-4 h-4 text-[#C4B5FD]" />
             <span>Elektron Kitabxana və Resurs Portalı</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight">
             Müasir Təhsil, <br />
             <span className="text-[#C4B5FD]">Zəngin Kitabxana.</span>
           </h1>
 
-          <p className="mt-4 text-xs sm:text-sm text-violet-200/90 leading-relaxed font-normal">
-            Lənkəran Dövlət Peşə Təhsil Mərkəzinin tələbə və müəllim heyəti üçün fiziki kitab fondu, rəqəmsal dərsliklər, texniki ədəbiyyat və onlayn sifariş sistemi.
+          <p className="mt-3 text-xs sm:text-sm text-violet-200/90 leading-relaxed font-normal">
+            Lənkəran Dövlət Peşə Təhsil Mərkəzinin tələbə və müəllim heyəti üçün fiziki kitab fondu, rəqəmsal dərsliklər və texniki ədəbiyyat bazası.
           </p>
 
           {/* Quick Stats or Features Pill */}
-          <div className="mt-8 grid grid-cols-2 gap-3 pt-6 border-t border-white/10">
+          <div className="mt-6 grid grid-cols-2 gap-3 pt-4 border-t border-white/10">
             <div className="p-3 rounded-lg bg-white/5 border border-white/10">
               <span className="text-xs font-bold text-white block">Elektron Kataloq</span>
-              <span className="text-[11px] text-violet-200/70">Axtarış və onlayn sifariş</span>
+              <span className="text-[11px] text-violet-200/70">Kitab fondu üzrə axtarış</span>
             </div>
             <div className="p-3 rounded-lg bg-white/5 border border-white/10">
               <span className="text-xs font-bold text-white block">Rəqəmsal Resurslar</span>
@@ -150,7 +168,7 @@ function ReaderLoginForm() {
 
         {/* Bottom: Institutional Footer */}
         <div className="relative z-10 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] text-violet-300/80">
-          <span>Peşə Təhsili üzrə Dövlət Agentliyi standartı</span>
+          <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi</span>
           <span>© 2026 Lənkəran DPTM</span>
         </div>
       </div>
@@ -158,12 +176,15 @@ function ReaderLoginForm() {
       {/* RIGHT HALF: Pure Crisp White Authentication Panel */}
       <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-16 bg-white min-h-[520px]">
         <div className="w-full max-w-md">
-          {/* Header */}
+          {/* Header & Prominent Welcome Text */}
           <div className="mb-8">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <div className="mb-2 p-2.5 rounded-lg bg-violet-50 border border-violet-100 text-violet-900 text-xs sm:text-sm font-bold">
+              Lənkəran Dövlət Peşə Təhsil Mərkəzinin elektron kitabxanasına xoş gəlmisiniz
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-3">
               Oxucu Girişi
             </h2>
-            <p className="mt-2 text-xs sm:text-sm text-slate-500">
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
               Şəxsi kabinetinizə daxil olaraq kitabları sifariş edin və oxu vəziyyətinizi izləyin.
             </p>
           </div>
@@ -198,7 +219,7 @@ function ReaderLoginForm() {
                   type="email"
                   required
                   autoComplete="email"
-                  placeholder="Məs: ad.soyad@ldptm.edu.az"
+                  placeholder=""
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -225,7 +246,7 @@ function ReaderLoginForm() {
                   type={showPassword ? "text" : "password"}
                   required
                   autoComplete="current-password"
-                  placeholder="••••••••"
+                  placeholder=""
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);

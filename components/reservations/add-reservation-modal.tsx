@@ -165,7 +165,7 @@ export function AddReservationModal({ isOpen, onClose, onSuccess }: AddReservati
                       type="text"
                       value={readerQuery}
                       onChange={(e) => setReaderQuery(e.target.value)}
-                      placeholder="Oxucu adı daxil edin..."
+                      placeholder=""
                       className="w-full pl-9 pr-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
                     />
                   </div>
@@ -234,7 +234,7 @@ export function AddReservationModal({ isOpen, onClose, onSuccess }: AddReservati
                       type="text"
                       value={bookQuery}
                       onChange={(e) => setBookQuery(e.target.value)}
-                      placeholder="Kitabın adı və ya ISBN daxil edin..."
+                      placeholder=""
                       className="w-full pl-9 pr-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
                     />
                   </div>

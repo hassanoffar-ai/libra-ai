@@ -97,7 +97,7 @@ export function NewBookModal({ isOpen, onClose, onSubmit }: NewBookModalProps) {
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Məs: İnformasiya Texnologiyalarının Əsasları"
+                placeholder=""
                 className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all text-slate-800 placeholder-slate-400"
               />
             </div>
@@ -111,7 +111,7 @@ export function NewBookModal({ isOpen, onClose, onSubmit }: NewBookModalProps) {
                 required
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
-                placeholder="Məs: Əli Məmmədov"
+                placeholder=""
                 className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all text-slate-800 placeholder-slate-400"
               />
             </div>

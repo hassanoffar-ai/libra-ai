@@ -253,7 +253,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
                     required
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Məs: Kompüter Şəbəkələri və İnformasiya Təhlükəsizliyi"
+                    placeholder=""
                     className={`w-full px-3.5 py-2 text-sm bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all ${
                       errors.title ? "border-rose-400 bg-rose-50/30" : "border-slate-200"
                     }`}
@@ -270,7 +270,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
                     required
                     value={author}
                     onChange={(e) => setAuthor(e.target.value)}
-                    placeholder="Məs: Professor E. Əliyev"
+                    placeholder=""
                     className={`w-full px-3.5 py-2 text-sm bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all ${
                       errors.author ? "border-rose-400 bg-rose-50/30" : "border-slate-200"
                     }`}
@@ -313,7 +313,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
                     type="text"
                     value={isbn}
                     onChange={(e) => setIsbn(e.target.value)}
-                    placeholder="Məs: 978-9952-12-345-6"
+                    placeholder=""
                     className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-mono text-xs"
                   />
                 </div>
@@ -326,7 +326,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
                     type="text"
                     value={udk}
                     onChange={(e) => setUdk(e.target.value)}
-                    placeholder="Məs: 004.7 (075.8)"
+                    placeholder=""
                     className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-mono text-xs"
                   />
                 </div>
@@ -339,7 +339,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
                     type="text"
                     value={publisher}
                     onChange={(e) => setPublisher(e.target.value)}
-                    placeholder="Məs: Maarif / Şərq-Qərb"
+                    placeholder=""
                     className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
                   />
                 </div>
@@ -353,7 +353,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
                       type="text"
                       value={year}
                       onChange={(e) => setYear(e.target.value)}
-                      placeholder="Məs: 2023"
+                      placeholder=""
                       className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-mono text-xs"
                     />
                   </div>
@@ -366,7 +366,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
                       min="1"
                       value={pages}
                       onChange={(e) => setPages(e.target.value ? parseInt(e.target.value) : "")}
-                      placeholder="Məs: 320"
+                      placeholder=""
                       className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs"
                     />
                   </div>
@@ -398,7 +398,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
                       type="text"
                       value={initialShelf}
                       onChange={(e) => setInitialShelf(e.target.value)}
-                      placeholder="Məs: Zal 1, Rəf A-2"
+                      placeholder=""
                       className="w-full pl-9 pr-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs"
                     />
                     <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
@@ -414,7 +414,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
                   rows={2}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Kitabın məzmunu və ya oxucuların axtarışı üçün açar sözlər..."
+                  placeholder=""
                   className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all resize-none text-xs"
                 />
               </div>
@@ -459,7 +459,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
                       type="text"
                       value={inventoryPrefix}
                       onChange={(e) => setInventoryPrefix(e.target.value)}
-                      placeholder="INV-"
+                      placeholder=""
                       className="w-full px-3.5 py-2 text-sm bg-white border border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-mono text-xs"
                     />
                   </div>

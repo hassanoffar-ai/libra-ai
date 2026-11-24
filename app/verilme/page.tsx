@@ -424,7 +424,7 @@ function VerilmeContent() {
                     type="text"
                     value={readerQuery}
                     onChange={(e) => setReaderQuery(e.target.value)}
-                    placeholder="Məs: Rəşad Qasımov..."
+                    placeholder=""
                     className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
                   />
                 </div>
@@ -598,7 +598,7 @@ function VerilmeContent() {
                         <input
                           type="text"
                           required
-                          placeholder="Məs: Kompüter sistemlərində proqramlaşdırma"
+                          placeholder=""
                           value={specialty}
                           onChange={(e) => setSpecialty(e.target.value)}
                           className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
@@ -632,7 +632,7 @@ function VerilmeContent() {
                         <input
                           type="text"
                           required
-                          placeholder="Məs: İxtisas fənn müəllimi və ya Direktor müavini"
+                          placeholder=""
                           value={position}
                           onChange={(e) => setPosition(e.target.value)}
                           className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-slate-800"
@@ -703,7 +703,7 @@ function VerilmeContent() {
                     type="text"
                     value={copyQuery}
                     onChange={(e) => setCopyQuery(e.target.value)}
-                    placeholder="Məs: INV-1001..."
+                    placeholder=""
                     className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-mono"
                   />
                 </div>
@@ -1000,7 +1000,7 @@ function VerilmeContent() {
                   type="text"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Məs: Kurs işi və ya tədris semestri üçün verilib..."
+                  placeholder=""
                   className="w-full px-3 py-2 text-xs bg-[#F7F5FC] border border-[#E4E0F0] rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all"
                 />
               </div>

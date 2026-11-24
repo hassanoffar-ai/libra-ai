@@ -416,7 +416,7 @@ export default function QaytarilmaPage() {
                   type="text"
                   value={returnNotes}
                   onChange={(e) => setReturnNotes(e.target.value)}
-                  placeholder="Məs: Cildi bərpa olunmalıdır..."
+                  placeholder=""
                   className="w-full px-3 py-2 text-xs bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all"
                 />
               </div>

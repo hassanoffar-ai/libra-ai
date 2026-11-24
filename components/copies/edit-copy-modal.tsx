@@ -128,7 +128,7 @@ export function EditCopyModal({ isOpen, copy, onClose, onSuccess }: EditCopyModa
                   required
                   value={shelfLocation}
                   onChange={(e) => setShelfLocation(e.target.value)}
-                  placeholder="Məs: Zal 1, Rəf B-4, Bölmə 2"
+                  placeholder=""
                   className="w-full pl-9 pr-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs"
                 />
                 <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />

@@ -440,7 +440,7 @@ export function AddResourceModal({
                     type="url"
                     value={fileUrl}
                     onChange={(e) => setFileUrl(e.target.value)}
-                    placeholder="https://example.com/kitab.pdf"
+                    placeholder=""
                     className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800"
                   />
                 </div>
@@ -457,7 +457,7 @@ export function AddResourceModal({
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Məs: Veb Proqramlaşdırma Əsasları"
+                placeholder=""
                 className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800"
               />
             </div>
@@ -472,7 +472,7 @@ export function AddResourceModal({
                 required
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
-                placeholder="Məs: R. Məmmədov"
+                placeholder=""
                 className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800"
               />
             </div>
@@ -524,7 +524,7 @@ export function AddResourceModal({
                 type="text"
                 value={fileSize}
                 onChange={(e) => setFileSize(e.target.value)}
-                placeholder="Məs: 4.5 MB"
+                placeholder=""
                 className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800 font-mono"
               />
             </div>
@@ -538,7 +538,7 @@ export function AddResourceModal({
                 rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Vəsaitin təyinatı və ya laboratoriya işləri haqqında..."
+                placeholder=""
                 className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white text-slate-800 resize-none"
               />
             </div>

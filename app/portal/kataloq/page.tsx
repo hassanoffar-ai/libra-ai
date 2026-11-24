@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   BookOpen,
@@ -82,9 +83,9 @@ function ReaderCatalogContent() {
 
   if (isAuthLoading || !reader) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F7F5FC] flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full animate-spin" />
           <p className="text-xs font-medium text-slate-500">Məlumatlar yüklənir...</p>
         </div>
       </div>
@@ -92,9 +93,9 @@ function ReaderCatalogContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col selection:bg-indigo-600 selection:text-white">
+    <div className="min-h-screen bg-[#F7F5FC] flex flex-col selection:bg-violet-700 selection:text-white">
       {/* Header - Reader Portal Top Navigation (NO Admin sidebar) */}
-      <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between">
+      <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-[#E4E0F0] px-4 sm:px-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
             href="/portal"
@@ -103,14 +104,21 @@ function ReaderCatalogContent() {
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-700 to-indigo-500 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-            <BookOpen className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-xl bg-white p-1 border border-violet-200 shadow-xs flex items-center justify-center overflow-hidden">
+            <Image
+              src="/ldptm-logo.png"
+              alt="LDPTM Logo"
+              width={32}
+              height={32}
+              className="object-contain"
+              priority
+            />
           </div>
           <div>
             <span className="text-base font-bold text-slate-900 leading-none block">
-              Elektron Kitab Fondu
+              LDPTM elektron kitabxanası
             </span>
-            <span className="text-[11px] text-slate-400 leading-tight">
+            <span className="text-[11px] text-slate-500 leading-tight">
               Lənkəran Dövlət Peşə Təhsil Mərkəzi
             </span>
           </div>
@@ -121,13 +129,13 @@ function ReaderCatalogContent() {
             <span className="text-xs font-bold text-slate-800">
               {reader.firstName} {reader.lastName}
             </span>
-            <span className="text-[10px] text-indigo-600 font-semibold font-mono">
+            <span className="text-[10px] text-violet-700 font-semibold font-mono">
               Bilet: {reader.ticketNumber}
             </span>
           </div>
           <button
             onClick={handleLogout}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span className="hidden xs:inline">Çıxış</span>
@@ -138,18 +146,18 @@ function ReaderCatalogContent() {
       {/* Main Body */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Banner with Real-time Search */}
-        <div className="bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden shadow-lg shadow-indigo-950/20">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-indigo-400/20 via-purple-500/10 to-transparent rounded-bl-full pointer-events-none" />
+        <div className="bg-gradient-to-br from-[#2E1065] via-[#4C1D95] to-[#5B21B6] rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden shadow-lg shadow-purple-950/20">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-purple-400/20 via-violet-500/10 to-transparent rounded-bl-full pointer-events-none" />
 
           <div className="relative z-10 max-w-2xl space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/30 border border-indigo-400/30 text-indigo-200 text-xs font-semibold backdrop-blur-xs">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-purple-200 text-xs font-semibold backdrop-blur-xs">
+              <Sparkles className="w-3.5 h-3.5 text-purple-300" />
               <span>Real-vaxt Kitab Fondu</span>
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-tight">
-              Kitabxana Fondunu Axtarın
+              Kitab Fondunu Axtarın
             </h1>
-            <p className="text-xs sm:text-sm text-indigo-200/90 leading-relaxed">
+            <p className="text-xs sm:text-sm text-purple-100/90 leading-relaxed">
               Mərkəzin fiziki və rəqəmsal dərsliklərini axtarın, rəf yerlərini və fonddakı cari nüsxə sayını dərhal öyrənin.
             </p>
 
@@ -162,7 +170,7 @@ function ReaderCatalogContent() {
                   placeholder="Kitabın adı, müəllif və ya kateqoriyaya görə axtarın..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-10 py-3.5 text-xs sm:text-sm bg-white/95 text-slate-900 placeholder:text-slate-400 rounded-2xl border border-white/20 shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-400/30 focus:bg-white transition-all font-medium"
+                  className="w-full pl-12 pr-10 py-3.5 text-xs sm:text-sm bg-white/95 text-slate-900 placeholder:text-slate-400 rounded-2xl border border-white/20 shadow-lg focus:outline-none focus:ring-4 focus:ring-violet-400/30 focus:bg-white transition-all font-medium"
                 />
                 {searchQuery && (
                   <button
@@ -188,7 +196,7 @@ function ReaderCatalogContent() {
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                     selectedCategory === cat
-                      ? "bg-indigo-600 text-white shadow-xs"
+                      ? "bg-violet-700 text-white shadow-xs"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
                 >
@@ -203,7 +211,7 @@ function ReaderCatalogContent() {
                 type="checkbox"
                 checked={onlyAvailable}
                 onChange={(e) => setOnlyAvailable(e.target.checked)}
-                className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                className="w-4 h-4 text-violet-700 rounded border-slate-300 focus:ring-violet-500"
               />
               <span>Yalnız fondda olanlar</span>
             </label>
@@ -218,13 +226,13 @@ function ReaderCatalogContent() {
         {/* Books Grid */}
         {isBooksLoading ? (
           <div className="py-16 flex flex-col items-center justify-center gap-3">
-            <div className="w-9 h-9 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <div className="w-9 h-9 border-4 border-violet-700 border-t-transparent rounded-full animate-spin" />
             <p className="text-xs font-medium text-slate-500">Kitabxana fondundan kitablar yüklənir...</p>
           </div>
         ) : filteredBooks.length === 0 ? (
-          <div className="py-16 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-8 space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-2">
-              <BookOpen className="w-6 h-6" />
+          <div className="py-16 text-center bg-white rounded-3xl border border-dashed border-[#E4E0F0] p-8 space-y-2">
+            <div className="w-12 h-12 rounded-2xl bg-[#F7F5FC] border border-[#E4E0F0] flex items-center justify-center text-slate-400 mx-auto mb-2">
+              <BookOpen className="w-6 h-6 text-violet-700" />
             </div>
             <h3 className="text-sm font-bold text-slate-800">Axtarışa uyğun kitab tapılmadı</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
@@ -239,12 +247,12 @@ function ReaderCatalogContent() {
                 <div
                   key={book.id}
                   onClick={() => setSelectedBook(book)}
-                  className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:shadow-md hover:border-indigo-400/80 transition-all cursor-pointer flex flex-col justify-between group"
+                  className="bg-white rounded-2xl border border-[#E4E0F0] p-5 shadow-xs hover:shadow-md hover:border-violet-400 transition-all cursor-pointer flex flex-col justify-between group"
                 >
                   <div className="space-y-3">
                     {/* Header badges: Category & Real-time Availability badge */}
                     <div className="flex items-start justify-between gap-2">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60 truncate max-w-[150px]">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-800 border border-violet-200/60 truncate max-w-[150px]">
                         {book.category}
                       </span>
 
@@ -264,7 +272,7 @@ function ReaderCatalogContent() {
 
                     {/* Book Title & Author */}
                     <div>
-                      <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug">
+                      <h3 className="text-sm font-bold text-slate-900 group-hover:text-violet-700 transition-colors line-clamp-2 leading-snug">
                         {book.title}
                       </h3>
                       <p className="text-xs text-slate-500 mt-1 font-medium truncate">
@@ -283,7 +291,7 @@ function ReaderCatalogContent() {
                   {/* Footer details: Shelf location & Year */}
                   <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                     <div className="flex items-center gap-1 text-slate-700">
-                      <MapPin className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-violet-700 flex-shrink-0" />
                       <span className="font-semibold truncate max-w-[150px]">
                         {book.shelfLocation || book.initialShelf}
                       </span>
@@ -311,12 +319,12 @@ function ReaderCatalogContent() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-violet-50 border border-violet-100 text-violet-700 flex items-center justify-center flex-shrink-0">
                   <BookOpen className="w-6 h-6" />
                 </div>
                 <button
                   onClick={() => setSelectedBook(null)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -324,7 +332,7 @@ function ReaderCatalogContent() {
 
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-800 border border-violet-200/80">
                     {selectedBook.category}
                   </span>
                   {selectedBook.availableCount > 0 ? (
@@ -355,7 +363,7 @@ function ReaderCatalogContent() {
                 <div className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-100">
                   <span className="text-[10px] text-slate-400 uppercase font-semibold block">Rəf yeri</span>
                   <span className="font-bold text-slate-800 text-xs flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+                    <MapPin className="w-3.5 h-3.5 text-violet-700" />
                     {selectedBook.shelfLocation || selectedBook.initialShelf}
                   </span>
                 </div>
@@ -368,9 +376,9 @@ function ReaderCatalogContent() {
               </div>
 
               <div className="pt-2">
-                <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs">
+                <div className="p-3 rounded-xl bg-violet-50 border border-violet-200 text-violet-950 text-xs">
                   <p className="font-semibold">Kitabı necə əldə etmək olar?</p>
-                  <p className="text-[11px] text-indigo-700 mt-0.5">
+                  <p className="text-[11px] text-violet-800 mt-0.5">
                     Kitabxanaya yaxınlaşaraq bilet nömrənizi (<strong>{reader.ticketNumber}</strong>) və rəf yerini (<strong>{selectedBook.shelfLocation}</strong>) kitabxanaçıya bildirin.
                   </p>
                 </div>
@@ -379,7 +387,7 @@ function ReaderCatalogContent() {
               <div className="pt-2 flex justify-end">
                 <button
                   onClick={() => setSelectedBook(null)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-violet-700 hover:bg-violet-800 transition-colors cursor-pointer"
                 >
                   Bağla
                 </button>
@@ -396,9 +404,9 @@ export default function ReaderCatalogPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[#F7F5FC] flex items-center justify-center p-4">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full animate-spin" />
             <p className="text-xs font-medium text-slate-500">Məlumatlar yüklənir...</p>
           </div>
         </div>

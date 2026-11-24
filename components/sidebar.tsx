@@ -130,8 +130,12 @@ export function Sidebar({
             href="/dashboard"
             className="flex items-center gap-3 overflow-hidden focus:outline-none group"
           >
-            <div className="w-10 h-10 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-[#DDD6FE] shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform">
-              <GraduationCap className="w-5 h-5 text-[#C4B5FD]" />
+            <div className="w-10 h-10 rounded-lg bg-white p-1 border border-white/20 flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
+              <img
+                src="/ldptm-logo.png"
+                alt="Lənkəran DPTM Loqo"
+                className="w-full h-full object-contain"
+              />
             </div>
 
             {(!isCollapsed || isMobileOpen) && (

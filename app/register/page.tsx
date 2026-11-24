@@ -179,13 +179,17 @@ export default function ReaderRegisterPage() {
           <div className="text-center mb-6">
             <Link
               href="/"
-              className="inline-flex items-center gap-2.5 group focus:outline-none mb-2"
+              className="inline-flex items-center gap-2.5 group focus:outline-none mb-3"
             >
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-tr from-[#2E1065] via-[#3B0764] to-[#4C1D95] flex items-center justify-center text-white shadow-md flex-shrink-0 group-hover:scale-105 transition-transform">
-                <GraduationCap className="w-6 h-6 text-[#C4B5FD]" />
+              <div className="w-12 h-12 rounded-xl bg-white border border-[#E4E0F0] flex items-center justify-center p-1.5 shadow-md flex-shrink-0 group-hover:scale-105 transition-transform">
+                <img
+                  src="/ldptm-logo.png"
+                  alt="Lənkəran Dövlət Peşə Təhsil Mərkəzi"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div className="text-left">
-                <span className="text-xl font-black tracking-tight text-slate-900 block uppercase">
+                <span className="text-lg font-black tracking-tight text-slate-900 block uppercase">
                   Lənkəran DPTM
                 </span>
                 <span className="text-xs text-violet-700 font-semibold block">
@@ -194,7 +198,12 @@ export default function ReaderRegisterPage() {
               </div>
             </Link>
 
-            <h1 className="mt-2 text-2xl font-extrabold text-slate-900 tracking-tight">
+            {/* Prominent Welcome Text */}
+            <div className="mb-3 p-2.5 rounded-lg bg-violet-50 border border-violet-100 text-violet-900 text-xs sm:text-sm font-bold">
+              Lənkəran Dövlət Peşə Təhsil Mərkəzinin elektron kitabxanasına xoş gəlmisiniz
+            </div>
+
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
               Oxucu Qeydiyyatı
             </h1>
             <p className="mt-1 text-xs sm:text-sm text-slate-500">
@@ -226,7 +235,7 @@ export default function ReaderRegisterPage() {
                     <input
                       type="text"
                       required
-                      placeholder="Məs: Əli"
+                      placeholder=""
                       value={firstName}
                       onChange={(e) => {
                         setFirstName(e.target.value);
@@ -255,7 +264,7 @@ export default function ReaderRegisterPage() {
                     <input
                       type="text"
                       required
-                      placeholder="Məs: Məmmədov"
+                      placeholder=""
                       value={lastName}
                       onChange={(e) => {
                         setLastName(e.target.value);
@@ -287,7 +296,7 @@ export default function ReaderRegisterPage() {
                     <input
                       type="tel"
                       required
-                      placeholder="Məs: +994 50 123 45 67"
+                      placeholder=""
                       value={phone}
                       onChange={(e) => {
                         setPhone(e.target.value);
@@ -316,7 +325,7 @@ export default function ReaderRegisterPage() {
                     <input
                       type="email"
                       required
-                      placeholder="Məs: ad.soyad@ldptm.edu.az"
+                      placeholder=""
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
@@ -344,7 +353,7 @@ export default function ReaderRegisterPage() {
                   <button
                     type="button"
                     onClick={() => setCategory("Tələbə")}
-                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border text-xs sm:text-sm font-bold transition-all focus:outline-none ${
+                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border text-xs sm:text-sm font-bold transition-all focus:outline-none cursor-pointer ${
                       category === "Tələbə"
                         ? "bg-violet-50 border-violet-700 text-violet-950 ring-2 ring-violet-600/20 shadow-xs"
                         : "bg-[#F7F5FC] border-[#E4E0F0] text-slate-600 hover:bg-slate-100"
@@ -357,7 +366,7 @@ export default function ReaderRegisterPage() {
                   <button
                     type="button"
                     onClick={() => setCategory("Müəllim")}
-                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border text-xs sm:text-sm font-bold transition-all focus:outline-none ${
+                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border text-xs sm:text-sm font-bold transition-all focus:outline-none cursor-pointer ${
                       category === "Müəllim"
                         ? "bg-violet-50 border-violet-700 text-violet-950 ring-2 ring-violet-600/20 shadow-xs"
                         : "bg-[#F7F5FC] border-[#E4E0F0] text-slate-600 hover:bg-slate-100"
@@ -381,11 +390,7 @@ export default function ReaderRegisterPage() {
                   <input
                     type="text"
                     required
-                    placeholder={
-                      category === "Müəllim"
-                        ? "Məs: Kompüter texnologiyaları kafedrası"
-                        : "Məs: Qrup 204 və ya Aqronomluq ixtisası"
-                    }
+                    placeholder=""
                     value={department}
                     onChange={(e) => {
                       setDepartment(e.target.value);
@@ -416,7 +421,7 @@ export default function ReaderRegisterPage() {
                     <input
                       type={showPassword ? "text" : "password"}
                       required
-                      placeholder="Min. 6 simvol"
+                      placeholder=""
                       value={password}
                       onChange={(e) => {
                         setPassword(e.target.value);
@@ -431,7 +436,7 @@ export default function ReaderRegisterPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                       aria-label={showPassword ? "Şifrəni gizlə" : "Şifrəni göstər"}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -453,7 +458,7 @@ export default function ReaderRegisterPage() {
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       required
-                      placeholder="Şifrəni təkrarlayın"
+                      placeholder=""
                       value={confirmPassword}
                       onChange={(e) => {
                         setConfirmPassword(e.target.value);
@@ -468,7 +473,7 @@ export default function ReaderRegisterPage() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                       aria-label={showConfirmPassword ? "Şifrəni gizlə" : "Şifrəni göstər"}
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -521,7 +526,7 @@ export default function ReaderRegisterPage() {
 
       {/* Footer */}
       <footer className="py-4 text-center text-xs text-slate-400">
-        Peşə Kitabxanası © 2026 • Lənkəran Dövlət Peşə Təhsil Mərkəzi
+        Elektron Kitabxana © 2026 • Lənkəran Dövlət Peşə Təhsil Mərkəzi
       </footer>
     </div>
   );

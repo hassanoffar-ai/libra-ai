@@ -191,7 +191,7 @@ export default function KataloqPage() {
                 type="text"
                 value={authorQuery}
                 onChange={(e) => setAuthorQuery(e.target.value)}
-                placeholder="Məs: Əli Məmmədov"
+                placeholder=""
                 className="w-full px-3 py-2 text-xs bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all text-slate-800"
               />
             </div>
@@ -222,7 +222,7 @@ export default function KataloqPage() {
                 type="text"
                 value={yearQuery}
                 onChange={(e) => setYearQuery(e.target.value)}
-                placeholder="Məs: 2023"
+                placeholder=""
                 className="w-full px-3 py-2 text-xs bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all font-mono text-slate-800"
               />
             </div>

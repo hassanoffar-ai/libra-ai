@@ -18,7 +18,7 @@ export function EmptyState({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200">
         <div>
           {category && (
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600 mb-1 inline-block">
+            <span className="text-xs font-semibold uppercase tracking-wider text-violet-700 mb-1 inline-block">
               {category}
             </span>
           )}
@@ -26,7 +26,7 @@ export function EmptyState({
             {title}
           </h1>
         </div>
-        <div className="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-medium">
+        <div className="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-lg bg-violet-50 border border-violet-100 text-violet-800 text-xs font-medium">
           <Clock className="w-3.5 h-3.5" />
           <span>Hazırlıq mərhələsində</span>
         </div>
@@ -34,7 +34,7 @@ export function EmptyState({
 
       {/* Empty State Container */}
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-8 sm:p-14 text-center flex flex-col items-center justify-center min-h-[380px]">
-        <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100/80 flex items-center justify-center text-indigo-600 shadow-sm mb-5 transition-transform hover:scale-105 duration-200">
+        <div className="w-16 h-16 rounded-2xl bg-violet-50 border border-violet-100/80 flex items-center justify-center text-violet-700 shadow-sm mb-5 transition-transform hover:scale-105 duration-200">
           <Sparkles className="w-8 h-8" />
         </div>
 
@@ -47,8 +47,8 @@ export function EmptyState({
         </p>
 
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium">
-          <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-          Peşə Kitabxanası Modulu Aktivləşdirilməsi Gözlənilir
+          <span className="w-2 h-2 rounded-full bg-violet-600 animate-pulse" />
+          Elektron Kitabxana Modulu Aktivləşdirilməsi Gözlənilir
         </div>
       </div>
     </div>

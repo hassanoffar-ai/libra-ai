@@ -180,9 +180,9 @@ function ReaderPortalContent() {
 
   if (isAuthLoading || !reader) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F7F5FC] flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full animate-spin" />
           <p className="text-xs font-medium text-slate-500">Məlumatlar yüklənir...</p>
         </div>
       </div>
@@ -204,32 +204,36 @@ function ReaderPortalContent() {
   const fullName = `${reader.firstName} ${reader.lastName}`.trim() || "Oxucu";
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col selection:bg-indigo-600 selection:text-white">
+    <div className="min-h-screen bg-[#F7F5FC] flex flex-col selection:bg-violet-700 selection:text-white">
       {/* Top Navigation - Reader Portal Header */}
-      <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between">
+      <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-[#E4E0F0] px-4 sm:px-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-700 to-indigo-500 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-            <BookOpen className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-white border border-[#E4E0F0] p-1 flex items-center justify-center shadow-xs">
+            <img
+              src="/ldptm-logo.png"
+              alt="LDPTM Loqo"
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
             <span className="text-base font-bold text-slate-900 leading-none block">
-              Peşə Kitabxanası
+              LDPTM elektron kitabxanası
             </span>
-            <span className="text-[11px] text-slate-400 leading-tight">Oxucu Şəxsi Portalı</span>
+            <span className="text-[11px] text-violet-700 font-medium leading-tight">Oxucu Şəxsi Portalı</span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex flex-col text-right">
             <span className="text-xs font-bold text-slate-800">{fullName}</span>
-            <span className="text-[10px] text-indigo-600 font-semibold font-mono">
+            <span className="text-[10px] text-violet-700 font-semibold font-mono">
               Bilet: {ticketNumber}
             </span>
           </div>
           {/* Isolated Reader Logout (Requirement 1) */}
           <button
             onClick={handleLogout}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span className="hidden xs:inline">Çıxış</span>
@@ -260,12 +264,12 @@ function ReaderPortalContent() {
         )}
 
         {/* Reader Profile Card */}
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-50 via-purple-50/40 to-transparent rounded-bl-full pointer-events-none -z-0" />
+        <div className="bg-white rounded-3xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-sm p-6 sm:p-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-violet-50 via-purple-50/40 to-transparent rounded-bl-full pointer-events-none -z-0" />
 
           <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
             <div className="flex items-start gap-4 sm:gap-5 flex-1">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-indigo-700 to-indigo-500 text-white flex items-center justify-center font-black text-xl sm:text-2xl shadow-md ring-4 ring-indigo-50 flex-shrink-0">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-[#2E1065] to-violet-700 text-white flex items-center justify-center font-black text-xl sm:text-2xl shadow-md ring-4 ring-violet-50 flex-shrink-0">
                 {reader.firstName?.[0] || "O"}
                 {reader.lastName?.[0] || "X"}
               </div>
@@ -274,7 +278,7 @@ function ReaderPortalContent() {
                 <div>
                   <div className="flex flex-wrap items-center gap-2 mb-1.5">
                     {/* Role / Category Badge */}
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-50 text-violet-800 border border-violet-200/80">
                       {readerCategory === "Müəllim" ? (
                         <Briefcase className="w-3.5 h-3.5" />
                       ) : (
@@ -314,23 +318,23 @@ function ReaderPortalContent() {
 
                 {/* Structured Profile Fields: Ad, Soyad, Bilet №, Qrup/Şöbə, E-poçt */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-100 text-xs">
-                  <div className="bg-slate-50/80 rounded-xl p-2.5 border border-slate-100">
+                  <div className="bg-[#F7F5FC] rounded-xl p-2.5 border border-[#E4E0F0]">
                     <span className="text-slate-400 block text-[11px] font-medium">Oxucu Bileti:</span>
-                    <span className="font-bold text-indigo-700 text-sm font-mono">{ticketNumber}</span>
+                    <span className="font-bold text-violet-800 text-sm font-mono">{ticketNumber}</span>
                   </div>
-                  <div className="bg-slate-50/80 rounded-xl p-2.5 border border-slate-100">
+                  <div className="bg-[#F7F5FC] rounded-xl p-2.5 border border-[#E4E0F0]">
                     <span className="text-slate-400 block text-[11px] font-medium">Qrup / Şöbə:</span>
                     <span className="font-bold text-slate-800 text-xs truncate block" title={department}>
                       {department || "—"}
                     </span>
                   </div>
-                  <div className="bg-slate-50/80 rounded-xl p-2.5 border border-slate-100">
+                  <div className="bg-[#F7F5FC] rounded-xl p-2.5 border border-[#E4E0F0]">
                     <span className="text-slate-400 block text-[11px] font-medium">Telefon:</span>
                     <span className="font-bold text-slate-800 text-xs truncate block">
                       {reader.phone || readerRecord?.phone || "—"}
                     </span>
                   </div>
-                  <div className="bg-slate-50/80 rounded-xl p-2.5 border border-slate-100">
+                  <div className="bg-[#F7F5FC] rounded-xl p-2.5 border border-[#E4E0F0]">
                     <span className="text-slate-400 block text-[11px] font-medium">E-poçt ünvanı:</span>
                     <span className="font-medium text-slate-700 text-xs truncate block" title={reader.email}>
                       {reader.email || "—"}
@@ -344,7 +348,7 @@ function ReaderPortalContent() {
             <div className="flex flex-wrap gap-2.5 flex-shrink-0">
               <Link
                 href="/portal/kataloq"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/30 transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-violet-700 hover:bg-violet-800 shadow-sm shadow-violet-900/20 transition-all cursor-pointer"
               >
                 <Search className="w-4 h-4" />
                 <span>Kitab Fondunu Axtar</span>
@@ -357,20 +361,20 @@ function ReaderPortalContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <Link
             href="/portal/kataloq"
-            className="p-6 rounded-3xl bg-white border border-slate-200/90 hover:border-indigo-400 hover:shadow-md transition-all group flex flex-col justify-between"
+            className="p-6 rounded-3xl bg-white border border-[#E4E0F0] border-t-2 border-violet-800 hover:border-violet-400 hover:shadow-md transition-all group flex flex-col justify-between"
           >
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-4 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-700 mb-4 group-hover:scale-105 transition-transform">
                 <Search className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+              <h3 className="text-base font-bold text-slate-900 group-hover:text-violet-700 transition-colors">
                 Elektron Kataloq və Kitab Fondu
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">
                 Mərkəzin zəngin kitabxana fondunda olan dərslik və nəşrləri axtarın, rəf yerlərini və mövcudluq sayını öyrənin.
               </p>
             </div>
-            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-bold text-indigo-600 group-hover:translate-x-1 transition-transform">
+            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-bold text-violet-700 group-hover:translate-x-1 transition-transform">
               <span>Kataloqa keçid et</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
@@ -378,20 +382,20 @@ function ReaderPortalContent() {
 
           <a
             href="#elektron-kitabxana"
-            className="p-6 rounded-3xl bg-white border border-slate-200/90 hover:border-indigo-400 hover:shadow-md transition-all group flex flex-col justify-between"
+            className="p-6 rounded-3xl bg-white border border-[#E4E0F0] border-t-2 border-violet-800 hover:border-violet-400 hover:shadow-md transition-all group flex flex-col justify-between"
           >
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 mb-4 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-700 mb-4 group-hover:scale-105 transition-transform">
                 <Laptop className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+              <h3 className="text-base font-bold text-slate-900 group-hover:text-violet-700 transition-colors">
                 Rəqəmsal Kitabxana və Resurslar
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">
                 Elektron dərsliklər, metodiki vəsaitlər və PDF/Word formatında olan rəqəmsal materialları onlayn oxuyun və orijinal formatda yükləyin.
               </p>
             </div>
-            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-bold text-sky-600 group-hover:translate-x-1 transition-transform">
+            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs font-bold text-violet-700 group-hover:translate-x-1 transition-transform">
               <span>Rəqəmsal fonda bax</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
@@ -399,11 +403,11 @@ function ReaderPortalContent() {
         </div>
 
         {/* ================= REAL-TIME FIREBASE CATALOG SEARCH SECTION (Requirement 3) ================= */}
-        <div id="fond-axtarisi" className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8 space-y-5">
+        <div id="fond-axtarisi" className="bg-white rounded-3xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-sm p-6 sm:p-8 space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center">
                   <BookOpen className="w-4 h-4" />
                 </div>
                 <h2 className="text-base sm:text-lg font-bold text-slate-900">
@@ -417,7 +421,7 @@ function ReaderPortalContent() {
 
             <Link
               href="/portal/kataloq"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-indigo-600 hover:bg-indigo-50 border border-indigo-200 transition-colors self-start sm:self-auto"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-violet-700 hover:bg-violet-50 border border-violet-200 transition-colors self-start sm:self-auto"
             >
               <span>Geniş Kataloq</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -430,10 +434,10 @@ function ReaderPortalContent() {
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Kitabın adı, müəllif və ya kateqoriya ilə axtarın..."
+                placeholder=""
                 value={catalogQuery}
                 onChange={(e) => setCatalogQuery(e.target.value)}
-                className="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-medium"
+                className="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all font-medium"
               />
               {catalogQuery && (
                 <button
@@ -451,9 +455,9 @@ function ReaderPortalContent() {
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all cursor-pointer ${
                       selectedCategory === cat
-                        ? "bg-indigo-600 text-white shadow-2xs font-bold"
+                        ? "bg-violet-700 text-white shadow-2xs font-bold"
                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
@@ -467,7 +471,7 @@ function ReaderPortalContent() {
                   type="checkbox"
                   checked={onlyAvailable}
                   onChange={(e) => setOnlyAvailable(e.target.checked)}
-                  className="w-3.5 h-3.5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                  className="w-3.5 h-3.5 text-violet-700 rounded border-slate-300 focus:ring-violet-500"
                 />
                 <span>Yalnız fondda olanlar</span>
               </label>
@@ -477,11 +481,11 @@ function ReaderPortalContent() {
           {/* Catalog Cards Grid */}
           {isCatalogLoading ? (
             <div className="py-12 flex flex-col items-center justify-center gap-2">
-              <div className="w-7 h-7 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+              <div className="w-7 h-7 border-3 border-violet-700 border-t-transparent rounded-full animate-spin" />
               <p className="text-xs text-slate-400 font-medium">Kitablar gətirilir...</p>
             </div>
           ) : filteredCatalog.length === 0 ? (
-            <div className="py-10 text-center bg-slate-50/60 rounded-2xl border border-dashed border-slate-200 p-6">
+            <div className="py-10 text-center bg-[#F7F5FC] rounded-2xl border border-dashed border-[#E4E0F0] p-6">
               <p className="text-xs text-slate-500 font-semibold">Axtarışa uyğun kitab tapılmadı</p>
             </div>
           ) : (
@@ -491,11 +495,11 @@ function ReaderPortalContent() {
                 return (
                   <div
                     key={book.id}
-                    className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/40 hover:bg-white hover:border-indigo-300 hover:shadow-sm transition-all flex flex-col justify-between"
+                    className="p-4 rounded-2xl border border-[#E4E0F0] bg-white hover:border-violet-400 hover:shadow-sm transition-all flex flex-col justify-between"
                   >
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-1.5">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60 truncate max-w-[130px]">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-800 border border-violet-200/60 truncate max-w-[130px]">
                           {book.category}
                         </span>
 
@@ -525,7 +529,7 @@ function ReaderPortalContent() {
 
                     <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
                       <span className="flex items-center gap-1 text-slate-700 font-medium">
-                        <MapPin className="w-3 h-3 text-indigo-600" />
+                        <MapPin className="w-3 h-3 text-violet-700" />
                         <span className="truncate max-w-[120px]">{book.shelfLocation || book.initialShelf}</span>
                       </span>
 
@@ -543,7 +547,7 @@ function ReaderPortalContent() {
             <div className="text-center pt-2">
               <Link
                 href="/portal/kataloq"
-                className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800"
+                className="inline-flex items-center gap-1 text-xs font-bold text-violet-700 hover:text-violet-900"
               >
                 <span>Bütün fonda bax ({filteredCatalog.length} kitab)</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -553,11 +557,11 @@ function ReaderPortalContent() {
         </div>
 
         {/* ================= REAL-TIME E-LIBRARY DIGITAL RESOURCES SECTION ================= */}
-        <div id="elektron-kitabxana" className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8 space-y-5">
+        <div id="elektron-kitabxana" className="bg-white rounded-3xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-sm p-6 sm:p-8 space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center">
                   <Laptop className="w-4 h-4" />
                 </div>
                 <h2 className="text-base sm:text-lg font-bold text-slate-900">
@@ -569,20 +573,20 @@ function ReaderPortalContent() {
               </p>
             </div>
 
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 self-start sm:self-auto">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-violet-50 text-violet-800 border border-violet-200 self-start sm:self-auto">
               {digitalResources.length} elektron vəsait
             </span>
           </div>
 
           {isDigitalLoading ? (
             <div className="py-12 flex flex-col items-center justify-center gap-2">
-              <div className="w-7 h-7 border-3 border-sky-600 border-t-transparent rounded-full animate-spin" />
+              <div className="w-7 h-7 border-3 border-violet-700 border-t-transparent rounded-full animate-spin" />
               <p className="text-xs text-slate-400 font-medium">Elektron resurslar gətirilir...</p>
             </div>
           ) : digitalResources.length === 0 ? (
-            <div className="py-10 text-center bg-slate-50/60 rounded-2xl border border-dashed border-slate-200 p-6">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-3">
-                <Laptop className="w-6 h-6" />
+            <div className="py-10 text-center bg-[#F7F5FC] rounded-2xl border border-dashed border-[#E4E0F0] p-6">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-[#E4E0F0] flex items-center justify-center text-slate-400 mx-auto mb-3">
+                <Laptop className="w-6 h-6 text-violet-700" />
               </div>
               <h4 className="text-sm font-bold text-slate-800">Hazırda elektron kitabxanaya vəsait əlavə edilməyib</h4>
               <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
@@ -597,7 +601,7 @@ function ReaderPortalContent() {
                 return (
                   <div
                     key={res.id}
-                    className="p-5 rounded-2xl border border-slate-200/80 bg-slate-50/40 hover:bg-white hover:border-sky-300 hover:shadow-sm transition-all flex flex-col justify-between"
+                    className="p-5 rounded-2xl border border-[#E4E0F0] bg-white hover:border-violet-300 hover:shadow-sm transition-all flex flex-col justify-between"
                   >
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
@@ -607,7 +611,7 @@ function ReaderPortalContent() {
                               ? "bg-rose-50 text-rose-700 border border-rose-200"
                               : isWord
                               ? "bg-blue-50 text-blue-700 border border-blue-200"
-                              : "bg-sky-50 text-sky-700 border border-sky-200"
+                              : "bg-violet-50 text-violet-800 border border-violet-200"
                           }`}
                         >
                           {res.format} • {res.fileSize}
@@ -656,7 +660,7 @@ function ReaderPortalContent() {
 
                       <button
                         onClick={() => handleDownloadDigital(res)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-violet-700 hover:bg-violet-800 active:bg-violet-900 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
                         title="Faylı orijinal formatda cihazınıza endirin"
                       >
                         <Download className="w-3.5 h-3.5" />
@@ -671,21 +675,21 @@ function ReaderPortalContent() {
         </div>
 
         {/* My Borrowed Books Section */}
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+        <div className="bg-white rounded-3xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-sm p-6 sm:p-8">
           <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
             <div>
               <h2 className="text-base font-bold text-slate-900">Məndə Olan Kitablar</h2>
               <p className="text-xs text-slate-500">Hazırda oxuduğunuz və təhvil verilməli olan kitablar</p>
             </div>
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-violet-50 text-violet-800 border border-violet-200">
               {activeLoans.length} aktiv kitab
             </span>
           </div>
 
           {activeLoans.length === 0 ? (
-            <div className="text-center py-10 px-4 rounded-2xl bg-slate-50/70 border border-dashed border-slate-200">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-3">
-                <BookOpen className="w-6 h-6" />
+            <div className="text-center py-10 px-4 rounded-2xl bg-[#F7F5FC] border border-dashed border-[#E4E0F0]">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-[#E4E0F0] flex items-center justify-center text-slate-400 mx-auto mb-3">
+                <BookOpen className="w-6 h-6 text-violet-700" />
               </div>
               <h4 className="text-sm font-bold text-slate-800">Hazırda borcda kitabınız yoxdur</h4>
               <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
@@ -693,7 +697,7 @@ function ReaderPortalContent() {
               </p>
               <Link
                 href="/portal/kataloq"
-                className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-xs"
+                className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-violet-700 hover:bg-violet-800 transition-all shadow-xs cursor-pointer"
               >
                 <span>Fondda Axtarış</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -704,12 +708,12 @@ function ReaderPortalContent() {
               {activeLoans.map((loan) => (
                 <div
                   key={loan.id}
-                  className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  className="p-4 rounded-2xl border border-[#E4E0F0] bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                 >
                   <div>
                     <h4 className="text-sm font-bold text-slate-900">{loan.bookTitle}</h4>
                     <p className="text-xs text-slate-500">{loan.bookAuthor}</p>
-                    <span className="inline-block mt-1 font-mono text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200/50">
+                    <span className="inline-block mt-1 font-mono text-[10px] font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded border border-violet-200/50">
                       İnventar: {loan.inventoryNumber}
                     </span>
                   </div>
@@ -725,7 +729,7 @@ function ReaderPortalContent() {
                         Gecikib
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-violet-50 text-violet-800 border border-violet-200">
                         <Clock className="w-3.5 h-3.5" />
                         Oxunur
                       </span>
@@ -738,23 +742,23 @@ function ReaderPortalContent() {
         </div>
 
         {/* Reservation History Section */}
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+        <div className="bg-white rounded-3xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-sm p-6 sm:p-8">
           <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
             <div>
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Bookmark className="w-4 h-4 text-indigo-600" />
+                <Bookmark className="w-4 h-4 text-violet-700" />
                 <span>Rezervasiya Tarixçəsi</span>
               </h2>
               <p className="text-xs text-slate-500">Növbəyə durduğunuz və təhvil gözləyən kitab rezervasiyaları</p>
             </div>
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-violet-50 text-violet-800 border border-violet-200">
               {reservations.length} rezervasiya
             </span>
           </div>
 
           {reservations.length === 0 ? (
-            <div className="text-center py-8 px-4 rounded-2xl bg-slate-50/70 border border-dashed border-slate-200">
-              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-2">
+            <div className="text-center py-8 px-4 rounded-2xl bg-[#F7F5FC] border border-dashed border-[#E4E0F0]">
+              <div className="w-10 h-10 rounded-xl bg-white border border-[#E4E0F0] flex items-center justify-center text-violet-700 mx-auto mb-2">
                 <Bookmark className="w-5 h-5" />
               </div>
               <h4 className="text-xs font-bold text-slate-700">Aktiv rezervasiya tapılmadı</h4>
@@ -767,7 +771,7 @@ function ReaderPortalContent() {
               {reservations.map((res) => (
                 <div
                   key={res.id}
-                  className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  className="p-4 rounded-2xl border border-[#E4E0F0] bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                 >
                   <div>
                     <h4 className="text-sm font-bold text-slate-900">{res.bookTitle}</h4>
@@ -777,7 +781,7 @@ function ReaderPortalContent() {
                         Rezerv tarixi: <span className="font-mono text-slate-600">{res.reservedDate}</span>
                       </span>
                       {res.queuePosition > 0 && (
-                        <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded border border-indigo-100">
+                        <span className="text-[10px] bg-violet-50 text-violet-800 font-bold px-2 py-0.5 rounded border border-violet-100">
                           Növbə: №{res.queuePosition}
                         </span>
                       )}
@@ -813,8 +817,8 @@ function ReaderPortalContent() {
         </div>
 
         {/* Footer */}
-        <footer className="mt-12 py-6 text-center text-xs text-slate-400 border-t border-slate-200/60">
-          <span>Peşə Kitabxanası © 2026 • Lənkəran Dövlət Peşə Təhsil Mərkəzi</span>
+        <footer className="mt-12 py-6 text-center text-xs text-slate-400 border-t border-[#E4E0F0]">
+          <span>Elektron Kitabxana © 2026 • Lənkəran Dövlət Peşə Təhsil Mərkəzi</span>
         </footer>
 
         {/* E-Library Reader Document Preview Modal */}
@@ -834,9 +838,9 @@ export default function ReaderPortalPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[#F7F5FC] flex items-center justify-center p-4">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full animate-spin" />
             <p className="text-xs font-medium text-slate-500">Məlumatlar yüklənir...</p>
           </div>
         </div>

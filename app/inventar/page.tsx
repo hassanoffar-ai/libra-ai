@@ -267,8 +267,8 @@ export default function InventarPage() {
               type="text"
               value={scanInput}
               onChange={(e) => setScanInput(e.target.value)}
-              placeholder="İnventar № daxil edin (Məs: INV-1001)..."
-              className="w-full pl-4 pr-10 py-3.5 text-sm sm:text-base bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white/20 transition-all font-mono font-bold"
+              placeholder=""
+              className="w-full pl-4 pr-10 py-3.5 text-sm sm:text-base bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white/20 transition-all font-mono font-bold"
             />
             {scanInput && (
               <button
@@ -409,18 +409,18 @@ export default function InventarPage() {
             {/* Inline Shelf Location Editor */}
             {isChangingShelf && (
               <div className="p-3.5 rounded-xl bg-white/10 border border-white/20 flex items-center gap-2 text-xs animate-in fade-in">
-                <MapPin className="w-4 h-4 text-indigo-300 flex-shrink-0" />
+                <MapPin className="w-4 h-4 text-violet-300 flex-shrink-0" />
                 <input
                   type="text"
                   value={newShelfLocation}
                   onChange={(e) => setNewShelfLocation(e.target.value)}
-                  placeholder="Yeni rəf ünvanı (Məs: Zal 1, Rəf B-2)..."
-                  className="flex-1 px-3 py-1.5 bg-white/20 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 placeholder-slate-400 text-xs"
+                  placeholder=""
+                  className="flex-1 px-3 py-1.5 bg-white/20 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-violet-400 placeholder-slate-400 text-xs"
                 />
                 <button
                   type="button"
                   onClick={() => handleSaveShelf(activeScannedCopy)}
-                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs"
+                  className="px-3 py-1.5 bg-violet-700 hover:bg-violet-800 text-white rounded-lg font-bold text-xs cursor-pointer"
                 >
                   Təsdiq et
                 </button>

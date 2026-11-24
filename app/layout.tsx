@@ -10,9 +10,14 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Peşə Kitabxanası - Lənkəran Dövlət Peşə Təhsil Mərkəzi",
+  title: "Elektron Kitabxana - Lənkəran Dövlət Peşə Təhsil Mərkəzi",
   description:
-    "Lənkəran Dövlət Peşə Təhsil Mərkəzi üçün Peşə Kitabxanası İdarəetmə Sistemi",
+    "Lənkəran Dövlət Peşə Təhsil Mərkəzi üçün Elektron Kitabxana İdarəetmə Sistemi",
+  icons: {
+    icon: "/ldptm-logo.png",
+    shortcut: "/ldptm-logo.png",
+    apple: "/ldptm-logo.png",
+  },
 };
 
 export default function RootLayout({
