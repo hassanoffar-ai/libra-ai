@@ -8,20 +8,13 @@ import {
   MapPin,
   Edit,
   Trash2,
-  Filter,
-  CheckCircle2,
-  Clock,
   AlertTriangle,
   BookOpen,
-  ArrowRight,
-  ShieldAlert,
 } from "lucide-react";
 import {
   BookCopy,
   getCopies,
   deleteCopy,
-  CopyCondition,
-  CopyStatus,
 } from "@/services/books-service";
 import { EditCopyModal } from "@/components/copies/edit-copy-modal";
 
@@ -58,7 +51,22 @@ export default function NusxelerPage() {
     return () => window.removeEventListener("libra-data-updated", handleUpdate);
   }, []);
 
-  // Unique Shelf locations list
+  const handleDeleteCopy = async (copy: BookCopy) => {
+    if (
+      confirm(
+        `"${copy.inventoryNumber}" nömrəli nüsxəni silmək istədiyinizdən əminsiniz?`
+      )
+    ) {
+      try {
+        await deleteCopy(copy.id);
+        fetchCopies();
+      } catch (err) {
+        console.error("Nüsxə silinərkən xəta:", err);
+      }
+    }
+  };
+
+  // Unique Shelves list
   const shelfLocationsList = useMemo(() => {
     const set = new Set<string>();
     copies.forEach((c) => {
@@ -66,6 +74,24 @@ export default function NusxelerPage() {
     });
     return Array.from(set);
   }, [copies]);
+
+  // Fast counts
+  const availableCount = useMemo(
+    () => copies.filter((c) => c.status === "Fondda").length,
+    [copies]
+  );
+  const borrowedCount = useMemo(
+    () => copies.filter((c) => c.status === "Oxucuda").length,
+    [copies]
+  );
+  const repairCount = useMemo(
+    () =>
+      copies.filter(
+        (c) =>
+          c.condition === "Təmirə ehtiyac var" || c.condition === "Yararsız"
+      ).length,
+    [copies]
+  );
 
   // Filtered Copies
   const filteredCopies = useMemo(() => {
@@ -79,10 +105,8 @@ export default function NusxelerPage() {
 
       const matchesShelf =
         filterShelf === "all" || copy.shelfLocation === filterShelf;
-
       const matchesStatus =
         filterStatus === "all" || copy.status === filterStatus;
-
       const matchesCondition =
         filterCondition === "all" || copy.condition === filterCondition;
 
@@ -90,68 +114,56 @@ export default function NusxelerPage() {
     });
   }, [copies, searchInv, filterShelf, filterStatus, filterCondition]);
 
-  const handleDeleteCopy = async (copy: BookCopy) => {
-    if (confirm(`"${copy.inventoryNumber}" nömrəli fiziki nüsxəni bazadan silmək istədiyinizdən əminsiniz?`)) {
-      await deleteCopy(copy.id);
-      fetchCopies();
-    }
-  };
-
-  // Metric counts
-  const availableCount = copies.filter((c) => c.status === "Fondda").length;
-  const borrowedCount = copies.filter((c) => c.status === "Oxucuda").length;
-  const repairCount = copies.filter((c) => c.condition === "Təmirə ehtiyac var" || c.condition === "Yararsız").length;
-
   return (
     <div className="space-y-6 pb-12">
-      {/* 1. Header & Summary Stats */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200">
+      {/* 1. Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-[#E4E0F0]">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-              Fiziki Nüsxələr
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              Fiziki Kitab Nüsxələri
             </h1>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold">
-              <Layers className="w-3.5 h-3.5 text-blue-600" />
-              {copies.length} fiziki nüsxə
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-violet-50 border border-violet-200/60 text-violet-800 text-xs font-bold">
+              <Layers className="w-3.5 h-3.5 text-violet-700" />
+              {copies.length} fiziki vahid
             </span>
           </div>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Manual inventar uçotu, fiziki vəziyyət və rəf ünvanlarının idarə olunması
           </p>
         </div>
 
         <Link
           href="/kitablar"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold shadow-2xs transition-colors self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-[#E4E0F0] hover:bg-[#F7F5FC] text-slate-700 text-xs sm:text-sm font-semibold shadow-2xs transition-colors self-start sm:self-auto cursor-pointer"
         >
-          <BookOpen className="w-4 h-4 text-indigo-600" />
+          <BookOpen className="w-4 h-4 text-violet-700" />
           <span>Kitab Fonduna Keç</span>
         </Link>
       </div>
 
       {/* Quick Status Pills */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] font-semibold text-slate-400 block uppercase">Cəmi Nüsxə</span>
-          <span className="text-xl font-extrabold text-slate-900">{copies.length}</span>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E4E0F0] border-t-2 border-violet-800 shadow-2xs">
+          <span className="text-[11px] font-bold text-slate-400 block uppercase">Cəmi Nüsxə</span>
+          <span className="text-xl font-black text-slate-900">{copies.length}</span>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] font-semibold text-emerald-600 block uppercase">Rəfdə / Hazır</span>
-          <span className="text-xl font-extrabold text-emerald-700">{availableCount}</span>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E4E0F0] border-t-2 border-emerald-600 shadow-2xs">
+          <span className="text-[11px] font-bold text-emerald-700 block uppercase">Rəfdə / Hazır</span>
+          <span className="text-xl font-black text-emerald-700">{availableCount}</span>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] font-semibold text-indigo-600 block uppercase">Oxucuda</span>
-          <span className="text-xl font-extrabold text-indigo-700">{borrowedCount}</span>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E4E0F0] border-t-2 border-violet-600 shadow-2xs">
+          <span className="text-[11px] font-bold text-violet-700 block uppercase">Oxucuda</span>
+          <span className="text-xl font-black text-violet-700">{borrowedCount}</span>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] font-semibold text-amber-600 block uppercase">Təmir / Yararsız</span>
-          <span className="text-xl font-extrabold text-amber-700">{repairCount}</span>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E4E0F0] border-t-2 border-amber-600 shadow-2xs">
+          <span className="text-[11px] font-bold text-amber-700 block uppercase">Təmir / Yararsız</span>
+          <span className="text-xl font-black text-amber-700">{repairCount}</span>
         </div>
       </div>
 
       {/* 2. Fast Filter Toolbar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs space-y-3">
+      <div className="bg-white rounded-xl border border-[#E4E0F0] p-4 shadow-2xs space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
           {/* Inventory Number & Book Search */}
           <div className="sm:col-span-4 relative">
@@ -163,7 +175,7 @@ export default function NusxelerPage() {
               value={searchInv}
               onChange={(e) => setSearchInv(e.target.value)}
               placeholder="İnventar № və ya Kitab adı..."
-              className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-mono text-xs"
+              className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all font-mono"
             />
           </div>
 
@@ -172,7 +184,7 @@ export default function NusxelerPage() {
             <select
               value={filterShelf}
               onChange={(e) => setFilterShelf(e.target.value)}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+              className="w-full px-3 py-2 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all"
             >
               <option value="all">Bütün Rəf Yerləri</option>
               {shelfLocationsList.map((loc) => (
@@ -188,7 +200,7 @@ export default function NusxelerPage() {
             <select
               value={filterCondition}
               onChange={(e) => setFilterCondition(e.target.value)}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+              className="w-full px-3 py-2 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all"
             >
               <option value="all">Bütün Fiziki Vəziyyətlər</option>
               <option value="Əla">Əla vəziyyətdə</option>
@@ -203,7 +215,7 @@ export default function NusxelerPage() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+              className="w-full px-3 py-2 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all"
             >
               <option value="all">Bütün Statuslar</option>
               <option value="Fondda">Fondda (Rəfdə)</option>
@@ -226,7 +238,7 @@ export default function NusxelerPage() {
                 setFilterStatus("all");
                 setFilterCondition("all");
               }}
-              className="text-indigo-600 hover:underline font-medium"
+              className="text-violet-700 hover:underline font-semibold"
             >
               Filtrləri sıfırla
             </button>
@@ -234,36 +246,36 @@ export default function NusxelerPage() {
         </div>
       </div>
 
-      {/* 3. Table or Graceful Empty State */}
+      {/* 3. Table or Graceful Real Empty State */}
       {isLoading ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400 text-sm">
+        <div className="bg-white rounded-xl border border-[#E4E0F0] p-12 text-center text-slate-400 text-sm">
           Fiziki nüsxələr yüklənir...
         </div>
       ) : copies.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-8 sm:p-14 text-center flex flex-col items-center justify-center min-h-[360px] shadow-xs">
-          <div className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-sm mb-4">
+        <div className="bg-white rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 p-8 sm:p-14 text-center flex flex-col items-center justify-center min-h-[360px] shadow-xs">
+          <div className="w-16 h-16 rounded-xl bg-violet-50 border border-violet-200/70 flex items-center justify-center text-violet-700 shadow-sm mb-4">
             <Layers className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-slate-900 mb-1">
-            Bazada heç bir fiziki nüsxə qeydiyyatı yoxdur
+            Hazırda bazada qeydiyyata alınmış məlumat yoxdur
           </h3>
           <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed mb-6">
             Kitab fonduna yeni nəşr əlavə edərkən nüsxə sayını qeyd etdikdə, sistem avtomatik olaraq unikal inventar nömrələri formalaşdıracaq.
           </p>
           <Link
             href="/kitablar"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-violet-700 hover:bg-violet-800 text-white text-xs sm:text-sm font-bold shadow-sm transition-all"
           >
             <BookOpen className="w-4 h-4" />
             <span>Kitab fonduna daxil ol və əlavə et</span>
           </Link>
         </div>
       ) : filteredCopies.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-10 text-center flex flex-col items-center justify-center shadow-xs">
-          <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+        <div className="bg-white rounded-xl border border-[#E4E0F0] p-10 text-center flex flex-col items-center justify-center shadow-xs">
+          <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
             <Search className="w-6 h-6" />
           </div>
-          <h4 className="text-base font-semibold text-slate-800 mb-1">
+          <h4 className="text-base font-bold text-slate-800 mb-1">
             Axtarışa uyğun fiziki nüsxə tapılmadı
           </h4>
           <p className="text-xs text-slate-500 max-w-sm mb-4">
@@ -276,18 +288,18 @@ export default function NusxelerPage() {
               setFilterStatus("all");
               setFilterCondition("all");
             }}
-            className="px-3.5 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+            className="px-3.5 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors"
           >
             Filtrləri təmizlə
           </button>
         </div>
       ) : (
         /* Copies Table */
-        <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs">
+        <div className="bg-white rounded-xl border border-[#E4E0F0] overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                <tr className="bg-[#F7F5FC] border-b border-[#E4E0F0] text-[11px] font-bold text-violet-950 uppercase tracking-wider">
                   <th className="py-3 px-4">İnventar №</th>
                   <th className="py-3 px-4">Aid Olduğu Kitab</th>
                   <th className="py-3 px-4">Rəf Ünvanı</th>
@@ -296,16 +308,16 @@ export default function NusxelerPage() {
                   <th className="py-3 px-4 text-right">Əməliyyatlar</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#E4E0F0]">
                 {filteredCopies.map((copy) => (
                   <tr
                     key={copy.id}
-                    className="hover:bg-slate-50/70 transition-colors group"
+                    className="hover:bg-[#F7F5FC] transition-colors group"
                   >
                     {/* Inventory ID */}
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-extrabold text-indigo-900 bg-indigo-50/80 px-2.5 py-1 rounded-md border border-indigo-100 text-xs">
+                        <span className="font-mono font-bold text-violet-900 bg-violet-50 px-2.5 py-1 rounded-md border border-violet-200/70 text-xs">
                           {copy.inventoryNumber}
                         </span>
                       </div>
@@ -326,7 +338,7 @@ export default function NusxelerPage() {
                     {/* Shelf Location */}
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-                        <MapPin className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-violet-700 flex-shrink-0" />
                         <span>{copy.shelfLocation}</span>
                       </div>
                     </td>
@@ -358,8 +370,8 @@ export default function NusxelerPage() {
                           copy.status === "Fondda"
                             ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
                             : copy.status === "Oxucuda"
-                            ? "bg-indigo-50 text-indigo-700 border border-indigo-200/60"
-                            : "bg-slate-100 text-slate-600 border border-slate-200/60"
+                            ? "bg-violet-50 text-violet-700 border border-violet-200/60"
+                            : "bg-slate-100 text-slate-600 border border-[#E4E0F0]"
                         }`}
                       >
                         <span
@@ -367,7 +379,7 @@ export default function NusxelerPage() {
                             copy.status === "Fondda"
                               ? "bg-emerald-500"
                               : copy.status === "Oxucuda"
-                              ? "bg-indigo-500"
+                              ? "bg-violet-600"
                               : "bg-slate-400"
                           }`}
                         />
@@ -380,7 +392,7 @@ export default function NusxelerPage() {
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setEditingCopy(copy)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 transition-all font-medium text-[11px]"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-[#E4E0F0] hover:border-blue-200 transition-all font-semibold text-[11px] cursor-pointer"
                           title="Redaktə et (Vəziyyət və Rəf yeri)"
                         >
                           <Edit className="w-3.5 h-3.5 text-blue-600" />
@@ -388,7 +400,7 @@ export default function NusxelerPage() {
                         </button>
                         <button
                           onClick={() => handleDeleteCopy(copy)}
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition-all font-medium text-[11px]"
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-[#E4E0F0] hover:border-rose-200 transition-all font-semibold text-[11px] cursor-pointer"
                           title="Fiziki nüsxəni sil"
                         >
                           <Trash2 className="w-3.5 h-3.5 text-rose-500" />

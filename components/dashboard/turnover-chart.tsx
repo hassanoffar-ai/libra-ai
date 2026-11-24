@@ -28,11 +28,11 @@ export function TurnoverChart({ data }: TurnoverChartProps) {
   const hasData = data && data.length > 0 && data.some((d) => d.borrowed > 0 || d.returned > 0);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+    <div className="bg-white rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 p-5 sm:p-6 shadow-2xs flex flex-col justify-between">
       {/* Chart Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
         <div>
-          <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
             Kitab Dövriyyəsi Dinamikası
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -40,33 +40,33 @@ export function TurnoverChart({ data }: TurnoverChartProps) {
           </p>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="inline-flex items-center gap-1.5 text-slate-600">
-            <span className="w-2.5 h-2.5 rounded-sm bg-indigo-600" />
+          <span className="inline-flex items-center gap-1.5 text-slate-700 font-medium">
+            <span className="w-2.5 h-2.5 rounded-xs bg-violet-700" />
             Verilən
           </span>
-          <span className="inline-flex items-center gap-1.5 text-slate-600">
-            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+          <span className="inline-flex items-center gap-1.5 text-slate-700 font-medium">
+            <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500" />
             Qaytarılan
           </span>
         </div>
       </div>
 
-      {/* Chart Body or Graceful Empty State */}
+      {/* Chart Body or Graceful Real Empty State */}
       <div className="h-64 sm:h-72 w-full flex items-center justify-center">
         {!isMounted ? (
           <div className="text-xs text-slate-400">Yüklənir...</div>
         ) : !hasData ? (
-          <div className="text-center p-6 flex flex-col items-center justify-center h-full w-full rounded-xl bg-slate-50/70 border border-dashed border-slate-200">
-            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3 shadow-2xs">
-              <BarChart3 className="w-6 h-6 text-slate-400" />
+          <div className="text-center p-6 flex flex-col items-center justify-center h-full w-full rounded-lg bg-[#F7F5FC] border border-dashed border-[#E4E0F0]">
+            <div className="w-12 h-12 rounded-lg bg-violet-50 border border-violet-200/70 flex items-center justify-center text-violet-700 mb-3 shadow-2xs">
+              <BarChart3 className="w-6 h-6" />
             </div>
-            <h4 className="text-sm font-semibold text-slate-700 mb-1">
-              Hələlik dövriyyə statistikası formalaşmayıb
+            <h4 className="text-sm font-bold text-slate-800 mb-1">
+              Hazırda bazada qeydiyyata alınmış məlumat yoxdur
             </h4>
-            <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
+            <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
               Kitabxanaçılar tərəfindən kitab verilməsi və ya qaytarılması əməliyyatları icra edildikcə aylıq dinamika qrafikdə əks olunacaq.
             </p>
-            <div className="mt-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200/60 text-slate-600 text-[11px] font-medium">
+            <div className="mt-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200/60 text-slate-700 text-[11px] font-semibold">
               <Info className="w-3 h-3 text-slate-500" />
               0 dövriyyə qeydi
             </div>
@@ -95,21 +95,21 @@ export function TurnoverChart({ data }: TurnoverChartProps) {
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#0F172A",
-                  borderColor: "#1E293B",
-                  borderRadius: "12px",
+                  backgroundColor: "#2E1065",
+                  borderColor: "#4C1D95",
+                  borderRadius: "8px",
                   color: "#fff",
                   fontSize: "12px",
-                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.4)",
                 }}
                 itemStyle={{ color: "#fff", padding: "2px 0" }}
-                labelStyle={{ fontWeight: "bold", color: "#94a3b8", marginBottom: "4px" }}
+                labelStyle={{ fontWeight: "bold", color: "#C4B5FD", marginBottom: "4px" }}
               />
               <Legend verticalAlign="bottom" height={36} iconType="circle" />
               <Bar
                 name="Verilən kitablar"
                 dataKey="borrowed"
-                fill="#4F46E5"
+                fill="#6D28D9"
                 radius={[4, 4, 0, 0]}
               />
               <Bar
@@ -125,4 +125,3 @@ export function TurnoverChart({ data }: TurnoverChartProps) {
     </div>
   );
 }
-

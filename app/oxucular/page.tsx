@@ -5,18 +5,12 @@ import {
   Users,
   Plus,
   Search,
-  Filter,
   Eye,
   Edit2,
   Trash2,
-  Phone,
-  Mail,
-  Building,
   CheckCircle2,
-  AlertTriangle,
   UserX,
   BookOpen,
-  Clock,
 } from "lucide-react";
 import {
   Reader,
@@ -122,28 +116,32 @@ export default function OxucularPage() {
   };
 
   const handleDelete = async (reader: Reader) => {
-    if (confirm(`"${reader.firstName} ${reader.lastName}" adlı oxucunu bazadan silmək istəyirsiniz?`)) {
-      await deleteReader(reader.id);
-      fetchData();
+    if (confirm(`"${reader.firstName} ${reader.lastName}" adlı oxucunu silmək istəyirsiniz?`)) {
+      try {
+        await deleteReader(reader.id);
+        fetchData();
+      } catch (err) {
+        console.error("Oxucu silinərkən xəta:", err);
+      }
     }
   };
 
   return (
     <div className="space-y-6 pb-12">
-      {/* 1. Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200">
+      {/* 1. Header & Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-[#E4E0F0]">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-              Oxucular
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              Oxucuların Reyestri
             </h1>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-100/80 text-indigo-700 text-xs font-semibold">
-              <Users className="w-3.5 h-3.5 text-indigo-600" />
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-violet-50 border border-violet-200/60 text-violet-800 text-xs font-bold">
+              <Users className="w-3.5 h-3.5 text-violet-700" />
               {readers.length} qeydiyyat
             </span>
           </div>
-          <p className="text-sm text-slate-500 mt-1">
-            Lənkəran Dövlət Peşə Təhsil Mərkəzinin tələbə, müəllim və əməkdaş oxucu bazası
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Lənkəran Dövlət Peşə Təhsil Mərkəzi tələbə, müəllim və inzibati oxucu bazası
           </p>
         </div>
 
@@ -152,76 +150,17 @@ export default function OxucularPage() {
             setEditingReader(null);
             setIsAddModalOpen(true);
           }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs sm:text-sm font-semibold shadow-sm shadow-indigo-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-violet-700 hover:bg-violet-800 active:bg-violet-900 text-white text-xs sm:text-sm font-bold shadow-md shadow-violet-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-violet-500/30 self-start sm:self-auto cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>Yeni Oxucu Əlavə Et</span>
+          <span>Yeni Oxucu Qeydiyyatı</span>
         </button>
       </div>
 
-      {/* 2. Top Bar: Search & Filters */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs space-y-3">
-        {/* Quick Filter Tabs / Badges - Requirement 4 */}
-        <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-100">
-          <button
-            onClick={() => setSelectedStatus("all")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              selectedStatus === "all"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
-          >
-            Bütün Oxucular ({readers.length})
-          </button>
-
-          <button
-            onClick={() => setSelectedStatus("pending")}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              selectedStatus === "pending"
-                ? "bg-amber-600 text-white shadow-xs"
-                : "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/80"
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5" />
-            <span>Təsdiq gözləyənlər</span>
-            {pendingCount > 0 && (
-              <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
-                  selectedStatus === "pending"
-                    ? "bg-white text-amber-800"
-                    : "bg-amber-500 text-white animate-pulse"
-                }`}
-              >
-                {pendingCount}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setSelectedStatus("active")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              selectedStatus === "active"
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/80"
-            }`}
-          >
-            Aktiv
-          </button>
-
-          <button
-            onClick={() => setSelectedStatus("blocked")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              selectedStatus === "blocked"
-                ? "bg-rose-600 text-white shadow-xs"
-                : "bg-rose-50 text-rose-800 hover:bg-rose-100 border border-rose-200/80"
-            }`}
-          >
-            Bloklanıb
-          </button>
-        </div>
-
+      {/* 2. Search & Filters Bar */}
+      <div className="bg-white rounded-xl border border-[#E4E0F0] p-4 shadow-2xs space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-          {/* Search field */}
+          {/* Main search input */}
           <div className="sm:col-span-6 relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
               <Search className="w-4 h-4" />
@@ -231,7 +170,7 @@ export default function OxucularPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Axtarış: Ad, Soyad, Bilet №, Qrup və ya Əlaqə..."
-              className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+              className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all"
             />
           </div>
 
@@ -240,7 +179,7 @@ export default function OxucularPage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+              className="w-full px-3 py-2 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all font-semibold"
             >
               <option value="all">Bütün Kateqoriyalar</option>
               <option value="Tələbə">Tələbə</option>
@@ -254,7 +193,7 @@ export default function OxucularPage() {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+              className="w-full px-3 py-2 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all font-semibold"
             >
               <option value="all">Bütün Statuslar</option>
               <option value="pending">Təsdiq gözləyir ({pendingCount})</option>
@@ -277,7 +216,7 @@ export default function OxucularPage() {
                 setSelectedCategory("all");
                 setSelectedStatus("all");
               }}
-              className="text-indigo-600 hover:underline font-medium"
+              className="text-violet-700 hover:underline font-semibold"
             >
               Filtrləri sıfırla
             </button>
@@ -285,19 +224,19 @@ export default function OxucularPage() {
         </div>
       </div>
 
-      {/* 3. Readers Table or Graceful Empty State */}
+      {/* 3. Readers Table or Graceful Real Empty State */}
       {isLoading ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400 text-sm">
+        <div className="bg-white rounded-xl border border-[#E4E0F0] p-12 text-center text-slate-400 text-sm">
           Oxucu bazası yüklənir...
         </div>
       ) : readers.length === 0 ? (
-        /* Empty State: No readers */
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-8 sm:p-14 text-center flex flex-col items-center justify-center min-h-[380px] shadow-xs">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-sm mb-4">
+        /* Empty State: 100% Real Empty state */
+        <div className="bg-white rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 p-8 sm:p-14 text-center flex flex-col items-center justify-center min-h-[380px] shadow-xs">
+          <div className="w-16 h-16 rounded-xl bg-violet-50 border border-violet-200/70 flex items-center justify-center text-violet-700 shadow-sm mb-4">
             <Users className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-slate-900 mb-1">
-            Oxucu bazasında hələ heç bir üzv qeydiyyatdan keçməyib
+            Hazırda bazada qeydiyyata alınmış məlumat yoxdur
           </h3>
           <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed mb-6">
             Mərkəzin tələbə və müəllim heyətini sistemə daxil edərək kitab istiqrazına başlayın.
@@ -307,7 +246,7 @@ export default function OxucularPage() {
               setEditingReader(null);
               setIsAddModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-violet-700 hover:bg-violet-800 text-white text-xs sm:text-sm font-bold shadow-sm transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>İlk oxucunu əlavə et</span>
@@ -315,11 +254,11 @@ export default function OxucularPage() {
         </div>
       ) : filteredReaders.length === 0 ? (
         /* Empty State: No results */
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-10 text-center flex flex-col items-center justify-center shadow-xs">
-          <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+        <div className="bg-white rounded-xl border border-[#E4E0F0] p-10 text-center flex flex-col items-center justify-center shadow-xs">
+          <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
             <UserX className="w-6 h-6" />
           </div>
-          <h4 className="text-base font-semibold text-slate-800 mb-1">
+          <h4 className="text-base font-bold text-slate-800 mb-1">
             Axtarışa uyğun oxucu tapılmadı
           </h4>
           <p className="text-xs text-slate-500 max-w-sm mb-4">
@@ -331,18 +270,18 @@ export default function OxucularPage() {
               setSelectedCategory("all");
               setSelectedStatus("all");
             }}
-            className="px-3.5 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+            className="px-3.5 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors cursor-pointer"
           >
             Filtrləri təmizlə
           </button>
         </div>
       ) : (
         /* Data Table */
-        <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs">
+        <div className="bg-white rounded-xl border border-[#E4E0F0] overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                <tr className="bg-[#F7F5FC] border-b border-[#E4E0F0] text-[11px] font-bold text-violet-950 uppercase tracking-wider">
                   <th className="py-3 px-4">Ad, Soyad və Ata Adı</th>
                   <th className="py-3 px-4">Kateqoriya</th>
                   <th className="py-3 px-4">Qrup / Şöbə</th>
@@ -352,7 +291,7 @@ export default function OxucularPage() {
                   <th className="py-3 px-4 text-right">Əməliyyatlar</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#E4E0F0]">
                 {filteredReaders.map((reader) => {
                   const activeBooks = readerActiveBookCount[reader.id] || 0;
                   const isNearLimit = activeBooks >= reader.maxBookLimit;
@@ -360,13 +299,13 @@ export default function OxucularPage() {
                   return (
                     <tr
                       key={reader.id}
-                      className="hover:bg-slate-50/70 transition-colors group"
+                      className="hover:bg-[#F7F5FC] transition-colors group"
                     >
                       {/* Name */}
                       <td className="py-3 px-4">
                         <span
                           onClick={() => setViewingReader(reader)}
-                          className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors cursor-pointer block"
+                          className="font-bold text-slate-900 group-hover:text-violet-700 transition-colors cursor-pointer block"
                         >
                           {reader.firstName} {reader.lastName}
                         </span>
@@ -380,12 +319,12 @@ export default function OxucularPage() {
                       {/* Category */}
                       <td className="py-3 px-4">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                             reader.category === "Müəllim"
                               ? "bg-purple-50 text-purple-700 border border-purple-200/60"
                               : reader.category === "Əməkdaş"
                               ? "bg-sky-50 text-sky-700 border border-sky-200/60"
-                              : "bg-blue-50 text-blue-700 border border-blue-200/60"
+                              : "bg-violet-50 text-violet-800 border border-violet-200/60"
                           }`}
                         >
                           {reader.category}
@@ -393,13 +332,13 @@ export default function OxucularPage() {
                       </td>
 
                       {/* Department / Group */}
-                      <td className="py-3 px-4 text-slate-700 max-w-[180px] truncate">
+                      <td className="py-3 px-4 text-slate-700 max-w-[180px] truncate font-medium">
                         {reader.department}
                       </td>
 
                       {/* Contact */}
                       <td className="py-3 px-4 text-slate-600">
-                        <div className="font-medium text-slate-800">{reader.phone}</div>
+                        <div className="font-semibold text-slate-800">{reader.phone}</div>
                         {reader.email && (
                           <div className="text-[10px] text-slate-400 truncate max-w-[150px]">
                             {reader.email}
@@ -412,10 +351,10 @@ export default function OxucularPage() {
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                             activeBooks === 0
-                              ? "bg-slate-100 text-slate-600"
+                              ? "bg-[#F7F5FC] text-slate-600 border border-[#E4E0F0]"
                               : isNearLimit
                               ? "bg-amber-50 text-amber-700 border border-amber-200"
-                              : "bg-indigo-50 text-indigo-700 border border-indigo-100"
+                              : "bg-violet-50 text-violet-800 border border-violet-200/60"
                           }`}
                         >
                           <BookOpen className="w-3 h-3" />
@@ -460,12 +399,11 @@ export default function OxucularPage() {
                       {/* Actions */}
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          {/* One-click Təsdiqlə / Aktiv et button - Requirement 4 */}
                           {isReaderPending(reader.status) && (
                             <button
                               onClick={() => handleApprove(reader)}
                               title="Oxucunu təsdiqlə və aktiv et"
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-xs transition-all whitespace-nowrap"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-xs transition-all whitespace-nowrap cursor-pointer"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               <span>Təsdiqlə / Aktiv et</span>
@@ -474,7 +412,7 @@ export default function OxucularPage() {
                           <button
                             onClick={() => setViewingReader(reader)}
                             title="Profilə və Tarixçəyə bax"
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-violet-700 hover:bg-violet-50 transition-colors cursor-pointer"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
@@ -484,14 +422,14 @@ export default function OxucularPage() {
                               setIsAddModalOpen(true);
                             }}
                             title="Redaktə et"
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(reader)}
                             title="Sil"
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

@@ -41,7 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (isDedicatedPage) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+      <div className="min-h-screen bg-[#F7F5FC] text-slate-900 antialiased selection:bg-violet-700 selection:text-white">
         {children}
       </div>
     );
@@ -51,16 +51,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Never leak or flash admin sidebar/content to unauthorized users
   if (isLoading || !isAuthAdmin) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4" />
-        <h3 className="text-sm font-bold text-slate-800">Təhlükəsizlik yoxlanılır...</h3>
+      <div className="min-h-screen bg-[#F7F5FC] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-10 h-10 border-4 border-violet-700 border-t-transparent rounded-full animate-spin mb-4" />
+        <h3 className="text-sm font-bold text-slate-900">Təhlükəsizlik yoxlanılır...</h3>
         <p className="text-xs text-slate-500 mt-1">İcazələr yoxlanılır və idarəetmə panelinə yönləndirilirsiniz.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex text-slate-800 antialiased print:bg-white print:min-h-0">
+    <div className="min-h-screen bg-[#F7F5FC] flex text-slate-900 antialiased print:bg-white print:min-h-0">
       {/* Sidebar Navigation */}
       <div className="print:hidden">
         <Sidebar
@@ -90,4 +90,3 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-

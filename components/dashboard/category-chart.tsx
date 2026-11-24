@@ -17,11 +17,12 @@ interface CategoryChartProps {
 }
 
 const DEFAULT_COLORS = [
-  "#4F46E5", // Indigo (Texniki)
-  "#0EA5E9", // Sky (Dərslik)
+  "#6D28D9", // Royal interactive purple (Texniki)
+  "#4C1D95", // Velvet deep purple (Dərslik)
+  "#0EA5E9", // Sky (Elmi)
   "#10B981", // Emerald (Bədii)
-  "#F59E0B", // Amber (Elmi)
-  "#8B5CF6", // Violet (Tarixi)
+  "#F59E0B", // Amber (Tarixi)
+  "#8B5CF6", // Violet (Metodiki)
   "#64748B", // Slate (Digər)
 ];
 
@@ -35,11 +36,11 @@ export function CategoryChart({ data }: CategoryChartProps) {
   const hasData = data && data.length > 0 && data.some((item) => item.count > 0);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+    <div className="bg-white rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 p-5 sm:p-6 shadow-2xs flex flex-col justify-between">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
         <div>
-          <h2 className="text-base font-bold text-slate-800">
+          <h2 className="text-base font-bold text-slate-900">
             Fondun Sahələr Üzrə Bölgüsü
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -48,22 +49,22 @@ export function CategoryChart({ data }: CategoryChartProps) {
         </div>
       </div>
 
-      {/* Donut Chart or Graceful Empty State */}
+      {/* Donut Chart or Graceful Real Empty State */}
       <div className="h-64 sm:h-72 w-full flex items-center justify-center">
         {!isMounted ? (
           <div className="text-xs text-slate-400">Yüklənir...</div>
         ) : !hasData ? (
-          <div className="text-center p-6 flex flex-col items-center justify-center h-full w-full rounded-xl bg-slate-50/70 border border-dashed border-slate-200">
-            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3 shadow-2xs">
-              <PieChartIcon className="w-6 h-6 text-slate-400" />
+          <div className="text-center p-6 flex flex-col items-center justify-center h-full w-full rounded-lg bg-[#F7F5FC] border border-dashed border-[#E4E0F0]">
+            <div className="w-12 h-12 rounded-lg bg-violet-50 border border-violet-200/70 flex items-center justify-center text-violet-700 mb-3 shadow-2xs">
+              <PieChartIcon className="w-6 h-6" />
             </div>
-            <h4 className="text-sm font-semibold text-slate-700 mb-1">
-              Hələlik dövriyyə statistikası formalaşmayıb
+            <h4 className="text-sm font-bold text-slate-800 mb-1">
+              Hazırda bazada qeydiyyata alınmış məlumat yoxdur
             </h4>
-            <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
+            <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
               Fondun sahələr üzrə (Texniki, Bədii, Dərslik və s.) bölgüsü sistemə kitab nüsxələri daxil edildikcə burada əks olunacaq.
             </p>
-            <div className="mt-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200/60 text-slate-600 text-[11px] font-medium">
+            <div className="mt-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200/60 text-slate-700 text-[11px] font-semibold">
               <Info className="w-3 h-3 text-slate-500" />
               Kateqoriya qeydiyyatı gözlənilir
             </div>
@@ -96,12 +97,12 @@ export function CategoryChart({ data }: CategoryChartProps) {
                   String(name),
                 ]}
                 contentStyle={{
-                  backgroundColor: "#0F172A",
-                  borderColor: "#1E293B",
-                  borderRadius: "12px",
+                  backgroundColor: "#2E1065",
+                  borderColor: "#4C1D95",
+                  borderRadius: "8px",
                   color: "#fff",
                   fontSize: "12px",
-                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.4)",
                 }}
               />
               <Legend
@@ -117,4 +118,3 @@ export function CategoryChart({ data }: CategoryChartProps) {
     </div>
   );
 }
-

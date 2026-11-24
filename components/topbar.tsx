@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import { Search, Menu, Building2, User, ChevronDown, LogOut, ShieldCheck, LogIn } from "lucide-react";
+import { Search, Menu, Building2, ChevronDown, LogOut, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/firebase/auth-context";
 
 interface TopbarProps {
@@ -33,12 +32,12 @@ export function Topbar({ onToggleMobileSidebar }: TopbarProps) {
   const userEmail = profile?.email || user?.email || (role === "admin" ? "admin@ldptm.edu.az" : "");
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-[#E4E0F0] px-4 sm:px-6 flex items-center justify-between gap-4">
       {/* Left side: Mobile Toggle + Global Search */}
       <div className="flex items-center gap-3 flex-1 max-w-xl">
         <button
           onClick={onToggleMobileSidebar}
-          className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors focus:outline-none"
+          className="lg:hidden p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-[#F7F5FC] transition-colors focus:outline-none"
           aria-label="Menyunu aç"
         >
           <Menu className="w-5 h-5" />
@@ -52,10 +51,10 @@ export function Topbar({ onToggleMobileSidebar }: TopbarProps) {
           <input
             type="text"
             placeholder="Axtarış: Kitab adı, Oxucu və ya İnventar №..."
-            className="w-full pl-10 pr-12 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all shadow-sm"
+            className="w-full pl-10 pr-12 py-2 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all shadow-2xs"
           />
           <div className="hidden sm:flex absolute inset-y-0 right-0 pr-2.5 items-center pointer-events-none">
-            <kbd className="px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-white border border-slate-200 rounded shadow-xs">
+            <kbd className="px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-white border border-[#E4E0F0] rounded shadow-2xs">
               ⌘K
             </kbd>
           </div>
@@ -65,9 +64,9 @@ export function Topbar({ onToggleMobileSidebar }: TopbarProps) {
       {/* Right side: Institution badge + Status indicator + Profile avatar */}
       <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
         {/* Institution Badge */}
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-700 shadow-2xs">
-          <Building2 className="w-4 h-4 text-indigo-600 flex-shrink-0" />
-          <span className="text-xs font-medium tracking-tight whitespace-nowrap">
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#F7F5FC] border border-[#E4E0F0] text-slate-700 shadow-2xs">
+          <Building2 className="w-4 h-4 text-violet-700 flex-shrink-0" />
+          <span className="text-xs font-semibold tracking-tight whitespace-nowrap text-slate-800">
             Lənkəran Dövlət Peşə Təhsil Mərkəzi
           </span>
         </div>
@@ -82,19 +81,19 @@ export function Topbar({ onToggleMobileSidebar }: TopbarProps) {
         </div>
 
         {/* User Profile / Admin Auth Display */}
-        <div className="relative pl-1 sm:pl-2 border-l border-slate-200">
+        <div className="relative pl-1 sm:pl-2 border-l border-[#E4E0F0]">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 p-1 sm:p-1.5 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none group"
+            className="flex items-center gap-2 p-1 sm:p-1.5 rounded-lg hover:bg-[#F7F5FC] transition-colors focus:outline-none group"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0F172A] to-indigo-700 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-indigo-500/20">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#2E1065] to-[#6D28D9] text-white flex items-center justify-center font-bold text-xs shadow-2xs ring-2 ring-violet-500/20">
               {role === "admin" ? "AD" : getInitials(displayName)}
             </div>
             <div className="hidden xl:flex flex-col text-left">
               <span className="text-xs font-semibold text-slate-800 leading-tight">
                 {displayName}
               </span>
-              <span className="text-[10px] text-indigo-600 font-semibold leading-tight">
+              <span className="text-[10px] text-violet-700 font-semibold leading-tight">
                 {roleTitle}
               </span>
             </div>
@@ -108,12 +107,12 @@ export function Topbar({ onToggleMobileSidebar }: TopbarProps) {
                 className="fixed inset-0 z-40"
                 onClick={() => setIsDropdownOpen(false)}
               />
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200/80 p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                <div className="p-2.5 border-b border-slate-100">
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-[#E4E0F0] p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="p-2.5 border-b border-[#E4E0F0]">
                   <p className="text-xs font-bold text-slate-900 truncate">{displayName}</p>
                   {userEmail && <p className="text-[11px] text-slate-500 truncate">{userEmail}</p>}
-                  <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/50">
-                    <ShieldCheck className="w-3 h-3 text-indigo-600" />
+                  <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-violet-50 text-violet-800 border border-violet-200/50">
+                    <ShieldCheck className="w-3 h-3 text-violet-700" />
                     <span>{roleTitle}</span>
                   </span>
                 </div>
@@ -123,7 +122,7 @@ export function Topbar({ onToggleMobileSidebar }: TopbarProps) {
                     setIsDropdownOpen(false);
                     logout();
                   }}
-                  className="w-full mt-1.5 flex items-center gap-2 px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-left"
+                  className="w-full mt-1.5 flex items-center gap-2 px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-lg transition-colors text-left"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Çıxış et</span>

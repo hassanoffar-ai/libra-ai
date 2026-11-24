@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Library,
   User,
   Phone,
   Mail,
@@ -65,7 +64,7 @@ export default function ReaderRegisterPage() {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim() || !emailRegex.test(email.trim())) {
-      errors.email = "Düzgün e-poçt formatı daxil edin (məs: ad.soyad@example.com).";
+      errors.email = "Düzgün e-poçt formatı daxil edin (məs: ad.soyad@ldptm.edu.az).";
     }
 
     if (!department.trim()) {
@@ -95,7 +94,6 @@ export default function ReaderRegisterPage() {
       const cleanPhone = phone.trim();
       const cleanDept = department.trim();
 
-      // Automatically generate unique Ticket Number (e.g., OX-1045)
       const ticketNumber = await generateNextTicketNumber().catch(
         () => `OX-${Math.floor(1000 + Math.random() * 9000)}`
       );
@@ -124,7 +122,6 @@ export default function ReaderRegisterPage() {
         return;
       }
 
-      // Synchronize immediately to circulation-service as a pending reader for librarian review
       const assignedTicket = data.ticketNumber || ticketNumber;
       await createReader({
         firstName: firstName.trim(),
@@ -146,9 +143,8 @@ export default function ReaderRegisterPage() {
         message: "Qeydiyyat tamamlandı! Hesabınız kitabxanaçı təsdiqindən sonra aktivləşəcək.",
       });
 
-      // Automatically redirect to /auth/login after 2 seconds
       setTimeout(() => {
-        router.push("/auth/login?registered=1");
+        router.push("/?registered=1");
       }, 2000);
     } catch (err: any) {
       setErrorMessage(err?.message || "Gözlənilməz şəbəkə xətası baş verdi.");
@@ -157,22 +153,17 @@ export default function ReaderRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-between py-8 px-4 sm:px-6 lg:px-8 relative selection:bg-indigo-600 selection:text-white">
-      {/* Decorative ambient gradient backdrop */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-indigo-100/70 via-purple-50/40 to-transparent blur-3xl opacity-80" />
-      </div>
-
+    <div className="min-h-screen bg-[#F7F5FC] flex flex-col justify-between py-8 px-4 sm:px-6 lg:px-8 relative selection:bg-violet-700 selection:text-white">
       {/* Floating Success Notification */}
       {successInfo && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4 animate-in slide-in-from-top-4 duration-300">
-          <div className="bg-emerald-900/95 text-white p-4 rounded-2xl shadow-2xl backdrop-blur-md border border-emerald-500/30 flex items-start gap-3.5">
-            <div className="p-2 bg-emerald-500 text-white rounded-xl flex-shrink-0">
+          <div className="bg-[#2E1065] text-white p-4 rounded-xl shadow-2xl border border-violet-500/30 flex items-start gap-3.5">
+            <div className="p-2 bg-emerald-500 text-white rounded-lg flex-shrink-0">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div className="flex-1">
-              <h4 className="text-sm font-bold">{successInfo.message}</h4>
-              <div className="mt-2.5 flex items-center gap-2 text-[11px] text-emerald-300">
+              <h4 className="text-xs sm:text-sm font-bold">{successInfo.message}</h4>
+              <div className="mt-2 flex items-center gap-2 text-[11px] text-violet-200">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 <span>Giriş səhifəsinə yönləndirilirsiniz...</span>
               </div>
@@ -184,46 +175,45 @@ export default function ReaderRegisterPage() {
       {/* Main Container */}
       <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 w-full">
         <div className="w-full max-w-xl my-auto">
-
-          {/* Brand Header */}
+          {/* Institutional Brand Header */}
           <div className="text-center mb-6">
             <Link
               href="/"
-              className="inline-flex items-center gap-2.5 group focus:outline-none mb-3"
+              className="inline-flex items-center gap-2.5 group focus:outline-none mb-2"
             >
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#0F172A] via-indigo-950 to-indigo-700 flex items-center justify-center text-white shadow-xl shadow-indigo-950/20 group-hover:scale-105 transition-transform duration-200">
-                <Library className="w-6 h-6 text-indigo-300" />
+              <div className="w-12 h-12 rounded-lg bg-gradient-to-tr from-[#2E1065] via-[#3B0764] to-[#4C1D95] flex items-center justify-center text-white shadow-md flex-shrink-0 group-hover:scale-105 transition-transform">
+                <GraduationCap className="w-6 h-6 text-[#C4B5FD]" />
               </div>
               <div className="text-left">
-                <span className="text-2xl font-black tracking-tight text-slate-900 font-sans block">
-                  Peşə Kitabxanası
+                <span className="text-xl font-black tracking-tight text-slate-900 block uppercase">
+                  Lənkəran DPTM
+                </span>
+                <span className="text-xs text-violet-700 font-semibold block">
+                  Elektron Kitabxana
                 </span>
               </div>
             </Link>
-            <p className="text-xs font-semibold text-indigo-600 tracking-wide uppercase">
-              Lənkəran Dövlət Peşə Təhsil Mərkəzi
-            </p>
+
             <h1 className="mt-2 text-2xl font-extrabold text-slate-900 tracking-tight">
               Oxucu Qeydiyyatı
             </h1>
             <p className="mt-1 text-xs sm:text-sm text-slate-500">
-              Kitabxana xidmətlərindən istifadə etmək üçün qeydiyyatdan keçin
+              Kitabxana xidmətlərindən istifadə etmək üçün təhsil və əlaqə məlumatlarınızı daxil edin
             </p>
           </div>
 
           {/* Registration Card */}
-          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xl shadow-slate-200/50 p-5 sm:p-8 lg:p-10 relative">
-
+          <div className="bg-white rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-sm p-5 sm:p-8 relative">
             {/* Error Banner */}
             {errorMessage && (
-              <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-800 text-xs sm:text-sm flex items-start gap-3 animate-in fade-in duration-200">
-                <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
+              <div className="mb-6 p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
+                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1 font-medium">{errorMessage}</div>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-              {/* 1. Ad & 2. Soyad (2 sütun) */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Ad & Soyad */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -236,16 +226,16 @@ export default function ReaderRegisterPage() {
                     <input
                       type="text"
                       required
-                      placeholder="Adınız"
+                      placeholder="Məs: Əli"
                       value={firstName}
                       onChange={(e) => {
                         setFirstName(e.target.value);
                         if (fieldErrors.firstName) setFieldErrors({ ...fieldErrors, firstName: "" });
                       }}
-                      className={`w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border rounded-lg text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.firstName
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
-                          : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          : "border-[#E4E0F0] focus:ring-violet-500/20 focus:border-violet-700"
                       }`}
                     />
                   </div>
@@ -265,16 +255,16 @@ export default function ReaderRegisterPage() {
                     <input
                       type="text"
                       required
-                      placeholder="Soyadınız"
+                      placeholder="Məs: Məmmədov"
                       value={lastName}
                       onChange={(e) => {
                         setLastName(e.target.value);
                         if (fieldErrors.lastName) setFieldErrors({ ...fieldErrors, lastName: "" });
                       }}
-                      className={`w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border rounded-lg text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.lastName
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
-                          : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          : "border-[#E4E0F0] focus:ring-violet-500/20 focus:border-violet-700"
                       }`}
                     />
                   </div>
@@ -284,11 +274,11 @@ export default function ReaderRegisterPage() {
                 </div>
               </div>
 
-              {/* 3. Mobil telefon & 4. E-poçt (2 sütun) */}
+              {/* Mobil telefon & E-poçt */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Mobil telefon nömrəsi <span className="text-rose-500">*</span>
+                    Mobil telefon <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -297,16 +287,16 @@ export default function ReaderRegisterPage() {
                     <input
                       type="tel"
                       required
-                      placeholder="+994 50 000 00 00"
+                      placeholder="Məs: +994 50 123 45 67"
                       value={phone}
                       onChange={(e) => {
                         setPhone(e.target.value);
                         if (fieldErrors.phone) setFieldErrors({ ...fieldErrors, phone: "" });
                       }}
-                      className={`w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border rounded-lg text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.phone
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
-                          : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          : "border-[#E4E0F0] focus:ring-violet-500/20 focus:border-violet-700"
                       }`}
                     />
                   </div>
@@ -326,16 +316,16 @@ export default function ReaderRegisterPage() {
                     <input
                       type="email"
                       required
-                      placeholder="ad.soyad@example.com"
+                      placeholder="Məs: ad.soyad@ldptm.edu.az"
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
                         if (fieldErrors.email) setFieldErrors({ ...fieldErrors, email: "" });
                       }}
-                      className={`w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border rounded-lg text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.email
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
-                          : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          : "border-[#E4E0F0] focus:ring-violet-500/20 focus:border-violet-700"
                       }`}
                     />
                   </div>
@@ -345,7 +335,7 @@ export default function ReaderRegisterPage() {
                 </div>
               </div>
 
-              {/* 5. İstifadəçi kateqoriyası: Tələbə / Müəllim */}
+              {/* Kateqoriya */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   İstifadəçi kateqoriyası <span className="text-rose-500">*</span>
@@ -354,26 +344,26 @@ export default function ReaderRegisterPage() {
                   <button
                     type="button"
                     onClick={() => setCategory("Tələbə")}
-                    className={`flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border text-xs sm:text-sm font-bold transition-all focus:outline-none ${
+                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border text-xs sm:text-sm font-bold transition-all focus:outline-none ${
                       category === "Tələbə"
-                        ? "bg-indigo-50/80 border-indigo-600 text-indigo-900 ring-2 ring-indigo-600/20 shadow-xs"
-                        : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                        ? "bg-violet-50 border-violet-700 text-violet-950 ring-2 ring-violet-600/20 shadow-xs"
+                        : "bg-[#F7F5FC] border-[#E4E0F0] text-slate-600 hover:bg-slate-100"
                     }`}
                   >
-                    <GraduationCap className={`w-4 h-4 ${category === "Tələbə" ? "text-indigo-600" : "text-slate-400"}`} />
+                    <GraduationCap className={`w-4 h-4 ${category === "Tələbə" ? "text-violet-700" : "text-slate-400"}`} />
                     <span>Tələbə</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setCategory("Müəllim")}
-                    className={`flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border text-xs sm:text-sm font-bold transition-all focus:outline-none ${
+                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border text-xs sm:text-sm font-bold transition-all focus:outline-none ${
                       category === "Müəllim"
-                        ? "bg-indigo-50/80 border-indigo-600 text-indigo-900 ring-2 ring-indigo-600/20 shadow-xs"
-                        : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                        ? "bg-violet-50 border-violet-700 text-violet-950 ring-2 ring-violet-600/20 shadow-xs"
+                        : "bg-[#F7F5FC] border-[#E4E0F0] text-slate-600 hover:bg-slate-100"
                     }`}
                   >
-                    <Briefcase className={`w-4 h-4 ${category === "Müəllim" ? "text-indigo-600" : "text-slate-400"}`} />
+                    <Briefcase className={`w-4 h-4 ${category === "Müəllim" ? "text-violet-700" : "text-slate-400"}`} />
                     <span>Müəllim</span>
                   </button>
                 </div>
@@ -401,10 +391,10 @@ export default function ReaderRegisterPage() {
                       setDepartment(e.target.value);
                       if (fieldErrors.department) setFieldErrors({ ...fieldErrors, department: "" });
                     }}
-                    className={`w-full pl-10 pr-3.5 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                    className={`w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border rounded-lg text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                       fieldErrors.department
                         ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
-                        : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
+                        : "border-[#E4E0F0] focus:ring-violet-500/20 focus:border-violet-700"
                     }`}
                   />
                 </div>
@@ -413,7 +403,7 @@ export default function ReaderRegisterPage() {
                 )}
               </div>
 
-              {/* 6. Şifrə & 7. Şifrənin təkrarı (2 sütun) */}
+              {/* Şifrə & Təkrarı */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -432,10 +422,10 @@ export default function ReaderRegisterPage() {
                         setPassword(e.target.value);
                         if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: "" });
                       }}
-                      className={`w-full pl-10 pr-10 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border rounded-lg text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.password
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
-                          : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          : "border-[#E4E0F0] focus:ring-violet-500/20 focus:border-violet-700"
                       }`}
                     />
                     <button
@@ -469,10 +459,10 @@ export default function ReaderRegisterPage() {
                         setConfirmPassword(e.target.value);
                         if (fieldErrors.confirmPassword) setFieldErrors({ ...fieldErrors, confirmPassword: "" });
                       }}
-                      className={`w-full pl-10 pr-10 py-3 sm:py-2.5 text-base sm:text-sm bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border rounded-lg text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
                         fieldErrors.confirmPassword
                           ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
-                          : "border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          : "border-[#E4E0F0] focus:ring-violet-500/20 focus:border-violet-700"
                       }`}
                     />
                     <button
@@ -490,12 +480,12 @@ export default function ReaderRegisterPage() {
                 </div>
               </div>
 
-              {/* Primary Submit Button */}
+              {/* Submit Button */}
               <div className="pt-2">
                 <button
                   type="submit"
                   disabled={isSubmitting || !!successInfo}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-[0.99] transition-all shadow-md shadow-indigo-600/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-xs sm:text-sm font-bold text-white bg-violet-700 hover:bg-violet-800 active:bg-violet-900 transition-all shadow-md shadow-violet-900/20 focus:outline-none focus:ring-2 focus:ring-violet-500/40 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
@@ -513,12 +503,12 @@ export default function ReaderRegisterPage() {
             </form>
 
             {/* Bottom link: Artıq hesabınız var? Daxil olun */}
-            <div className="mt-6 pt-5 border-t border-slate-100 text-center">
+            <div className="mt-6 pt-5 border-t border-[#E4E0F0] text-center">
               <p className="text-xs sm:text-sm text-slate-500">
                 Artıq hesabınız var?{" "}
                 <Link
                   href="/"
-                  className="font-bold text-indigo-600 hover:text-indigo-800 transition-colors ml-1 inline-flex items-center gap-1 group"
+                  className="font-bold text-violet-700 hover:text-violet-900 transition-colors ml-1 inline-flex items-center gap-1 group"
                 >
                   <span>Daxil olun</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -536,4 +526,3 @@ export default function ReaderRegisterPage() {
     </div>
   );
 }
-

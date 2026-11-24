@@ -48,26 +48,26 @@ export function NewBookModal({ isOpen, onClose, onSubmit }: NewBookModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-[#2E1065]/60 backdrop-blur-xs transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-lg bg-white rounded-xl border border-[#E4E0F0] shadow-2xl overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="px-6 py-4 bg-gradient-to-r from-[#2E1065] via-[#3B0764] to-[#4C1D95] text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm">
-              <BookOpen className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-[#DDD6FE] shadow-xs">
+              <BookOpen className="w-4 h-4 text-[#C4B5FD]" />
             </div>
             <div>
               <h3 className="text-base font-bold text-white">Yeni Kitab Əlavə Et</h3>
-              <p className="text-xs text-slate-400">Fondun kataloquna yeni nəşr qeydiyyatı</p>
+              <p className="text-xs text-violet-200">Fondun kataloquna yeni nəşr qeydiyyatı</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-violet-200 hover:text-white hover:bg-white/10 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -76,7 +76,7 @@ export function NewBookModal({ isOpen, onClose, onSubmit }: NewBookModalProps) {
         {/* Form Body */}
         {isSuccess ? (
           <div className="p-8 text-center flex flex-col items-center justify-center">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+            <div className="w-14 h-14 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <h4 className="text-base font-bold text-slate-800 mb-1">
@@ -89,7 +89,7 @@ export function NewBookModal({ isOpen, onClose, onSubmit }: NewBookModalProps) {
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Kitabın Adı <span className="text-rose-500">*</span>
               </label>
               <input
@@ -98,12 +98,12 @@ export function NewBookModal({ isOpen, onClose, onSubmit }: NewBookModalProps) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Məs: İnformasiya Texnologiyalarının Əsasları"
-                className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all text-slate-800 placeholder-slate-400"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Müəllif(lər) <span className="text-rose-500">*</span>
               </label>
               <input
@@ -112,19 +112,19 @@ export function NewBookModal({ isOpen, onClose, onSubmit }: NewBookModalProps) {
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="Məs: Əli Məmmədov"
-                className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all text-slate-800 placeholder-slate-400"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Kateqoriya / Sahə
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all text-slate-800"
                 >
                   <option value="Texniki">Texniki</option>
                   <option value="Dərslik">Dərslik</option>
@@ -136,7 +136,7 @@ export function NewBookModal({ isOpen, onClose, onSubmit }: NewBookModalProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Fiziki Nüsxə Sayı
                 </label>
                 <div className="relative">
@@ -146,24 +146,24 @@ export function NewBookModal({ isOpen, onClose, onSubmit }: NewBookModalProps) {
                     max="1000"
                     value={copies}
                     onChange={(e) => setCopies(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full pl-9 pr-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                    className="w-full pl-9 pr-3.5 py-2.5 text-xs sm:text-sm bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 focus:bg-white transition-all text-slate-800"
                   />
-                  <Layers className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+                  <Layers className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+            <div className="pt-4 border-t border-[#E4E0F0] flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors"
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
               >
                 İmtina
               </button>
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-xl shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-violet-700 hover:bg-violet-800 active:bg-violet-900 rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-violet-500/30 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 Fonduna Əlavə Et
@@ -175,4 +175,3 @@ export function NewBookModal({ isOpen, onClose, onSubmit }: NewBookModalProps) {
     </div>
   );
 }
-

@@ -51,7 +51,6 @@ export default function DashboardPage() {
     return () => window.removeEventListener("libra-data-updated", handleUpdate);
   }, []);
 
-  // Yeni kitab əlavə edildikdə kitab fonduna daxil edirik və dashboard-u yeniləyirik
   const handleAddNewBook = async (newBook: {
     title: string;
     author: string;
@@ -76,19 +75,19 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 pb-8">
       {/* 1. WELCOME HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-[#E4E0F0]">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
               Salam, Administrator!
             </h1>
-            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-100/80 text-indigo-700 text-xs font-semibold">
-              <Sparkles className="w-3 h-3 text-indigo-500" />
-              Peşə Kitabxanası
+            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-violet-50 border border-violet-200/60 text-violet-800 text-xs font-bold">
+              <Sparkles className="w-3 h-3 text-violet-700" />
+              Lənkəran DPTM
             </span>
           </div>
-          <p className="text-sm text-slate-500 mt-1">
-            Kitabxananın cari vəziyyətinə və dövriyyəsinə ümumi baxış.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Lənkəran Dövlət Peşə Təhsil Mərkəzi kitabxana fondunun cari vəziyyəti və dövriyyə göstəriciləri.
           </p>
         </div>
 
@@ -99,14 +98,14 @@ export default function DashboardPage() {
             onClick={() => loadData(true)}
             disabled={isRefreshing || isLoading}
             title="Məlumatları yenilə"
-            className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-2xs transition-colors disabled:opacity-50"
+            className="p-2.5 rounded-lg border border-[#E4E0F0] bg-white text-slate-600 hover:text-violet-900 hover:bg-violet-50 shadow-2xs transition-colors disabled:opacity-50 cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin text-indigo-600" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin text-violet-700" : ""}`} />
           </button>
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs sm:text-sm font-semibold shadow-sm shadow-indigo-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-violet-700 hover:bg-violet-800 active:bg-violet-900 text-white text-xs sm:text-sm font-bold shadow-md shadow-violet-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-violet-500/30 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Yeni Kitab Əlavə Et</span>

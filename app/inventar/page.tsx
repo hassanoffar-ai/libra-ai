@@ -198,18 +198,18 @@ export default function InventarPage() {
   return (
     <div className="space-y-6 pb-12">
       {/* 1. Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-[#E4E0F0]">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
               İnventarlaşdırma və Rəf Yoxlanışı
             </h1>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-100/80 text-indigo-700 text-xs font-semibold">
-              <ClipboardCheck className="w-3.5 h-3.5 text-indigo-600" />
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-violet-50 border border-violet-200/60 text-violet-800 text-xs font-bold">
+              <ClipboardCheck className="w-3.5 h-3.5 text-violet-700" />
               Dövri Audit
             </span>
           </div>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Fiziki nüsxələrin rəflər üzrə faktiki mövcudluğunun, yerləşməsinin və vəziyyətinin təsdiqi
           </p>
         </div>
@@ -218,35 +218,35 @@ export default function InventarPage() {
           type="button"
           onClick={() => fetchCopies(true)}
           disabled={isRefreshing || isLoading}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold shadow-2xs transition-colors self-start sm:self-auto disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-[#E4E0F0] text-slate-700 hover:bg-violet-50 hover:text-violet-900 text-xs font-semibold shadow-2xs transition-colors self-start sm:self-auto disabled:opacity-50 cursor-pointer"
         >
-          <RefreshCw className={`w-3.5 h-3.5 text-indigo-600 ${isRefreshing ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-3.5 h-3.5 text-violet-700 ${isRefreshing ? "animate-spin" : ""}`} />
           <span>Məlumatları Yenilə</span>
         </button>
       </div>
 
       {/* Summary KPI Badges */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] font-semibold text-slate-400 block uppercase">Cəmi Nüsxə</span>
-          <span className="text-xl font-extrabold text-slate-900">{totalCopiesCount}</span>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E4E0F0] border-t-2 border-violet-800 shadow-2xs">
+          <span className="text-[11px] font-bold text-slate-400 block uppercase">Cəmi Nüsxə</span>
+          <span className="text-xl font-black text-slate-900">{totalCopiesCount}</span>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] font-semibold text-emerald-600 block uppercase">Yoxlanılıb</span>
-          <span className="text-xl font-extrabold text-emerald-700">{verifiedCount}</span>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E4E0F0] border-t-2 border-emerald-600 shadow-2xs">
+          <span className="text-[11px] font-bold text-emerald-700 block uppercase">Yoxlanılıb</span>
+          <span className="text-xl font-black text-emerald-700">{verifiedCount}</span>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] font-semibold text-amber-600 block uppercase">Yoxlama Gözləyir</span>
-          <span className="text-xl font-extrabold text-amber-700">{pendingCount}</span>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E4E0F0] border-t-2 border-amber-600 shadow-2xs">
+          <span className="text-[11px] font-bold text-amber-700 block uppercase">Yoxlama Gözləyir</span>
+          <span className="text-xl font-black text-amber-700">{pendingCount}</span>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] font-semibold text-rose-600 block uppercase">Təmir / İtmiş</span>
-          <span className="text-xl font-extrabold text-rose-700">{repairOrLostCount}</span>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E4E0F0] border-t-2 border-rose-600 shadow-2xs">
+          <span className="text-[11px] font-bold text-rose-700 block uppercase">Təmir / İtmiş</span>
+          <span className="text-xl font-black text-rose-700">{repairOrLostCount}</span>
         </div>
       </div>
 
       {/* 2. Sürətli Yoxlama Paneli (Central Keyboard-First Input) */}
-      <div className="bg-gradient-to-tr from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-lg space-y-5">
+      <div className="bg-gradient-to-tr from-[#2E1065] via-[#3B0764] to-[#4C1D95] text-white rounded-xl p-6 sm:p-8 shadow-lg space-y-5">
         <div className="max-w-xl space-y-2">
           <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-400 bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-800/40">
             Klaviaturadan Sürətli Yoxlama
@@ -283,7 +283,7 @@ export default function InventarPage() {
 
           <button
             type="submit"
-            className="px-5 py-3.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-sm transition-all flex items-center gap-2 flex-shrink-0"
+            className="px-5 py-3.5 bg-violet-700 hover:bg-violet-800 active:bg-violet-900 text-white font-bold text-xs sm:text-sm rounded-lg shadow-sm transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer"
           >
             <Search className="w-4 h-4" />
             <span>Axtar / Yoxla</span>
@@ -456,11 +456,11 @@ export default function InventarPage() {
 
       {/* 3. Rəf üzrə Filtrləmə & Audit Siyahısı */}
       <div className="space-y-4">
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs space-y-3">
+        <div className="bg-white rounded-xl border border-[#E4E0F0] p-4 shadow-2xs space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                <Layers className="w-4 h-4 text-indigo-600" />
+                <Layers className="w-4 h-4 text-violet-700" />
                 Rəf Üzrə Faktiki Yoxlama Siyahısı
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -473,7 +473,7 @@ export default function InventarPage() {
               <select
                 value={selectedShelf}
                 onChange={(e) => setSelectedShelf(e.target.value)}
-                className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 font-semibold"
+                className="px-3 py-1.5 text-xs bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 text-slate-700 font-semibold"
               >
                 <option value="all">Bütün Rəflər</option>
                 {shelfList.map((s) => (
@@ -487,7 +487,7 @@ export default function InventarPage() {
               <select
                 value={auditFilter}
                 onChange={(e) => setAuditFilter(e.target.value as any)}
-                className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 font-semibold"
+                className="px-3 py-1.5 text-xs bg-[#F7F5FC] border border-[#E4E0F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-700 text-slate-700 font-semibold"
               >
                 <option value="all">Bütün audit statusları</option>
                 <option value="verified">Yoxlanılıb</option>
@@ -499,19 +499,19 @@ export default function InventarPage() {
 
         {/* Audit Table */}
         {isLoading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400 text-sm">
+          <div className="bg-white rounded-xl border border-[#E4E0F0] p-12 text-center text-slate-400 text-sm">
             Nüsxələr yüklənir...
           </div>
         ) : filteredAuditCopies.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-8 text-center text-slate-400 text-xs">
-            Seçilmiş rəf və ya filtrə uyğun nüsxə tapılmadı.
+          <div className="bg-white rounded-xl border border-[#E4E0F0] p-8 text-center text-slate-500 text-xs">
+            Hazırda bazada qeydiyyata alınmış məlumat yoxdur
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs">
+          <div className="bg-white rounded-xl border border-[#E4E0F0] overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                  <tr className="bg-[#F7F5FC] border-b border-[#E4E0F0] text-[11px] font-bold text-violet-950 uppercase tracking-wider">
                     <th className="py-3 px-4">İnventar №</th>
                     <th className="py-3 px-4">Kitabın Adı və Müəllif</th>
                     <th className="py-3 px-4">Rəf Yeri</th>
@@ -521,7 +521,7 @@ export default function InventarPage() {
                     <th className="py-3 px-4 text-right">Təsdiq</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#E4E0F0]">
                   {filteredAuditCopies.map((copy) => {
                     const isVerified = copy.auditStatus === "Yoxlanılıb";
 

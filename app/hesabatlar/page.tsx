@@ -644,7 +644,7 @@ export default function HesabatlarPage() {
       />
 
       {/* 1. Header (Screen Only) */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200 print:hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-[#E4E0F0] print:hidden">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
@@ -660,16 +660,16 @@ export default function HesabatlarPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={handleExportWord}
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-800 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-lg bg-violet-50 border border-violet-200 hover:bg-violet-100 text-violet-800 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
             title="Microsoft Word sənədi (.doc) kimi rəsmi hesabatı yüklə"
           >
-            <FileText className="w-4 h-4 text-blue-700" />
+            <FileText className="w-4 h-4 text-violet-700" />
             <span>Word kimi saxla (.doc)</span>
           </button>
 
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-black hover:bg-slate-900 active:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-violet-700 hover:bg-violet-800 active:bg-violet-900 text-white text-xs font-bold shadow-md shadow-violet-900/20 transition-all cursor-pointer"
             title="A4 formatında rəsmi sənədi çap et və ya PDF kimi yadda saxla"
           >
             <Printer className="w-4 h-4" />
@@ -679,10 +679,10 @@ export default function HesabatlarPage() {
       </div>
 
       {/* 2. Filtrlər Paneli (Screen Only) */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs space-y-3 print:hidden">
+      <div className="bg-white rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 p-4 shadow-xs space-y-3 print:hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-            <Calendar className="w-4 h-4 text-indigo-600" />
+            <Calendar className="w-4 h-4 text-violet-700" />
             Hesabat Dövrü:
           </span>
 
@@ -690,9 +690,9 @@ export default function HesabatlarPage() {
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
             <button
               onClick={() => setPeriod("academic")}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                 period === "academic"
-                  ? "bg-slate-900 text-white shadow-2xs"
+                  ? "bg-violet-700 text-white shadow-2xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -700,9 +700,9 @@ export default function HesabatlarPage() {
             </button>
             <button
               onClick={() => setPeriod("month")}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                 period === "month"
-                  ? "bg-slate-900 text-white shadow-2xs"
+                  ? "bg-violet-700 text-white shadow-2xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -710,9 +710,9 @@ export default function HesabatlarPage() {
             </button>
             <button
               onClick={() => setPeriod("week")}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                 period === "week"
-                  ? "bg-slate-900 text-white shadow-2xs"
+                  ? "bg-violet-700 text-white shadow-2xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -720,9 +720,9 @@ export default function HesabatlarPage() {
             </button>
             <button
               onClick={() => setPeriod("today")}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                 period === "today"
-                  ? "bg-slate-900 text-white shadow-2xs"
+                  ? "bg-violet-700 text-white shadow-2xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -730,9 +730,9 @@ export default function HesabatlarPage() {
             </button>
             <button
               onClick={() => setPeriod("all")}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                 period === "all"
-                  ? "bg-slate-900 text-white shadow-2xs"
+                  ? "bg-violet-700 text-white shadow-2xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -740,9 +740,9 @@ export default function HesabatlarPage() {
             </button>
             <button
               onClick={() => setPeriod("custom")}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                 period === "custom"
-                  ? "bg-slate-900 text-white shadow-2xs"
+                  ? "bg-violet-700 text-white shadow-2xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -753,14 +753,14 @@ export default function HesabatlarPage() {
 
         {/* Custom Date Pickers */}
         {period === "custom" && (
-          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100 text-xs">
+          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[#E4E0F0] text-xs">
             <div className="flex items-center gap-2">
               <span className="text-slate-500 font-medium">Başlanğıc:</span>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-800 text-xs font-mono focus:outline-none focus:border-indigo-600"
+                className="px-2.5 py-1.5 rounded-lg border border-[#E4E0F0] text-slate-800 text-xs font-mono focus:outline-none focus:border-violet-700 focus:ring-1 focus:ring-violet-500/20"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -769,7 +769,7 @@ export default function HesabatlarPage() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-800 text-xs font-mono focus:outline-none focus:border-indigo-600"
+                className="px-2.5 py-1.5 rounded-lg border border-[#E4E0F0] text-slate-800 text-xs font-mono focus:outline-none focus:border-violet-700 focus:ring-1 focus:ring-violet-500/20"
               />
             </div>
             <span className="text-[11px] text-slate-400">
@@ -785,10 +785,10 @@ export default function HesabatlarPage() {
       <div className="space-y-6 print:hidden">
         {/* Real-time Summary Stat Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white p-4 rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500">Kitab Fondu</span>
-              <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-violet-50 text-violet-700 flex items-center justify-center">
                 <BookOpen className="w-4 h-4" />
               </div>
             </div>
@@ -798,7 +798,7 @@ export default function HesabatlarPage() {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white p-4 rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500">Fondda (Rəfdə)</span>
               <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -811,7 +811,7 @@ export default function HesabatlarPage() {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white p-4 rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500">Oxucuda</span>
               <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -824,7 +824,7 @@ export default function HesabatlarPage() {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white p-4 rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500">Gecikən</span>
               <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
@@ -837,20 +837,20 @@ export default function HesabatlarPage() {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white p-4 rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500">Elektron Resurs</span>
-              <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-violet-50 text-violet-700 flex items-center justify-center">
                 <Layers className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <span className="text-2xl font-black text-purple-700">{summaryStats.eResources}</span>
+              <span className="text-2xl font-black text-violet-800">{summaryStats.eResources}</span>
               <p className="text-[10px] text-slate-400 mt-0.5">PDF / e-kitablar</p>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white p-4 rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500">Aktiv Oxucu</span>
               <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
@@ -865,11 +865,11 @@ export default function HesabatlarPage() {
         </div>
 
         {/* Interactive Books Table */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div className="bg-white rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E4E0F0]">
             <div>
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-indigo-600" />
+                <BookOpen className="w-4 h-4 text-violet-700" />
                 Əsas Kitab Fondu və Dövriyyə Cədvəli
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -886,14 +886,14 @@ export default function HesabatlarPage() {
                   value={bookSearchQuery}
                   onChange={(e) => setBookSearchQuery(e.target.value)}
                   placeholder="Kitab, müəllif və ya inventar axtar..."
-                  className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-indigo-600 w-56 sm:w-64"
+                  className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[#E4E0F0] bg-[#F7F5FC] focus:bg-white focus:outline-none focus:border-violet-700 focus:ring-1 focus:ring-violet-500/20 w-56 sm:w-64"
                 />
               </div>
 
               <select
                 value={selectedBookCategory}
                 onChange={(e) => setSelectedBookCategory(e.target.value)}
-                className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-indigo-600 text-slate-700"
+                className="px-3 py-1.5 text-xs rounded-lg border border-[#E4E0F0] bg-[#F7F5FC] focus:bg-white focus:outline-none focus:border-violet-700 focus:ring-1 focus:ring-violet-500/20 text-slate-700"
               >
                 <option value="all">Bütün Bölmələr</option>
                 {categoriesList.map((c) => (
@@ -904,14 +904,14 @@ export default function HesabatlarPage() {
           </div>
 
           {filteredBooksReport.length === 0 ? (
-            <div className="py-10 text-center text-slate-400 text-xs">
-              Axtarışa uyğun kitab tapılmadı.
+            <div className="py-10 text-center text-slate-500 text-xs">
+              Hazırda bazada qeydiyyata alınmış məlumat yoxdur
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                  <tr className="bg-[#F7F5FC] border-b border-[#E4E0F0] text-[11px] font-bold text-violet-950 uppercase tracking-wider">
                     <th className="py-2.5 px-3">№ / İnventar</th>
                     <th className="py-2.5 px-3">Nəşrin Adı & Müəllif</th>
                     <th className="py-2.5 px-3">İxtisas / Bölmə</th>
@@ -925,10 +925,10 @@ export default function HesabatlarPage() {
                     <th className="py-2.5 px-3 text-right">Ümumi Verilmə</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#E4E0F0]">
                   {filteredBooksReport.map((b) => (
                     <tr key={b.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-2.5 px-3 font-mono font-bold text-indigo-700 whitespace-nowrap">
+                      <td className="py-2.5 px-3 font-mono font-bold text-violet-700 whitespace-nowrap">
                         {b.inventoryNumber}
                       </td>
                       <td className="py-2.5 px-3">
@@ -965,7 +965,7 @@ export default function HesabatlarPage() {
                               ? "bg-amber-50 text-amber-700 border border-amber-200"
                               : (b.condition as string) === "Yararsız"
                               ? "bg-rose-50 text-rose-700 border border-rose-200"
-                              : "bg-blue-50 text-blue-700 border border-blue-200"
+                              : "bg-violet-50 text-violet-700 border border-violet-200"
                           }`}
                         >
                           {b.condition}
@@ -983,8 +983,8 @@ export default function HesabatlarPage() {
         </div>
 
         {/* Delinquent Readers Table */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div className="bg-white rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E4E0F0]">
             <div>
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600" />
@@ -1007,7 +1007,7 @@ export default function HesabatlarPage() {
           </div>
 
           {delinquentLoans.length === 0 ? (
-            <div className="p-8 text-center text-slate-400 text-xs flex flex-col items-center justify-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+            <div className="p-8 text-center text-slate-500 text-xs flex flex-col items-center justify-center bg-[#F7F5FC] rounded-xl border border-dashed border-[#E4E0F0]">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
@@ -1018,7 +1018,7 @@ export default function HesabatlarPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                  <tr className="bg-[#F7F5FC] border-b border-[#E4E0F0] text-[11px] font-bold text-violet-950 uppercase tracking-wider">
                     <th className="py-2.5 px-3">Bilet №</th>
                     <th className="py-2.5 px-3">Oxucu Adı Soyadı</th>
                     <th className="py-2.5 px-3">Statusu / Qrupu / Vəzifəsi</th>
@@ -1028,7 +1028,7 @@ export default function HesabatlarPage() {
                     <th className="py-2.5 px-3 text-right">Gecikmə Vəziyyəti</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#E4E0F0]">
                   {delinquentLoans.map((item) => (
                     <tr
                       key={item.id}
@@ -1036,7 +1036,7 @@ export default function HesabatlarPage() {
                         item.isOverdue ? "hover:bg-rose-50/30 bg-rose-50/10" : "hover:bg-slate-50/60"
                       }`}
                     >
-                      <td className="py-2.5 px-3 font-mono font-bold text-indigo-700 whitespace-nowrap">
+                      <td className="py-2.5 px-3 font-mono font-bold text-violet-700 whitespace-nowrap">
                         {item.ticketNumber}
                       </td>
                       <td className="py-2.5 px-3 font-bold text-slate-900 whitespace-nowrap">
@@ -1047,7 +1047,7 @@ export default function HesabatlarPage() {
                       </td>
                       <td className="py-2.5 px-3">
                         <div className="font-medium text-slate-900 leading-snug">{item.bookTitle}</div>
-                        <span className="font-mono text-[10px] text-indigo-600 font-bold">
+                        <span className="font-mono text-[10px] text-violet-700 font-bold">
                           {item.inventoryNumber}
                         </span>
                       </td>
@@ -1082,28 +1082,28 @@ export default function HesabatlarPage() {
 
         {/* Rankings */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="bg-white rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E4E0F0]">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Users className="w-4 h-4 text-indigo-600" />
+                <Users className="w-4 h-4 text-violet-700" />
                 Ən Fəal Oxucular
               </h2>
               <span className="text-xs text-slate-400 font-medium">Top 5 Oxucu</span>
             </div>
 
             {topReaders.length === 0 ? (
-              <div className="py-6 text-center text-slate-400 text-xs">
-                Hələ heç bir oxu statistikası formalaşmayıb.
+              <div className="py-6 text-center text-slate-500 text-xs">
+                Hazırda bazada qeydiyyata alınmış məlumat yoxdur
               </div>
             ) : (
               <div className="space-y-2.5">
                 {topReaders.map((r, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-200/60"
+                    className="flex items-center justify-between gap-3 p-3 rounded-lg bg-[#F7F5FC] border border-[#E4E0F0]"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="w-6 h-6 rounded-lg bg-indigo-600 text-white font-extrabold text-xs flex items-center justify-center flex-shrink-0">
+                      <span className="w-6 h-6 rounded-lg bg-violet-700 text-white font-extrabold text-xs flex items-center justify-center flex-shrink-0">
                         {idx + 1}
                       </span>
                       <div>
@@ -1112,7 +1112,7 @@ export default function HesabatlarPage() {
                       </div>
                     </div>
 
-                    <span className="text-xs font-extrabold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-lg border border-indigo-100">
+                    <span className="text-xs font-extrabold text-violet-800 bg-violet-50 px-2.5 py-0.5 rounded-lg border border-violet-200">
                       {r.count} kitab
                     </span>
                   </div>
@@ -1121,25 +1121,25 @@ export default function HesabatlarPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="bg-white rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E4E0F0]">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-indigo-600" />
+                <BookOpen className="w-4 h-4 text-violet-700" />
                 Ən Çox Müraciət Olunan Nəşrlər
               </h2>
               <span className="text-xs text-slate-400 font-medium">Top 5 Nəşr</span>
             </div>
 
             {topBooks.length === 0 ? (
-              <div className="py-6 text-center text-slate-400 text-xs">
-                Hələ heç bir kitab istiqrazı formalaşmayıb.
+              <div className="py-6 text-center text-slate-500 text-xs">
+                Hazırda bazada qeydiyyata alınmış məlumat yoxdur
               </div>
             ) : (
               <div className="space-y-2.5">
                 {topBooks.map((b, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-200/60"
+                    className="flex items-center justify-between gap-3 p-3 rounded-lg bg-[#F7F5FC] border border-[#E4E0F0]"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <span className="w-6 h-6 rounded-lg bg-emerald-600 text-white font-extrabold text-xs flex items-center justify-center flex-shrink-0">

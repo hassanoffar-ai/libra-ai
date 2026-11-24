@@ -190,16 +190,16 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
       {/* Modal Dialog */}
       <div className="relative w-full max-w-2xl bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200 my-8 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between flex-shrink-0">
+        <div className="px-6 py-4 bg-gradient-to-r from-[#2E1065] via-[#3B0764] to-[#4C1D95] text-white flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
-              <BookPlus className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-[#DDD6FE] shadow-xs flex-shrink-0">
+              <BookPlus className="w-5 h-5 text-[#C4B5FD]" />
             </div>
             <div>
               <h3 className="text-base font-bold text-white">
                 {isEdit ? "Kitab Məlumatlarını Redaktə Et" : "Yeni Kitab Qeydiyyatı"}
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-violet-200">
                 {isEdit
                   ? "Kataloq və biblioqrafik göstəricilərin yenilənməsi"
                   : "Kitab fondu və avtomatik fiziki nüsxələrin uçotu"}
@@ -208,7 +208,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-violet-200 hover:text-white hover:bg-white/10 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -496,19 +496,19 @@ export function AddBookModal({ isOpen, onClose, onSuccess, editBook }: AddBookMo
             )}
 
             {/* Footer Buttons */}
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 flex-shrink-0">
+            <div className="pt-4 border-t border-[#E4E0F0] flex items-center justify-end gap-3 flex-shrink-0">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors"
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
               >
                 İmtina
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-xl shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-violet-700 hover:bg-violet-800 active:bg-violet-900 rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-violet-500/30 disabled:opacity-50 cursor-pointer"
               >
                 {isSubmitting ? (
                   <span>Saxlanılır...</span>

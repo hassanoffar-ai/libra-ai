@@ -12,12 +12,12 @@ export function ActivityWidget({ activities }: ActivityWidgetProps) {
   const hasActivities = activities && activities.length > 0;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+    <div className="bg-white rounded-xl border border-[#E4E0F0] border-t-2 border-violet-800 p-5 sm:p-6 shadow-2xs flex flex-col justify-between">
       {/* Header */}
-      <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
+      <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-[#E4E0F0]">
         <div>
-          <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <History className="w-4 h-4 text-indigo-600" />
+          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <History className="w-4 h-4 text-violet-700" />
             Son Əməliyyatlar
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -25,24 +25,24 @@ export function ActivityWidget({ activities }: ActivityWidgetProps) {
           </p>
         </div>
         {hasActivities && (
-          <span className="text-xs text-slate-400 font-medium">
+          <span className="text-xs text-slate-500 font-semibold">
             Son {activities.length} qeyd
           </span>
         )}
       </div>
 
-      {/* Content or Graceful Empty State */}
+      {/* Content or Graceful Real Empty State */}
       <div className="flex-1 flex flex-col justify-center min-h-[220px]">
         {!hasActivities ? (
-          <div className="text-center py-8 px-4 flex flex-col items-center justify-center rounded-xl bg-slate-50/70 border border-dashed border-slate-200">
-            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3 shadow-2xs">
-              <History className="w-6 h-6 text-slate-400" />
+          <div className="text-center py-8 px-4 flex flex-col items-center justify-center rounded-lg bg-[#F7F5FC] border border-dashed border-[#E4E0F0]">
+            <div className="w-12 h-12 rounded-lg bg-violet-50 border border-violet-200/70 flex items-center justify-center text-violet-700 mb-3 shadow-2xs">
+              <History className="w-6 h-6" />
             </div>
-            <h4 className="text-sm font-semibold text-slate-700 mb-1">
-              Hələlik heç bir əməliyyat qeydə alınmayıb
+            <h4 className="text-sm font-bold text-slate-800 mb-1">
+              Hazırda bazada qeydiyyata alınmış məlumat yoxdur
             </h4>
-            <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
-              Oxuculara kitab verildikdə və ya geri qaytarıldıqda bütün əməliyyat tarixçəsi anbaan bu jurnalda görünəcək.
+            <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
+              Oxuculara kitab verildikdə və ya geri qaytarıldıqda bütün əməliyyat tarixçəsi anbaan bu rəsmi jurnalda əks olunacaq.
             </p>
           </div>
         ) : (
@@ -52,14 +52,14 @@ export function ActivityWidget({ activities }: ActivityWidgetProps) {
               return (
                 <div
                   key={act.id}
-                  className="flex items-center justify-between gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100"
+                  className="flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-[#F7F5FC] transition-colors border border-transparent hover:border-[#E4E0F0]"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                         isBorrow
-                          ? "bg-indigo-50 text-indigo-600 border border-indigo-100"
-                          : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                          ? "bg-violet-50 text-violet-700 border border-violet-200/70"
+                          : "bg-emerald-50 text-emerald-700 border border-emerald-200/70"
                       }`}
                     >
                       {isBorrow ? (
@@ -70,9 +70,9 @@ export function ActivityWidget({ activities }: ActivityWidgetProps) {
                     </div>
 
                     <div className="min-w-0">
-                      <div className="text-xs font-semibold text-slate-800 truncate">
-                        <span className="text-slate-900">{act.readerName}</span>
-                        <span className="text-slate-400 font-normal ml-1">
+                      <div className="text-xs font-bold text-slate-900 truncate">
+                        <span>{act.readerName}</span>
+                        <span className="text-slate-500 font-normal ml-1">
                           {isBorrow ? "kitabı götürdü" : "kitabı qaytardı"}
                         </span>
                       </div>
@@ -80,15 +80,15 @@ export function ActivityWidget({ activities }: ActivityWidgetProps) {
                         <BookOpen className="w-3 h-3 text-slate-400 flex-shrink-0" />
                         <span className="truncate">{act.bookTitle}</span>
                         <span className="text-slate-300">•</span>
-                        <span className="font-mono text-[10px] text-slate-400">
+                        <span className="font-mono text-[10px] text-slate-500">
                           {act.inventoryNumber}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 text-[11px] text-slate-400 font-mono flex-shrink-0">
-                    <Clock className="w-3 h-3 text-slate-300" />
+                  <div className="flex items-center gap-1 text-[11px] text-slate-500 font-mono flex-shrink-0">
+                    <Clock className="w-3 h-3 text-slate-400" />
                     <span>{act.timestamp}</span>
                   </div>
                 </div>
@@ -100,4 +100,3 @@ export function ActivityWidget({ activities }: ActivityWidgetProps) {
     </div>
   );
 }
-
